@@ -21,7 +21,7 @@ springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
   swagger-ui:
-    path: /swagger-ui-diary.html
+    path: /swagger-ui-onmarket.html
     tags-sorter: alpha
     operations-sorter: alpha
   api-docs:
