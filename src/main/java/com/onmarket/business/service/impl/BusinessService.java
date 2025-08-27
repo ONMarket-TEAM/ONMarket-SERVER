@@ -20,8 +20,8 @@ public class BusinessService {
     private final BusinessRepository businessRepository;
     private final MemberRepository memberRepository;
 
-    public BusinessResponse registerBusiness(Long memberId, BusinessRequest request) {
-        Member member = memberRepository.findById(memberId)
+    public BusinessResponse registerBusiness(String email, BusinessRequest request) {
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
         Business business = Business.builder()
@@ -47,6 +47,24 @@ public class BusinessService {
                 saved.getEmployeeCount(),
                 saved.getStatus()
         );
+    }
+
+    public List<BusinessResponse> getMemberBusinesses(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        return businessRepository.findByMember(member).stream()
+                .map(b -> new BusinessResponse(
+                        b.getBusinessId(),
+                        b.getIndustry(),
+                        b.getBusinessType(),
+                        b.getRegionCodeId(),
+                        b.getEstablishedYear(),
+                        b.getAnnualRevenue(),
+                        b.getEmployeeCount(),
+                        b.getStatus()
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<BusinessResponse> getMemberBusinesses(Long memberId) {
