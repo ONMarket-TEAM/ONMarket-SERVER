@@ -17,7 +17,7 @@ spring:
     allow-credentials: true
 
 springdoc:
-  packages-to-scan: adhd.diary
+  packages-to-scan: com.onmarket
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
   swagger-ui:
