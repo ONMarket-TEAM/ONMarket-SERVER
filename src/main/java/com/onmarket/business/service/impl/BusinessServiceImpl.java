@@ -7,8 +7,9 @@ import com.onmarket.business.dto.BusinessResponse;
 import com.onmarket.business.exception.BusinessException;
 import com.onmarket.business.repository.BusinessRepository;
 import com.onmarket.member.domain.Member;
-import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.member.service.MemberService;
 import com.onmarket.response.ResponseCode;
+import com.onmarket.business.service.BusinessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BusinessService {
+public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
+    @Override
     public BusinessResponse registerBusiness(String email, BusinessRequest request) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+        Member member = memberService.findByEmail(email);
 
         // 이미 같은 사업장이 등록된 경우 체크
         if (businessRepository.existsByMemberAndIndustryAndBusinessTypeAndRegionCodeId(
@@ -34,7 +35,6 @@ public class BusinessService {
                 request.getRegionCodeId())) {
             throw new BusinessException(ResponseCode.BUSINESS_ALREADY_EXISTS);
         }
-
 
         Business business = Business.builder()
                 .member(member)
@@ -49,61 +49,44 @@ public class BusinessService {
 
         Business saved = businessRepository.save(business);
 
-        return new BusinessResponse(
-                saved.getBusinessId(),
-                saved.getIndustry(),
-                saved.getBusinessType(),
-                saved.getRegionCodeId(),
-                saved.getEstablishedYear(),
-                saved.getAnnualRevenue(),
-                saved.getEmployeeCount(),
-                saved.getStatus()
-        );
+        return toResponse(saved);
     }
 
+    @Override
     public List<BusinessResponse> getMemberBusinesses(String email) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+        Member member = memberService.findByEmail(email);
+        return getBusinessesByMember(member);
+    }
 
+    @Override
+    public List<BusinessResponse> getMemberBusinesses(Long memberId) {
+        Member member = memberService.findById(memberId);
+        return getBusinessesByMember(member);
+    }
+
+    /** 공통 비즈니스 조회 로직 */
+    private List<BusinessResponse> getBusinessesByMember(Member member) {
         List<Business> businesses = businessRepository.findByMember(member);
         if (businesses.isEmpty()) {
             throw new BusinessException(ResponseCode.BUSINESS_NOT_FOUND);
         }
 
         return businesses.stream()
-                .map(b -> new BusinessResponse(
-                        b.getBusinessId(),
-                        b.getIndustry(),
-                        b.getBusinessType(),
-                        b.getRegionCodeId(),
-                        b.getEstablishedYear(),
-                        b.getAnnualRevenue(),
-                        b.getEmployeeCount(),
-                        b.getStatus()
-                ))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public List<BusinessResponse> getMemberBusinesses(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
-
-        List<Business> businesses = businessRepository.findByMember(member);
-        if (businesses.isEmpty()) {
-            throw new BusinessException(ResponseCode.BUSINESS_NOT_FOUND);
-        }
-
-        return businesses.stream()
-                .map(b -> new BusinessResponse(
-                        b.getBusinessId(),
-                        b.getIndustry(),
-                        b.getBusinessType(),
-                        b.getRegionCodeId(),
-                        b.getEstablishedYear(),
-                        b.getAnnualRevenue(),
-                        b.getEmployeeCount(),
-                        b.getStatus()
-                ))
-                .collect(Collectors.toList());
+    /** Entity → DTO 변환 */
+    private BusinessResponse toResponse(Business b) {
+        return new BusinessResponse(
+                b.getBusinessId(),
+                b.getIndustry(),
+                b.getBusinessType(),
+                b.getRegionCodeId(),
+                b.getEstablishedYear(),
+                b.getAnnualRevenue(),
+                b.getEmployeeCount(),
+                b.getStatus()
+        );
     }
 }

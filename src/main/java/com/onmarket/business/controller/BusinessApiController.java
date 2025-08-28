@@ -2,7 +2,7 @@ package com.onmarket.business.controller;
 
 import com.onmarket.business.dto.BusinessRequest;
 import com.onmarket.business.dto.BusinessResponse;
-import com.onmarket.business.service.impl.BusinessService;
+import com.onmarket.business.service.BusinessService;
 import com.onmarket.common.jwt.JwtTokenProvider;
 import com.onmarket.member.exception.LoginException;
 import com.onmarket.response.ApiResponse;

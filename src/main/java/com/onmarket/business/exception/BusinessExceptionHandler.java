@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
-@RestControllerAdvice(basePackages = "com.onmarket.business") // business 패키지 전용
+@RestControllerAdvice(basePackages = "com.onmarket.business")
 public class BusinessExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)

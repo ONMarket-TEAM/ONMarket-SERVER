@@ -5,6 +5,8 @@ import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.dto.SignupRequest;
 import com.onmarket.member.exception.SignupException;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.member.service.SignupService;
+import com.onmarket.member.service.ValidationService;
 import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,29 +14,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SignupServiceImpl {
+public class SignupServiceImpl implements SignupService {
 
     private final MemberRepository memberRepository;
+    private final ValidationService validationService;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Override
     public void signup(SignupRequest request) {
+        // 유효성 검증
+        validationService.validateEmail(request.getEmail());
+        validationService.validateNickname(request.getNickname());
+
         // 아이디 중복 체크
         if (memberRepository.existsByUsername(request.getUsername())) {
             throw new SignupException(ResponseCode.DUPLICATED_EMAIL);
-            // 혹은 ResponseCode.DUPLICATED_NICKNAME / 다른 적절한 코드
         }
 
-        // 이메일 중복 체크
-        if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new SignupException(ResponseCode.DUPLICATED_EMAIL);
-        }
-
-        // 닉네임 중복 체크
-        if (memberRepository.existsByNickname(request.getNickname())) {
-            throw new SignupException(ResponseCode.DUPLICATED_NICKNAME);
-        }
-
-        // 비밀번호 유효성 검사 (규칙 미준수 시 예외 발생)
+        // 비밀번호 유효성 검사
         if (request.getPassword() == null || request.getPassword().length() < 8) {
             throw new SignupException(ResponseCode.INVALID_PASSWORD_FORMAT);
         }

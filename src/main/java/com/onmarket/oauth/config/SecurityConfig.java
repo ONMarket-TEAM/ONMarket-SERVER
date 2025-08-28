@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/signup",
                                 "/api/auth/login",
                                 "/api/auth/refresh",
-                                "/api/validation/check/*"
+                                "/api/validation/check/*",
+                                "/api/sms/*"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

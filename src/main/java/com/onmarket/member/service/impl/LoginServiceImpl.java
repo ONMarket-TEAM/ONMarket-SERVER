@@ -7,6 +7,7 @@ import com.onmarket.member.dto.LoginRequest;
 import com.onmarket.member.dto.LoginResponse;
 import com.onmarket.member.exception.LoginException;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.member.service.LoginService;
 import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,16 +15,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LoginServiceImpl {
+public class LoginServiceImpl implements LoginService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Override
     public LoginResponse login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new LoginException(ResponseCode.MEMBER_NOT_FOUND));
 
+        // 비밀번호 검증
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new LoginException(ResponseCode.INVALID_CREDENTIALS);
         }
@@ -36,11 +39,12 @@ public class LoginServiceImpl {
             throw new LoginException(ResponseCode.AUTHENTICATION_REQUIRED);
         }
 
+        // JWT 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail());
 
         // Refresh Token 저장
-        member.setRefreshToken(refreshToken);
+        member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
 
         return new LoginResponse(accessToken, refreshToken);
