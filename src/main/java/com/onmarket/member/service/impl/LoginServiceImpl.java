@@ -2,9 +2,12 @@ package com.onmarket.member.service.impl;
 
 import com.onmarket.common.jwt.JwtTokenProvider;
 import com.onmarket.member.domain.Member;
+import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.dto.LoginRequest;
 import com.onmarket.member.dto.LoginResponse;
+import com.onmarket.member.exception.LoginException;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,16 +22,24 @@ public class LoginServiceImpl {
 
     public LoginResponse login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> new LoginException(ResponseCode.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new LoginException(ResponseCode.INVALID_CREDENTIALS);
+        }
+
+        // 회원 상태 체크
+        if (member.getStatus() == MemberStatus.DELETED) {
+            throw new LoginException(ResponseCode.MEMBER_DELETED);
+        }
+        if (member.getStatus() == MemberStatus.INACTIVE) {
+            throw new LoginException(ResponseCode.AUTHENTICATION_REQUIRED);
         }
 
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail());
 
-        // Refresh Token을 DB에 저장 (예: Member 테이블 컬럼 추가)
+        // Refresh Token 저장
         member.setRefreshToken(refreshToken);
         memberRepository.save(member);
 

@@ -3,8 +3,9 @@ package com.onmarket.member.controller;
 import com.onmarket.member.dto.LoginRequest;
 import com.onmarket.member.dto.LoginResponse;
 import com.onmarket.member.service.impl.LoginServiceImpl;
+import com.onmarket.response.ApiResponse;
+import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +16,8 @@ public class LoginApiController {
     private final LoginServiceImpl loginService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = loginService.login(request);
-        return ResponseEntity.ok(response);
+        return ApiResponse.success(ResponseCode.LOGIN_SUCCESS, response);
     }
 }

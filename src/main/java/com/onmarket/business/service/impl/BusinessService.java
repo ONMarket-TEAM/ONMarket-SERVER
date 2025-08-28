@@ -4,9 +4,11 @@ import com.onmarket.business.domain.Business;
 import com.onmarket.business.domain.enums.BusinessStatus;
 import com.onmarket.business.dto.BusinessRequest;
 import com.onmarket.business.dto.BusinessResponse;
+import com.onmarket.business.exception.BusinessException;
 import com.onmarket.business.repository.BusinessRepository;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,17 @@ public class BusinessService {
 
     public BusinessResponse registerBusiness(String email, BusinessRequest request) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+
+        // 이미 같은 사업장이 등록된 경우 체크
+        if (businessRepository.existsByMemberAndIndustryAndBusinessTypeAndRegionCodeId(
+                member,
+                request.getIndustry(),
+                request.getBusinessType(),
+                request.getRegionCodeId())) {
+            throw new BusinessException(ResponseCode.BUSINESS_ALREADY_EXISTS);
+        }
+
 
         Business business = Business.builder()
                 .member(member)
@@ -51,9 +63,14 @@ public class BusinessService {
 
     public List<BusinessResponse> getMemberBusinesses(String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
-        return businessRepository.findByMember(member).stream()
+        List<Business> businesses = businessRepository.findByMember(member);
+        if (businesses.isEmpty()) {
+            throw new BusinessException(ResponseCode.BUSINESS_NOT_FOUND);
+        }
+
+        return businesses.stream()
                 .map(b -> new BusinessResponse(
                         b.getBusinessId(),
                         b.getIndustry(),
@@ -69,9 +86,14 @@ public class BusinessService {
 
     public List<BusinessResponse> getMemberBusinesses(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
-        return businessRepository.findByMember(member).stream()
+        List<Business> businesses = businessRepository.findByMember(member);
+        if (businesses.isEmpty()) {
+            throw new BusinessException(ResponseCode.BUSINESS_NOT_FOUND);
+        }
+
+        return businesses.stream()
                 .map(b -> new BusinessResponse(
                         b.getBusinessId(),
                         b.getIndustry(),
