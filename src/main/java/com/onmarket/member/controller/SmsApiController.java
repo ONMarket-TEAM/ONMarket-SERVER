@@ -3,8 +3,8 @@ package com.onmarket.member.controller;
 import com.onmarket.member.dto.SmsRequest;
 import com.onmarket.member.dto.SmsVerifyRequest;
 import com.onmarket.member.service.impl.SmsServiceImpl;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

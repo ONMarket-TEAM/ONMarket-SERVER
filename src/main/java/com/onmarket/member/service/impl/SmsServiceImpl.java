@@ -3,7 +3,7 @@ package com.onmarket.member.service.impl;
 import com.onmarket.member.exception.SmsSendFailException;
 import com.onmarket.member.exception.SmsVerifyFailedException;
 import com.onmarket.member.service.SmsService;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
