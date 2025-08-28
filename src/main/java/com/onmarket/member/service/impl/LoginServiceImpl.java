@@ -1,6 +1,6 @@
 package com.onmarket.member.service.impl;
 
-import com.onmarket.common.jwt.JwtTokenProvider;
+import com.onmarket.oauth.jwt.JwtTokenProvider;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.dto.LoginRequest;
@@ -8,7 +8,7 @@ import com.onmarket.member.dto.LoginResponse;
 import com.onmarket.member.exception.LoginException;
 import com.onmarket.member.repository.MemberRepository;
 import com.onmarket.member.service.LoginService;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

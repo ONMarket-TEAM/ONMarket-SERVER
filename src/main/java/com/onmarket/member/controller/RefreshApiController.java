@@ -1,13 +1,13 @@
 package com.onmarket.member.controller;
 
-import com.onmarket.common.jwt.JwtTokenProvider;
+import com.onmarket.oauth.jwt.JwtTokenProvider;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.dto.LoginResponse;
 import com.onmarket.member.dto.RefreshRequest;
 import com.onmarket.member.exception.RefreshTokenException;
 import com.onmarket.member.repository.MemberRepository;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
