@@ -2,7 +2,7 @@ package com.onmarket.member.service.impl;
 
 import com.onmarket.member.exception.ValidationException;
 import com.onmarket.member.repository.MemberRepository;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.member.service.ValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -3,7 +3,7 @@ package com.onmarket.member.service.impl;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.repository.MemberRepository;
 import com.onmarket.business.exception.BusinessException;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

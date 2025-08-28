@@ -2,8 +2,8 @@ package com.onmarket.member.controller;
 
 import com.onmarket.member.dto.SignupRequest;
 import com.onmarket.member.service.impl.SignupServiceImpl;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
