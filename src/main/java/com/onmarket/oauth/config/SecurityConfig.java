@@ -29,7 +29,20 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/signup", "/api/auth/login", "/api/auth/refresh", "/api/validation/check/*").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui-onmarket.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/api/signup",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/validation/check/*"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
@@ -42,3 +55,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
