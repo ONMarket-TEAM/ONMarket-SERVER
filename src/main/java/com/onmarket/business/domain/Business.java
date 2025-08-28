@@ -1,11 +1,10 @@
 package com.onmarket.business.domain;
 
 import com.onmarket.business.domain.enums.*;
+import com.onmarket.common.domain.BaseTimeEntity;
 import com.onmarket.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "business")
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Business {
+public class Business extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,21 +50,8 @@ public class Business {
     @Column(nullable = false)
     private BusinessStatus status;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    protected void onCreate() {
         if (this.status == null) this.status = BusinessStatus.ACTIVE;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -1,6 +1,8 @@
 package com.onmarket.member.service.impl;
 
+import com.onmarket.member.exception.ValidationException;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +12,15 @@ public class ValidationService {
 
     private final MemberRepository memberRepository;
 
-    public boolean isEmailDuplicate(String email) {
-        return memberRepository.existsByEmail(email);
+    public void validateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new ValidationException(ResponseCode.DUPLICATED_EMAIL);
+        }
     }
 
-    public boolean isNicknameDuplicate(String nickname) {
-        return memberRepository.existsByNickname(nickname);
+    public void validateNickname(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new ValidationException(ResponseCode.DUPLICATED_NICKNAME);
+        }
     }
 }
