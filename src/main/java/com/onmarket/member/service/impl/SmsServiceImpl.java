@@ -1,6 +1,9 @@
 package com.onmarket.member.service.impl;
 
+import com.onmarket.member.exception.SmsSendFailException;
+import com.onmarket.member.exception.SmsVerifyFailedException;
 import com.onmarket.member.service.SmsService;
+import com.onmarket.response.ResponseCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
@@ -50,11 +53,10 @@ public class SmsServiceImpl implements SmsService {
 
         try {
             messageService.send(message);
-            System.out.println("인증번호 [" + code + "] 발송 완료 → " + phoneNumber);
         } catch (NurigoMessageNotReceivedException e) {
-            System.out.println("발송 실패: " + e.getFailedMessageList());
+            throw new SmsSendFailException(ResponseCode.SMS_SEND_FAIL);
         } catch (Exception e) {
-            System.out.println("발송 에러: " + e.getMessage());
+            throw new SmsSendFailException(ResponseCode.SMS_SEND_FAIL);
         }
 
         return code;
@@ -64,11 +66,16 @@ public class SmsServiceImpl implements SmsService {
     public boolean verifyCode(String phoneNumber, String code) {
         String savedCode = redisTemplate.opsForValue().get("SMS:" + phoneNumber);
 
-        if (savedCode != null && savedCode.equals(code)) {
-            // 일치하면 Redis에서 즉시 삭제 (보안 강화)
-            redisTemplate.delete("SMS:" + phoneNumber);
-            return true;
+        if (savedCode == null) {
+            throw new SmsVerifyFailedException(ResponseCode.SMS_VERIFY_FAILED);
         }
-        return false;
+
+        if (!savedCode.equals(code)) {
+            throw new SmsVerifyFailedException(ResponseCode.SMS_VERIFY_FAILED);
+        }
+
+        // 일치하면 Redis에서 즉시 삭제 (보안 강화)
+        redisTemplate.delete("SMS:" + phoneNumber);
+        return true;
     }
 }
