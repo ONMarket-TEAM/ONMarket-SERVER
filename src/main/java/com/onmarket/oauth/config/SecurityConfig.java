@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/validation/check/*",
-                                "/api/sms/*"
+                                "/api/sms/*",
+                                "/api/public-data/*"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
