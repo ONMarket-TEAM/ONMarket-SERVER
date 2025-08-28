@@ -81,6 +81,20 @@ public enum ResponseCode {
     SCHEDULER_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "스케줄러 업데이트 실패"),
 
     /**
+     * Business response
+     */
+    BUSINESS_REGISTER_SUCCESS(HttpStatus.CREATED, "사업장 등록에 성공했습니다."),
+    BUSINESS_UPDATE_SUCCESS(HttpStatus.OK, "사업장 수정에 성공했습니다."),
+    BUSINESS_DELETE_SUCCESS(HttpStatus.OK, "사업장 삭제에 성공했습니다."),
+    BUSINESS_READ_SUCCESS(HttpStatus.OK, "사업장 조회에 성공했습니다."),
+
+    BUSINESS_NOT_FOUND(HttpStatus.NOT_FOUND, "사업장을 찾을 수 없습니다."),
+    BUSINESS_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 사업장이 있습니다."),
+    BUSINESS_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 사업장에 접근할 권한이 없습니다."),
+    BUSINESS_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "사업장 처리 중 오류가 발생했습니다."),
+
+
+    /**
      * scrap response
      */
     SCRAP_CREATE_SUCCESS(HttpStatus.CREATED, "관심상품 등록 성공"),
