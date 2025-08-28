@@ -76,27 +76,23 @@ public enum ResponseCode {
     SMS_VERIFY_SUCCESS(HttpStatus.OK, "인증이 완료되었습니다."),
     SMS_VERIFY_FAILED(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
 
-
-
-
     // 스케줄러 관련
     SCHEDULER_UPDATE_SUCCESS(HttpStatus.OK, "스케줄러 업데이트 성공"),
     SCHEDULER_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "스케줄러 업데이트 실패"),
 
     /**
-     * favorite response
+     * scrap response
      */
-    FAVORITE_CREATE_SUCCESS(HttpStatus.CREATED, "관심상품 등록 성공"),
-    FAVORITE_DELETE_SUCCESS(HttpStatus.OK, "관심상품 삭제 성공"),
-    FAVORITE_READ_SUCCESS(HttpStatus.OK, "관심상품 목록 조회 성공"),
-    FAVORITE_STATUS_CHECK_SUCCESS(HttpStatus.OK, "관심상품 여부 확인 성공"),
+    SCRAP_CREATE_SUCCESS(HttpStatus.CREATED, "관심상품 등록 성공"),
+    SCRAP_DELETE_SUCCESS(HttpStatus.OK, "관심상품 삭제 성공"),
+    SCRAP_READ_SUCCESS(HttpStatus.OK, "관심상품 목록 조회 성공"),
+    SCRAP_STATUS_CHECK_SUCCESS(HttpStatus.OK, "관심상품 여부 확인 성공"),
 
-    FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, "관심상품을 찾을 수 없습니다"),
-    FAVORITE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 관심상품으로 등록된 상품입니다"),
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다"),
+    SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "관심상품을 찾을 수 없습니다"),
+    SCRAP_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 관심상품으로 등록된 상품입니다"),
 
-    FAVORITE_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 목록 조회에 실패했습니다"),
-    FAVORITE_CHECK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 여부 확인에 실패했습니다"),
+    SCRAP_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 목록 조회에 실패했습니다"),
+    SCRAP_CHECK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 여부 확인에 실패했습니다"),
 
     /**
      *  database operation response
@@ -112,23 +108,6 @@ public enum ResponseCode {
     INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "가입 금액은 0보다 커야 합니다"),
     INVALID_SAVE_TERM(HttpStatus.BAD_REQUEST, "저축 기간은 0보다 커야 합니다"),
     INVALID_MEMBER_ID(HttpStatus.BAD_REQUEST, "회원 ID는 양수여야 합니다"),
-
-
-    /**
-     * Product response
-     */
-    PRODUCT_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "금융상품 API 호출 중 오류가 발생했습니다."),
-    PRODUCT_SEARCH_SUCCESS(HttpStatus.OK, "상품 검색이 성공적으로 처리되었습니다."),
-    PRODUCT_DETAIL_SUCCESS(HttpStatus.OK, "상품 상세 정보를 성공적으로 조회했습니다."),
-    PRODUCT_COMPARE_SUCCESS(HttpStatus.OK, "상품 비교가 성공적으로 처리되었습니다."),
-    INVALID_PRODUCT_TYPE_ERROR(HttpStatus.BAD_REQUEST, "유효하지 않는 상품 유형입니다"),
-    PRODUCT_INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "잘못된 상품 파라미터가 입력되었습니다."),
-    PRODUCT_AUTOCOMPLETE_SUCCESS(HttpStatus.OK, "상품 검색 자동완성을 성공했습니다."),
-    PRODUCT_CATEGORY_SUCCESS(HttpStatus.OK, "상품 카테고리 목록 조회를 성공했습니다."),
-    PRODUCT_FILTER_OPTIONS_SUCCESS(HttpStatus.OK, "상품 필터링 기능이 성공적으로 처리되었습니다."),
-    PRODUCT_COMPARISON_SUCCESS(HttpStatus.OK, "상품 비교를 성공했습니다."),
-    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리 조회에 실패했습니다."),
-    SUBCATEGORY_SUCCESS(HttpStatus.OK, "서브 카테고리 조회에 성공했습니다."),
 
     /**
      * Notification response
