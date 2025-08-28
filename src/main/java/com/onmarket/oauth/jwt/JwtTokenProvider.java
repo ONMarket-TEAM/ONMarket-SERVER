@@ -1,4 +1,4 @@
-package  com.onmarket.common.jwt;
+package com.onmarket.oauth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

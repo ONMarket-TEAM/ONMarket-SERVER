@@ -7,7 +7,7 @@ import com.onmarket.member.exception.SignupException;
 import com.onmarket.member.repository.MemberRepository;
 import com.onmarket.member.service.SignupService;
 import com.onmarket.member.service.ValidationService;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

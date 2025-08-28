@@ -8,7 +8,7 @@ import com.onmarket.business.exception.BusinessException;
 import com.onmarket.business.repository.BusinessRepository;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.service.MemberService;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.business.service.BusinessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

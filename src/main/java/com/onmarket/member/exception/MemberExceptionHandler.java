@@ -1,8 +1,8 @@
 package com.onmarket.member.exception;
 
 import com.onmarket.common.exception.ErrorResponse;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

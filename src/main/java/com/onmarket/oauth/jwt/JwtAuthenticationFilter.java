@@ -1,4 +1,4 @@
-package com.onmarket.common.jwt;
+package com.onmarket.oauth.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

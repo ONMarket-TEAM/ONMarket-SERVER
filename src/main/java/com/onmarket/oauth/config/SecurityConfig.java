@@ -1,11 +1,10 @@
 package com.onmarket.oauth.config;
 
-import com.onmarket.common.jwt.JwtAuthenticationFilter;
-import com.onmarket.common.jwt.JwtTokenProvider;
+import com.onmarket.oauth.jwt.JwtAuthenticationFilter;
+import com.onmarket.oauth.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
