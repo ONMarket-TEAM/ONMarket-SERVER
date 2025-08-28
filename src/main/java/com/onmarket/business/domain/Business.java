@@ -9,7 +9,6 @@ import lombok.*;
 @Entity
 @Table(name = "business")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,7 +19,6 @@ public class Business extends BaseTimeEntity {
     @Column(name = "business_id")
     private Long businessId;
 
-    // Member와 N:1 관계 (FK: member_id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -37,7 +35,7 @@ public class Business extends BaseTimeEntity {
     private String regionCodeId;
 
     @Column(name = "established_year")
-    private Integer establishedYear; // YEAR 타입 → JPA에서는 int/Integer
+    private Integer establishedYear;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "annual_revenue", nullable = false)
@@ -53,5 +51,40 @@ public class Business extends BaseTimeEntity {
     @PrePersist
     protected void onCreate() {
         if (this.status == null) this.status = BusinessStatus.ACTIVE;
+    }
+
+    /** 업종 변경 */
+    public void changeIndustry(Industry industry) {
+        this.industry = industry;
+    }
+
+    /** 사업 형태 변경 */
+    public void changeBusinessType(BusinessType businessType) {
+        this.businessType = businessType;
+    }
+
+    /** 지역 코드 변경 */
+    public void changeRegion(String regionCodeId) {
+        this.regionCodeId = regionCodeId;
+    }
+
+    /** 설립 연도 변경 */
+    public void changeEstablishedYear(Integer establishedYear) {
+        this.establishedYear = establishedYear;
+    }
+
+    /** 연매출 변경 */
+    public void changeAnnualRevenue(AnnualRevenue annualRevenue) {
+        this.annualRevenue = annualRevenue;
+    }
+
+    /** 직원 수 변경 */
+    public void changeEmployeeCount(Integer employeeCount) {
+        this.employeeCount = employeeCount;
+    }
+
+    /** 상태 변경 (ACTIVE, INACTIVE, CLOSED 등) */
+    public void changeStatus(BusinessStatus status) {
+        this.status = status;
     }
 }

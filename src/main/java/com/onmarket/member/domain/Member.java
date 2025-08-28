@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "member")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,7 +19,6 @@ public class Member extends BaseTimeEntity {
     @Column(name = "member_id")
     private Long memberId;
 
-    // 소셜 로그인은 나중에 사용 → nullable
     @Enumerated(EnumType.STRING)
     @Column(name = "social_provider", length = 20)
     private SocialProvider socialProvider;
@@ -28,9 +26,8 @@ public class Member extends BaseTimeEntity {
     @Column(name = "social_id", length = 100, unique = true)
     private String socialId;
 
-    // 기본 회원가입 필드
     @Column(name = "username", length = 50, nullable = false)
-    private String username;  // 로그인 아이디(고유값)
+    private String username;
 
     @Column(name = "password", nullable = false)
     private String password;  // 비밀번호 (암호화)
@@ -67,5 +64,30 @@ public class Member extends BaseTimeEntity {
     @PrePersist
     protected void onCreate() {
         if (this.status == null) this.status = MemberStatus.ACTIVE;
+    }
+
+    /** 닉네임 변경 */
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    /** 비밀번호 변경 */
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    /** 프로필 이미지 변경 */
+    public void changeProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    /** 리프레시 토큰 갱신 */
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    /** 회원 상태 변경  */
+    public void changeStatus(MemberStatus status) {
+        this.status = status;
     }
 }

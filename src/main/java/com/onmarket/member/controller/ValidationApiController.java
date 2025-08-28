@@ -1,6 +1,6 @@
 package com.onmarket.member.controller;
 
-import com.onmarket.member.service.impl.ValidationService;
+import com.onmarket.member.service.ValidationService;
 import com.onmarket.response.ApiResponse;
 import com.onmarket.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;

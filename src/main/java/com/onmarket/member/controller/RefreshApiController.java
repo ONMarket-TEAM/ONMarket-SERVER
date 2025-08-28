@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
-
 public class RefreshApiController {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -61,7 +60,7 @@ public class RefreshApiController {
         String newRefreshToken = jwtTokenProvider.createRefreshToken(email);
 
         // DB에 새로운 Refresh Token 저장
-        member.setRefreshToken(newRefreshToken);
+        member.updateRefreshToken(newRefreshToken);
         memberRepository.save(member);
 
         return ApiResponse.success(ResponseCode.TOKEN_REFRESH_SUCCESS,
