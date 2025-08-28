@@ -15,6 +15,12 @@ spring:
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
+  codec:
+    max-in-memory-size: 10MB
+  mvc:
+    async:
+      request-timeout: -1 # 응답 대기 시간을 무제한으로 설정
+
 
 springdoc:
   packages-to-scan: com.onmarket
@@ -35,3 +41,10 @@ springdoc:
     user:
       name: test
       password: 1234
+
+gov:
+  api:
+    base-url: https://api.odcloud.kr/api
+    service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
+
+
