@@ -1,5 +1,6 @@
 package com.onmarket.business.dto;
 
+import com.onmarket.business.domain.Business;
 import com.onmarket.business.domain.enums.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -33,4 +34,17 @@ public class BusinessResponse {
 
     @Schema(description = "사업장 상태", example = "ACTIVE")
     private BusinessStatus status;
+
+    public static BusinessResponse from(Business b) {
+        return new BusinessResponse(
+                b.getBusinessId(),
+                b.getIndustry(),
+                b.getBusinessType(),
+                b.getRegionCodeId(),
+                b.getEstablishedYear(),
+                b.getAnnualRevenue(),
+                b.getEmployeeCount(),
+                b.getStatus()
+        );
+    }
 }
