@@ -9,4 +9,7 @@ public interface MemberService {
 
     /** ID로 회원 조회 */
     Member findById(Long memberId);
+
+    void withdraw(String token);
+
 }

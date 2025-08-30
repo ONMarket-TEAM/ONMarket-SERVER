@@ -5,4 +5,7 @@ import com.onmarket.member.dto.LoginResponse;
 
 public interface LoginService {
     LoginResponse login(LoginRequest request);
+
+    void logout(String token);
+
 }
