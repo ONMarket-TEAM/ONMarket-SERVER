@@ -45,7 +45,7 @@ public enum ResponseCode {
     PASSWORD_FIND_SUCCESS(HttpStatus.OK, "비밀번호 찾기에 성공했습니다."),
     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "비밀번호가 성공적으로 변경되었습니다."),
     PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "프로필이 성공적으로 수정되었습니다."),
-    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃이 성공적으로 처리되었습니다."),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
     PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "사진이 성공적으로 업로드되었습니다."),

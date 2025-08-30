@@ -11,6 +11,9 @@ public interface MemberService {
     /** ID로 회원 조회 */
     Member findById(Long memberId);
 
+    void withdraw(String token);
+
+
     /** 현재 비밀번호 일치 여부 확인(이메일 기반) */
     void verifyPassword(String email, String currentPassword);
 

@@ -1,10 +1,13 @@
 package com.onmarket.member.domain;
 
+import com.onmarket.business.domain.Business;
 import com.onmarket.common.domain.BaseTimeEntity;
 import com.onmarket.member.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -65,6 +68,9 @@ public class Member extends BaseTimeEntity {
     protected void onCreate() {
         if (this.status == null) this.status = MemberStatus.ACTIVE;
     }
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Business> businesses = new ArrayList<>();
 
     /** 닉네임 변경 */
     public void changeNickname(String nickname) {

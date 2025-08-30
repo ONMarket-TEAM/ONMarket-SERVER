@@ -49,4 +49,44 @@ public class LoginServiceImpl implements LoginService {
 
         return new LoginResponse(accessToken, refreshToken);
     }
+
+    @Override
+    public void logout(String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            throw new LoginException(ResponseCode.AUTH_TOKEN_NOT_FOUND);
+        }
+
+        String jwt;
+        try {
+            jwt = accessToken.replace("Bearer ", "").trim();
+        } catch (Exception e) {
+            throw new LoginException(ResponseCode.AUTH_TOKEN_INVALID);
+        }
+
+        // 토큰 유효성 검증
+        if (!jwtTokenProvider.validateToken(jwt)) {
+            throw new LoginException(ResponseCode.AUTH_TOKEN_INVALID);
+        }
+
+        // 만료 여부 체크
+        if (jwtTokenProvider.isTokenExpired(jwt)) {
+            throw new LoginException(ResponseCode.AUTH_TOKEN_EXPIRED);
+        }
+
+        String email = jwtTokenProvider.getEmail(jwt);
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new LoginException(ResponseCode.MEMBER_NOT_FOUND));
+
+        member.updateRefreshToken(null);
+
+        try {
+            memberRepository.save(member);
+        } catch (Exception e) {
+            throw new LoginException(ResponseCode.SERVER_ERROR);
+        }
+    }
+
+
+
 }
