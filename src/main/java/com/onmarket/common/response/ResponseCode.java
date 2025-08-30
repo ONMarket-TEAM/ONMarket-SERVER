@@ -93,6 +93,10 @@ public enum ResponseCode {
     BUSINESS_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 사업장에 접근할 권한이 없습니다."),
     BUSINESS_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "사업장 처리 중 오류가 발생했습니다."),
 
+    /**
+     * post response
+     */
+    POST_LIST_SUCCESS(HttpStatus.OK,"타입별 전체 리스트 조회 성공"),
 
     /**
      * scrap response
