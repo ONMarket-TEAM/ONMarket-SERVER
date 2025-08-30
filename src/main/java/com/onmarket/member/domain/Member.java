@@ -54,7 +54,6 @@ public class Member extends BaseTimeEntity {
     @Column(name = "gender", length = 10)
     private Gender gender;
 
-
     @Column(name = "main_business_id")
     private Long mainBusinessId;
 

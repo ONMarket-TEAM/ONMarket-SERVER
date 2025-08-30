@@ -155,8 +155,6 @@ public enum ResponseCode {
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
     NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다.");
 
-
-
     private final HttpStatus httpStatus;
     private final String message;
 
