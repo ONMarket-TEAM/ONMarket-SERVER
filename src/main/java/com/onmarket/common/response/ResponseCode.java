@@ -54,6 +54,23 @@ public enum ResponseCode {
     TOKEN_EXCHANGE_FAILED(HttpStatus.UNAUTHORIZED, "토큰 교환에 실패했습니다."),
 
     /**
+     * 회원정보 수정 관련 응답
+     */
+    CURRENT_PASSWORD_VERIFY_SUCCESS(HttpStatus.OK, "현재 비밀번호와 일치합니다."),
+    UPDATE_PROFILE_SUCCESS(HttpStatus.OK, "회원정보 수정 완료"),
+    REQUIRED_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호를 입력해주세요"),
+    NEW_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "새 비밀번호 확인이 일치하지 않습니다."),
+    SOCIAL_ACCOUNT_PASSWORD_VERIFICATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 검증 불가"),
+    SOCIAL_ACCOUNT_PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 변경 불가"),
+
+
+    /**
+     * 사업정보 수정 관련 응담
+     */
+    BUSINESS_DUPLICATED(HttpStatus.BAD_REQUEST, "중복 사업장 방지"),
+    BUSINESS_FORBIDDEN(HttpStatus.BAD_REQUEST, "내부 유출 방지"),
+
+    /**
      * OAuth2 / Social Login 관련 응답
      */
 

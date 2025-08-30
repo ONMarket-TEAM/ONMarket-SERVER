@@ -1,5 +1,7 @@
 package com.onmarket.business.service;
 
+import com.onmarket.business.domain.Business;
+import com.onmarket.business.domain.BusinessUpdateRequest;
 import com.onmarket.business.dto.BusinessRequest;
 import com.onmarket.business.dto.BusinessResponse;
 
@@ -15,4 +17,10 @@ public interface BusinessService {
 
     /** 회원 ID로 사업자 목록 조회 */
     List<BusinessResponse> getMemberBusinesses(Long memberId);
+
+    /** 사업장 단건조회(이메일 기반) */
+    BusinessResponse getMyBusiness(String email, Long businessId);
+
+    /** 사업 정보 수정(이메일 기반) */
+    BusinessResponse updateMyBusiness(String email, Long businessId, BusinessUpdateRequest request);
 }
