@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "/api/validation/check/*",
                                 "/api/sms/*",
                                 "/api/public-data/*",
-                                "/api/loan-data/*"
+                                "/api/loan-data/*",
+                                "/api/credit-loans/*"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
