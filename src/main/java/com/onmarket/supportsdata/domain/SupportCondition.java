@@ -38,7 +38,6 @@ public class SupportCondition {
     private String businessProspective;
     private String businessOperating;
     private String businessStruggling;
-    // ...DTO에 추가한 모든 필드들을 여기에 추가...
 
 
     public void setSupportService(SupportService supportService) {

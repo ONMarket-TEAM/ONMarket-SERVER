@@ -31,6 +31,7 @@ public class SupportService {
     @Column(length = 500)
     private String detailUrl;
     private String departmentName;
+    private String userCategory; // 사용자구분 필드 추가
 
     // --- serviceDetail 에서 추가로 가져오는 정보 ---
     @Lob
@@ -44,6 +45,9 @@ public class SupportService {
     @Lob
     private String laws;
 
+    // ▼▼▼ 키워드 저장을 위한 컬럼 추가 ▼▼▼
+    @Column(name = "keywords", length = 1024)
+    private String keywords;
 
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
     @OneToOne(mappedBy = "supportService", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,7 +58,7 @@ public class SupportService {
     }
 
     @Builder
-    public SupportService(String serviceId, String supportType, String serviceName, String servicePurposeSummary, String supportTarget, String selectionCriteria, String supportContent, String applicationMethod, String detailUrl, String departmentName, String servicePurpose, String applicationDeadline, String requiredDocuments, String receptionAgencyName, String contact, String onlineApplicationUrl, String laws) {
+    public SupportService(String serviceId, String supportType, String serviceName, String servicePurposeSummary, String supportTarget, String selectionCriteria, String supportContent, String applicationMethod, String detailUrl, String departmentName, String userCategory, String servicePurpose, String applicationDeadline, String requiredDocuments, String receptionAgencyName, String contact, String onlineApplicationUrl, String laws, String keywords) {
         this.serviceId = serviceId;
         this.supportType = supportType;
         this.serviceName = serviceName;
@@ -65,6 +69,7 @@ public class SupportService {
         this.applicationMethod = applicationMethod;
         this.detailUrl = detailUrl;
         this.departmentName = departmentName;
+        this.userCategory = userCategory;
         this.servicePurpose = servicePurpose;
         this.applicationDeadline = applicationDeadline;
         this.requiredDocuments = requiredDocuments;
@@ -72,5 +77,6 @@ public class SupportService {
         this.contact = contact;
         this.onlineApplicationUrl = onlineApplicationUrl;
         this.laws = laws;
+        this.keywords = keywords;
     }
 }

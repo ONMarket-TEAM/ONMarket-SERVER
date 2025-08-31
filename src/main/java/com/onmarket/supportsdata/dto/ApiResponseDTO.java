@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ApiResponseDTO<T>  { // ◀◀-- 1. 클래스 선언부에 제네릭 타입 <T> 추가
+public class ApiResponseDTO<T>  {
 
     @JsonProperty("currentCount")
     private int currentCount;
@@ -25,5 +25,5 @@ public class ApiResponseDTO<T>  { // ◀◀-- 1. 클래스 선언부에 제네�
     private int perPage;
 
     @JsonProperty("data")
-    private List<T> data; // ◀◀-- 2. data 필드의 타입을 List<ServiceInfoDTO>에서 List<T>로 변경
+    private List<T> data;
 }

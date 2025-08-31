@@ -44,7 +44,12 @@ springdoc:
 
 gov:
   api:
-    base-url: https://api.odcloud.kr/api
-    service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
+    support: # 지원금 API용 설정
+      base-url: https://api.odcloud.kr/api
+      service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
+    loan: # 대출상품 API용 설정
+      base-url: https://apis.data.go.kr/B553701/LoanProductSearchingInfo/LoanProductSearchingInfo
+      service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
+
 
 
