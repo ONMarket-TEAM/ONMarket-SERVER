@@ -136,7 +136,16 @@ public enum ResponseCode {
     NOTIFICATION_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "이미 읽은 알림입니다."),
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
-    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다.");
+    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다."),
+
+    /**
+     * 데이터 조회 response
+     */
+    DATA_FETCH_SUCCESS(HttpStatus.OK, "데이터 수집에 성공했습니다."),
+    DATA_STATUS_READ_SUCCESS(HttpStatus.OK, "데이터 상태 조회에 성공했습니다."),
+    PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
+    OPTION_READ_SUCCESS(HttpStatus.OK, "상품 옵션 조회에 성공했습니다."),
+    DATA_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "데이터 수집에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
