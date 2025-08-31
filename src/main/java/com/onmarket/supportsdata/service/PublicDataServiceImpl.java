@@ -1,7 +1,7 @@
 package com.onmarket.supportsdata.service;
 
 import com.onmarket.supportsdata.domain.SupportCondition;
-import com.onmarket.supportsdata.domain.SupportService;
+import com.onmarket.supportsdata.domain.SupportProduct;
 import com.onmarket.supportsdata.dto.ApiResponseDTO;
 import com.onmarket.supportsdata.dto.ServiceDetailDTO;
 import com.onmarket.supportsdata.dto.ServiceInfoDTO;
@@ -21,12 +21,11 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -131,16 +130,16 @@ public class PublicDataServiceImpl implements PublicDataService {
     private void createAndSaveEntities(ServiceInfoDTO infoDTO, ServiceDetailDTO detailDTO, SupportConditionDTO conditionDTO) {
         String serviceId = infoDTO.getServiceId();
 
-        // ▼▼▼ DB에 저장하기 전, 이미 존재하는 ID인지 확인하는 로직 추가 ▼▼▼
+        // DB 저장 전 ID 중복 확인
         if (supportServiceRepository.existsById(serviceId)) {
             log.info("Service ID {} already exists in the database. Skipping.", serviceId);
             return; // 이미 존재하면 저장을 건너뛰고 메소드를 종료합니다.
         }
 
-        // ▼▼▼ 존재하지 않을 경우에만 아래 저장 로직을 실행합니다 ▼▼▼
+        // 존재하지 않을 시 실행
         String generatedKeywords = generateKeywords(infoDTO, detailDTO, conditionDTO);
 
-        SupportService serviceEntity = SupportService.builder()
+        SupportProduct serviceEntity = SupportProduct.builder()
                 .serviceId(serviceId) // serviceId 변수 사용
                 .supportType(infoDTO.getSupportType())
                 .serviceName(infoDTO.getServiceName())
@@ -182,7 +181,7 @@ public class PublicDataServiceImpl implements PublicDataService {
                 .businessStruggling(conditionDTO.getBusinessStruggling())
                 .build();
 
-        conditionEntity.setSupportService(serviceEntity);
+        conditionEntity.setSupportProduct(serviceEntity);
         supportServiceRepository.save(serviceEntity);
     }
 

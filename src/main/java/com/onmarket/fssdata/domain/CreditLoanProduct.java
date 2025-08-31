@@ -2,8 +2,12 @@ package com.onmarket.fssdata.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "credit_loan_products")
@@ -49,6 +53,11 @@ public class CreditLoanProduct {
     @Column(name = "fin_co_subm_day")
     private String finCoSubmDay;
 
+    @OneToMany(mappedBy = "creditLoanProduct", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<CreditLoanOption> options = new ArrayList<>();
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -64,5 +73,11 @@ public class CreditLoanProduct {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // == 연관관계 편의 메서드 == //
+    public void addOption(CreditLoanOption option) {
+        this.options.add(option);
+        option.setCreditLoanProduct(this);
     }
 }

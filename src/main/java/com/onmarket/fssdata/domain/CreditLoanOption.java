@@ -52,6 +52,11 @@ public class CreditLoanOption {
     @Column(name = "crdt_grad_avg")
     private Double crdtGradAvg;
 
+    // [추가된 부분] 다대일(N:1) 관계 설정
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id") // 외래 키(Foreign Key)가 될 컬럼명
+    private CreditLoanProduct creditLoanProduct;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

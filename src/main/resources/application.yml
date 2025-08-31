@@ -7,6 +7,9 @@ server:
       enabled: true
 
 spring:
+  config:
+    import: optional:application-data.yml
+
   profiles:
     active: local
     include: oauth
@@ -19,7 +22,7 @@ spring:
     max-in-memory-size: 10MB
   mvc:
     async:
-      request-timeout: -1 # 응답 대기 시간을 무제한으로 설정
+      request-timeout: -1 # 응답 대기 시간 연장
 
 
 springdoc:
@@ -42,19 +45,7 @@ springdoc:
       name: test
       password: 1234
 
-gov:
-  api:
-    support: # 지원금 API용 설정
-      base-url: https://api.odcloud.kr/api
-      service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
-    loan: # 대출상품 API용 설정
-      base-url: https://apis.data.go.kr/B553701/LoanProductSearchingInfo/LoanProductSearchingInfo
-      service-key: 8d6c3422e6cdcc982ba6f9d31406fb87ff17902da9441dfb4cd9aae5229b62b5
 
-fss:
-  api:
-    base-url: https://finlife.fss.or.kr/finlifeapi
-    auth-key: 96b7b2e34a0f1532eceb64a58b81b05a
 
 
 

@@ -18,7 +18,7 @@ public class SupportCondition {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", unique = true)
-    private SupportService supportService;
+    private SupportProduct supportProduct;
 
     // --- JA 코드 필드들 ---
     private String genderMale;
@@ -40,10 +40,10 @@ public class SupportCondition {
     private String businessStruggling;
 
 
-    public void setSupportService(SupportService supportService) {
-        this.supportService = supportService;
-        if (supportService.getSupportCondition() != this) {
-            supportService.setSupportCondition(this);
+    public void setSupportProduct(SupportProduct supportProduct) {
+        this.supportProduct = supportProduct;
+        if (supportProduct.getSupportCondition() != this) {
+            supportProduct.setSupportCondition(this);
         }
     }
 

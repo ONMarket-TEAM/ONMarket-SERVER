@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "support_service")
-public class SupportService {
+public class SupportProduct {
 
     @Id
     @Column(name = "service_id")
@@ -45,12 +45,12 @@ public class SupportService {
     @Lob
     private String laws;
 
-    // ▼▼▼ 키워드 저장을 위한 컬럼 추가 ▼▼▼
+    // 키워드 저장을 위한 컬럼 추가
     @Column(name = "keywords", length = 1024)
     private String keywords;
 
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
-    @OneToOne(mappedBy = "supportService", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition;
 
     public void setSupportCondition(SupportCondition supportCondition) {
@@ -58,7 +58,7 @@ public class SupportService {
     }
 
     @Builder
-    public SupportService(String serviceId, String supportType, String serviceName, String servicePurposeSummary, String supportTarget, String selectionCriteria, String supportContent, String applicationMethod, String detailUrl, String departmentName, String userCategory, String servicePurpose, String applicationDeadline, String requiredDocuments, String receptionAgencyName, String contact, String onlineApplicationUrl, String laws, String keywords) {
+    public SupportProduct(String serviceId, String supportType, String serviceName, String servicePurposeSummary, String supportTarget, String selectionCriteria, String supportContent, String applicationMethod, String detailUrl, String departmentName, String userCategory, String servicePurpose, String applicationDeadline, String requiredDocuments, String receptionAgencyName, String contact, String onlineApplicationUrl, String laws, String keywords) {
         this.serviceId = serviceId;
         this.supportType = supportType;
         this.serviceName = serviceName;
