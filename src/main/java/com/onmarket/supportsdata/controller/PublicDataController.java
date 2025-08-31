@@ -1,7 +1,7 @@
 package com.onmarket.supportsdata.controller;
 
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.supportsdata.service.PublicDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

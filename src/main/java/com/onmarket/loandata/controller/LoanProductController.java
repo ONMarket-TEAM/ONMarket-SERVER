@@ -1,9 +1,9 @@
 package com.onmarket.loandata.controller;
 
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.loandata.domain.LoanProduct;
 import com.onmarket.loandata.service.LoanProductService;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses; // ApiResponses 임포트
 import io.swagger.v3.oas.annotations.tags.Tag;

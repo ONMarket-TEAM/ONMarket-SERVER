@@ -1,10 +1,11 @@
 package com.onmarket.fssdata.controller;
 
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.fssdata.domain.CreditLoanOption;
 import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.fssdata.service.CreditLoanService;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
