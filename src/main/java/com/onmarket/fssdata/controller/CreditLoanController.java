@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "CreditLoan API", description = "개인신용대출 API")
+@Tag(name = "CreditLoan API", description = "금융감독원 개인신용대출 API")
 @RestController
 @RequestMapping("/api/credit-loans")
 @RequiredArgsConstructor

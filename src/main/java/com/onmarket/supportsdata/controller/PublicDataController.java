@@ -17,14 +17,14 @@ import java.util.HashMap;
 
 @Tag(name = "Support API", description = "정부 지원금 API")
 @RestController
-@RequestMapping("/api/support-data")
+@RequestMapping("/api/support-products")
 @RequiredArgsConstructor
 public class PublicDataController {
 
     private final PublicDataService publicDataService;
 
     @PostMapping("/fetch-all")
-    @Operation(summary = "전체 데이터 수집 작업 시작", description = "모든 정부지원금 상품을 가져오는 비동기 작업을 시작시킵니다.")
+    @Operation(summary = "전체 지원금데이터 수집", description = "모든 정부지원금 상품을 가져오는 비동기 작업을 시작시킵니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "데이터 수집 작업이 성공적으로 시작되었습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "데이터 수집 작업 시작 중 오류가 발생했습니다.")
