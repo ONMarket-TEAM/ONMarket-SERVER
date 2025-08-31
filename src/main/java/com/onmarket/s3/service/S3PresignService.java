@@ -1,4 +1,4 @@
-package com.onmarket.s3;
+package com.onmarket.s3.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

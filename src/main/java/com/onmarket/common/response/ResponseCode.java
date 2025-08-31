@@ -45,13 +45,30 @@ public enum ResponseCode {
     PASSWORD_FIND_SUCCESS(HttpStatus.OK, "비밀번호 찾기에 성공했습니다."),
     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "비밀번호가 성공적으로 변경되었습니다."),
     PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "프로필이 성공적으로 수정되었습니다."),
-    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃이 성공적으로 처리되었습니다."),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
     PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "사진이 성공적으로 업로드되었습니다."),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
     PASSWORD_CHECK_SUCCESS(HttpStatus.OK,"본인인증에 성공했습니다.") ,
     TOKEN_EXCHANGE_FAILED(HttpStatus.UNAUTHORIZED, "토큰 교환에 실패했습니다."),
+
+    /**
+     * 회원정보 수정 관련 응답
+     */
+    CURRENT_PASSWORD_VERIFY_SUCCESS(HttpStatus.OK, "현재 비밀번호와 일치합니다."),
+    UPDATE_PROFILE_SUCCESS(HttpStatus.OK, "회원정보 수정 완료"),
+    REQUIRED_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호를 입력해주세요"),
+    NEW_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "새 비밀번호 확인이 일치하지 않습니다."),
+    SOCIAL_ACCOUNT_PASSWORD_VERIFICATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 검증 불가"),
+    SOCIAL_ACCOUNT_PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 변경 불가"),
+
+
+    /**
+     * 사업정보 수정 관련 응담
+     */
+    BUSINESS_DUPLICATED(HttpStatus.BAD_REQUEST, "중복 사업장 방지"),
+    BUSINESS_FORBIDDEN(HttpStatus.BAD_REQUEST, "내부 유출 방지"),
 
     /**
      * OAuth2 / Social Login 관련 응답
@@ -136,7 +153,17 @@ public enum ResponseCode {
     NOTIFICATION_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "이미 읽은 알림입니다."),
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
-    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다.");
+    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다."),
+
+    /**
+     * S3 / 파일 스토리지 관련 응답
+     */
+    S3_PRESIGN_PUT_SUCCESS(HttpStatus.OK, "업로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_PRESIGN_GET_SUCCESS(HttpStatus.OK, "다운로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_MISSING_PARAMS(HttpStatus.BAD_REQUEST, "필수 파라미터(dir, filename, contentType)가 누락되었습니다."),
+    S3_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "필수 파라미터(key)가 누락되었습니다."),
+    S3_INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않은 Content-Type 입니다."),
+    S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 작업 처리 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
