@@ -1,4 +1,4 @@
-package com.onmarket.response;
+package com.onmarket.common.response;
 
 public class ApiBody <T> {
 

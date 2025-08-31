@@ -1,12 +1,14 @@
 package com.onmarket.business.controller;
 
+import com.onmarket.business.domain.Business;
+import com.onmarket.business.domain.BusinessUpdateRequest;
 import com.onmarket.business.dto.BusinessRequest;
 import com.onmarket.business.dto.BusinessResponse;
 import com.onmarket.business.service.BusinessService;
-import com.onmarket.common.jwt.JwtTokenProvider;
+import com.onmarket.oauth.jwt.JwtTokenProvider;
 import com.onmarket.member.exception.LoginException;
-import com.onmarket.response.ApiResponse;
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.common.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -79,5 +82,42 @@ public class BusinessApiController {
         List<BusinessResponse> responses = businessService.getMemberBusinesses(email);
 
         return ApiResponse.success(ResponseCode.BUSINESS_READ_SUCCESS, responses);
+    }
+
+    // 사업장 단건 조회
+    @GetMapping("/{businessId}")
+    @Operation(summary = "내 사업장 단건 조회", description = "businessId가 내 소유인지 검증 후 상세를 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "내 소유 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사업장 없음")
+    })
+    public ApiResponse<BusinessResponse> getMyBusiness(
+            @AuthenticationPrincipal String email,
+            @PathVariable Long businessId
+    ) {
+        BusinessResponse body = businessService.getMyBusiness(email, businessId);
+        return ApiResponse.success(ResponseCode.BUSINESS_READ_SUCCESS, body);
+    }
+
+    // 사업정보 수정
+    @PatchMapping("/{businessId}")
+    @Operation(summary = "사업장 정보 부분 수정",
+            description = "업종/형태/지역/연매출/직원수/설립연도 중 전달된 값만 반영합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 값"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "내 소유 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사업장 없음")
+    })
+    public ApiResponse<BusinessResponse> updateMyBusiness(
+            @AuthenticationPrincipal String email,
+            @PathVariable Long businessId,
+            @RequestBody BusinessUpdateRequest request
+    ) {
+        BusinessResponse updated = businessService.updateMyBusiness(email, businessId, request);
+        return ApiResponse.success(ResponseCode.BUSINESS_UPDATE_SUCCESS, updated);
     }
 }

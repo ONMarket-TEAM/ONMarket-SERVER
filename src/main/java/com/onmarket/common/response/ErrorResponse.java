@@ -1,4 +1,4 @@
-package com.onmarket.response;
+package com.onmarket.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

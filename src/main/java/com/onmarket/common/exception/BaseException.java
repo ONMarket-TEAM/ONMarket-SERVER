@@ -1,6 +1,6 @@
 package com.onmarket.common.exception;
 
-import com.onmarket.response.ResponseCode;
+import com.onmarket.common.response.ResponseCode;
 import lombok.Getter;
 
 @Getter
