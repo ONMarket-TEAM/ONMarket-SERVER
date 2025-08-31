@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/validation/check/*",
-                                "/api/sms/*"
+                                "/api/sms/*",
+                                "/api/members/find-id"
                         ).permitAll()
                         .requestMatchers("/api/members/me/**").authenticated()
                         .anyRequest().authenticated()
