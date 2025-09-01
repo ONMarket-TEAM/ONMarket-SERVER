@@ -1,4 +1,4 @@
-package com.onmarket.s3;
+package com.onmarket.s3.controller;
 
 import com.onmarket.common.response.ApiResponse;
 import com.onmarket.common.response.ResponseCode;
