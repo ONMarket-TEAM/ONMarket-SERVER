@@ -45,13 +45,39 @@ public enum ResponseCode {
     PASSWORD_FIND_SUCCESS(HttpStatus.OK, "비밀번호 찾기에 성공했습니다."),
     PASSWORD_RESET_SUCCESS(HttpStatus.OK, "비밀번호가 성공적으로 변경되었습니다."),
     PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "프로필이 성공적으로 수정되었습니다."),
-    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃이 성공적으로 처리되었습니다."),
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
     PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "사진이 성공적으로 업로드되었습니다."),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
     PASSWORD_CHECK_SUCCESS(HttpStatus.OK,"본인인증에 성공했습니다.") ,
     TOKEN_EXCHANGE_FAILED(HttpStatus.UNAUTHORIZED, "토큰 교환에 실패했습니다."),
+
+    /**
+     * 비밀번호 강도 검증 관련
+     */
+    PASSWORD_REQUIRED(HttpStatus.BAD_REQUEST, "비밀번호를 입력해주세요."),
+    PASSWORD_TOO_SHORT(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이어야 합니다."),
+    PASSWORD_TOO_LONG(HttpStatus.BAD_REQUEST, "비밀번호는 최대 20자 이하여야 합니다."),
+    PASSWORD_COMPLEXITY_INSUFFICIENT(HttpStatus.BAD_REQUEST, "영문 대/소문자, 숫자, 특수문자 중 최소 2가지를 조합해주세요."),
+    PASSWORD_WHITESPACE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "비밀번호에 공백문자를 포함할 수 없습니다."),
+
+    /**
+     * 회원정보 수정 관련 응답
+     */
+    CURRENT_PASSWORD_VERIFY_SUCCESS(HttpStatus.OK, "현재 비밀번호와 일치합니다."),
+    UPDATE_PROFILE_SUCCESS(HttpStatus.OK, "회원정보 수정 완료"),
+    REQUIRED_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호를 입력해주세요"),
+    NEW_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "새 비밀번호 확인이 일치하지 않습니다."),
+    SOCIAL_ACCOUNT_PASSWORD_VERIFICATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 검증 불가"),
+    SOCIAL_ACCOUNT_PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 변경 불가"),
+
+
+    /**
+     * 사업정보 수정 관련 응담
+     */
+    BUSINESS_DUPLICATED(HttpStatus.BAD_REQUEST, "중복 사업장 방지"),
+    BUSINESS_FORBIDDEN(HttpStatus.BAD_REQUEST, "내부 유출 방지"),
 
     /**
      * OAuth2 / Social Login 관련 응답
@@ -79,6 +105,16 @@ public enum ResponseCode {
     // 스케줄러 관련
     SCHEDULER_UPDATE_SUCCESS(HttpStatus.OK, "스케줄러 업데이트 성공"),
     SCHEDULER_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "스케줄러 업데이트 실패"),
+
+    /**
+     * 이메일 인증 관련
+     */
+    MAIL_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일을 보내지 못했습니다."),
+    INVALID_MAIL(HttpStatus.BAD_REQUEST, "인증 이메일 발송 이력 없음/인증 시간 만료"),
+    INVALID_CODE(HttpStatus.BAD_REQUEST, "인증코드 불일치"),
+    VERIFICATION_MAIL_SENT(HttpStatus.OK, "인증 메일을 보냈습니다."),
+    VERIFIED_CODE(HttpStatus.OK, "인증코드 일치"),
+    EMAIL_VERIFICATION_REQUIRED(HttpStatus.BAD_REQUEST, "이메일 인증이 필요합니다."),
 
     /**
      * Business response
@@ -142,7 +178,33 @@ public enum ResponseCode {
     NOTIFICATION_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "이미 읽은 알림입니다."),
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
-    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다.");
+
+    /**
+     * S3 / 파일 스토리지 관련 응답
+     */
+    S3_PRESIGN_PUT_SUCCESS(HttpStatus.OK, "업로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_PRESIGN_GET_SUCCESS(HttpStatus.OK, "다운로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_MISSING_PARAMS(HttpStatus.BAD_REQUEST, "필수 파라미터(dir, filename, contentType)가 누락되었습니다."),
+    S3_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "필수 파라미터(key)가 누락되었습니다."),
+    S3_INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않은 Content-Type 입니다."),
+    S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 작업 처리 중 오류가 발생했습니다."),
+    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다."),
+
+    /**
+     * 데이터 조회 response
+     */
+    DATA_FETCH_SUCCESS(HttpStatus.OK, "데이터 수집에 성공했습니다."),
+    DATA_STATUS_READ_SUCCESS(HttpStatus.OK, "데이터 상태 조회에 성공했습니다."),
+    OPTION_READ_SUCCESS(HttpStatus.OK, "상품 옵션 조회에 성공했습니다."),
+    DATA_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "데이터 수집에 실패했습니다."),
+
+    /**
+     * Product response
+     */
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+    PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
+    PRODUCT_FETCH_SUCCESS(HttpStatus.OK, "상품 데이터 수집에 성공했습니다."),
+    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
