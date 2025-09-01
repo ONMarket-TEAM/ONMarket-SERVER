@@ -31,7 +31,6 @@ public class PostServiceImpl implements PostService {
         }
         return PostListResponse.builder()
                 .postId(post.getPostId())
-                .productId(productId)
                 .postType(post.getPostType())
                 .title("null")
                 .summary(post.getSummary())

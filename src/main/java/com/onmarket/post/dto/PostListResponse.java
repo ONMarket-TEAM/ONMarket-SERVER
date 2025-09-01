@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostListResponse {
     private Long postId;
-    private Long productId;
     private String title;
     private PostType postType;
     private String summary;

@@ -28,5 +28,4 @@ public class Post extends BaseTimeEntity {
     //임시
     private Long loanId;
     private Long policyId;
-
 }
