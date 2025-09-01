@@ -172,7 +172,17 @@ public enum ResponseCode {
     NOTIFICATION_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "이미 읽은 알림입니다."),
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
-    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다.");
+    NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다."),
+
+    /**
+     * S3 / 파일 스토리지 관련 응답
+     */
+    S3_PRESIGN_PUT_SUCCESS(HttpStatus.OK, "업로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_PRESIGN_GET_SUCCESS(HttpStatus.OK, "다운로드용 프리사인 URL 발급에 성공했습니다."),
+    S3_MISSING_PARAMS(HttpStatus.BAD_REQUEST, "필수 파라미터(dir, filename, contentType)가 누락되었습니다."),
+    S3_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "필수 파라미터(key)가 누락되었습니다."),
+    S3_INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않은 Content-Type 입니다."),
+    S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 작업 처리 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
