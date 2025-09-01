@@ -7,57 +7,64 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 
+/**
+ * 신용대출 상품의 금리 옵션 정보
+ * 각 상품별로 신용등급에 따른 금리 조건을 관리
+ */
 @Entity
-@Table(name = "credit_loan_options")
+@Table(name = "credit_loan_option")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditLoanOption extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 옵션 고유 ID
 
     @Column(name = "fin_co_no")
-    private String finCoNo;
+    private String finCoNo; // 금융회사 코드
 
     @Column(name = "fin_prdt_cd")
-    private String finPrdtCd;
+    private String finPrdtCd; // 금융상품 코드 (상품 식별자)
 
     @Column(name = "crdt_lend_rate_type")
-    private String crdtLendRateType;
+    private String crdtLendRateType; // 금리 유형 (변동/고정)
 
     @Column(name = "crdt_lend_rate_type_nm")
-    private String crdtLendRateTypeNm;
+    private String crdtLendRateTypeNm; // 금리 유형명
 
+    // 신용등급별 금리 정보 (%)
     @Column(name = "crdt_grad_1")
-    private Double crdtGrad1;
+    private Double crdtGrad1; // 1등급 금리
 
     @Column(name = "crdt_grad_4")
-    private Double crdtGrad4;
+    private Double crdtGrad4; // 4등급 금리
 
     @Column(name = "crdt_grad_5")
-    private Double crdtGrad5;
+    private Double crdtGrad5; // 5등급 금리
 
     @Column(name = "crdt_grad_6")
-    private Double crdtGrad6;
+    private Double crdtGrad6; // 6등급 금리
 
     @Column(name = "crdt_grad_10")
-    private Double crdtGrad10;
+    private Double crdtGrad10; // 10등급 금리
 
     @Column(name = "crdt_grad_11")
-    private Double crdtGrad11;
+    private Double crdtGrad11; // 11등급 금리
 
     @Column(name = "crdt_grad_12")
-    private Double crdtGrad12;
+    private Double crdtGrad12; // 12등급 금리
 
     @Column(name = "crdt_grad_13")
-    private Double crdtGrad13;
+    private Double crdtGrad13; // 13등급 금리
 
     @Column(name = "crdt_grad_avg")
-    private Double crdtGradAvg;
+    private Double crdtGradAvg; // 평균 금리
 
+    // 상품과의 연관관계 (fin_prdt_cd로 연결)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private CreditLoanProduct creditLoanProduct;
+    @JoinColumn(name = "fin_prdt_cd", referencedColumnName = "fin_prdt_cd", insertable = false, updatable = false)
+    private CreditLoanProduct creditLoanProduct; // 연관된 신용대출 상품
 
     @Builder
     public CreditLoanOption(String finCoNo, String finPrdtCd, String crdtLendRateType,
@@ -81,7 +88,9 @@ public class CreditLoanOption extends BaseTimeEntity {
         this.creditLoanProduct = creditLoanProduct;
     }
 
-    // 비즈니스 로직이 필요한 경우 메서드로 안전하게 값 변경
+    /**
+     * 신용등급별 금리 정보 업데이트
+     */
     public void updateCreditGrades(Double grad1, Double grad4, Double grad5, Double grad6,
                                    Double grad10, Double grad11, Double grad12, Double grad13, Double gradAvg) {
         this.crdtGrad1 = grad1;
@@ -95,6 +104,9 @@ public class CreditLoanOption extends BaseTimeEntity {
         this.crdtGradAvg = gradAvg;
     }
 
+    /**
+     * 연관된 상품 정보 업데이트
+     */
     public void updateCreditLoanProduct(CreditLoanProduct creditLoanProduct) {
         this.creditLoanProduct = creditLoanProduct;
     }

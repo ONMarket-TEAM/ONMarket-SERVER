@@ -12,55 +12,61 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 신용대출 상품 정보
+ * 금융감독원 API에서 제공하는 개인신용대출 상품의 기본 정보를 관리
+ */
 @Entity
-@Table(name = "credit_loan_products")
+@Table(name = "credit_loan_product")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditLoanProduct extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 상품 고유 ID
 
     @Column(name = "dcls_month")
-    private String dclsMonth;
+    private String dclsMonth; // 공시 월 (YYYYMM)
 
     @Column(name = "fin_co_no")
-    private String finCoNo;
+    private String finCoNo; // 금융회사 코드
 
     @Column(name = "kor_co_nm")
-    private String korCoNm;
+    private String korCoNm; // 금융회사명 (한국어)
 
     @Column(name = "fin_prdt_cd")
-    private String finPrdtCd;
+    private String finPrdtCd; // 금융상품 코드 (상품 식별자)
 
     @Column(name = "fin_prdt_nm")
-    private String finPrdtNm;
+    private String finPrdtNm; // 금융상품명
 
     @Column(name = "join_way", columnDefinition = "TEXT")
-    private String joinWay;
+    private String joinWay; // 가입 방법 (온라인, 영업점 등)
 
     @Column(name = "crdt_prdt_type")
-    private String crdtPrdtType;
+    private String crdtPrdtType; // 신용대출 상품 유형 코드
 
     @Column(name = "crdt_prdt_type_nm")
-    private String crdtPrdtTypeNm;
+    private String crdtPrdtTypeNm; // 신용대출 상품 유형명
 
     @Column(name = "cb_name")
-    private String cbName;
+    private String cbName; // 신용평가회사명
 
     @Column(name = "dcls_strt_day")
-    private String dclsStrtDay;
+    private String dclsStrtDay; // 공시 시작일 (YYYYMMDD)
 
     @Column(name = "dcls_end_day")
-    private String dclsEndDay;
+    private String dclsEndDay; // 공시 종료일 (YYYYMMDD)
 
     @Column(name = "fin_co_subm_day")
-    private String finCoSubmDay;
+    private String finCoSubmDay; // 금융회사 제출일 (YYYYMMDD)
 
-    @OneToMany(mappedBy = "creditLoanProduct", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<CreditLoanOption> options = new ArrayList<>();
+    // 해당 상품의 금리 옵션들 (양방향 연관관계)
+    @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY)
+    @ToString.Exclude  // toString 무한루프 방지
+    @EqualsAndHashCode.Exclude  // equals/hashCode 무한루프 방지
+    private List<CreditLoanOption> options = new ArrayList<>(); // 상품별 금리 옵션 목록
 
     @Builder
     public CreditLoanProduct(String dclsMonth, String finCoNo, String korCoNm, String finPrdtCd,
@@ -80,7 +86,9 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.finCoSubmDay = finCoSubmDay;
     }
 
-    // 비즈니스 로직 - 상품 정보 업데이트
+    /**
+     * 상품 정보 업데이트 (공시 정보 변경 시 사용)
+     */
     public void updateProductInfo(String dclsMonth, String korCoNm, String finPrdtNm,
                                   String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
                                   String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay) {
@@ -96,7 +104,10 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.finCoSubmDay = finCoSubmDay;
     }
 
-    // == 연관관계 편의 메서드 == //
+    /**
+     * 연관관계 편의 메서드 - 옵션 추가
+     * 양방향 연관관계를 안전하게 설정
+     */
     public void addOption(CreditLoanOption option) {
         this.options.add(option);
         option.updateCreditLoanProduct(this);
