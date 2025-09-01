@@ -58,11 +58,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    private Member getMemberOrThrow(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
-    }
-
     /** 현재 비밀번호 일치 여부 검증 */
     @Override
     @Transactional(readOnly = true)
