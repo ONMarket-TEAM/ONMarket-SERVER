@@ -6,6 +6,12 @@ build/
 !**/src/test/**/build/
 
 .DB_Store
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
+EOF
 
 ### STS ###
 .apt_generated
