@@ -97,7 +97,9 @@ public enum ResponseCode {
      * post response
      */
     POST_LIST_SUCCESS(HttpStatus.OK,"타입별 전체 리스트 조회 성공"),
+    POST_DETAIL_SUCCESS(HttpStatus.OK,"게시글 상세 조회 성공"),
 
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
     /**
      * scrap response
      */
