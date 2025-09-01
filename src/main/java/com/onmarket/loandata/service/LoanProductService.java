@@ -1,0 +1,233 @@
+package com.onmarket.loandata.service;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.onmarket.loandata.domain.LoanProduct;
+import com.onmarket.loandata.dto.XmlLoanApiResponse;
+import com.onmarket.loandata.repository.LoanProductRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class LoanProductService {
+
+    private final LoanProductRepository loanProductRepository;
+    private final RestTemplate restTemplate;
+    private final XmlMapper xmlMapper = new XmlMapper();
+
+    @Value("${gov.api.loan.service-key}")
+    private String serviceKey;
+
+    @Value("${gov.api.loan.base-url}")
+    private String baseUrl;
+
+    // 모든 대출 상품 데이터 수집
+    @Transactional
+    public void fetchAndSaveAllLoanProducts() {
+        int pageNo = 1;
+        int numOfRows = 100;
+        int totalProcessed = 0;
+
+        do {
+            try {
+                log.info("대출 상품 데이터 수집 시작 - 페이지: {}", pageNo);
+                XmlLoanApiResponse response = fetchLoanProducts(pageNo, numOfRows);
+                if (response == null || response.getHeader() == null || !"00".equals(response.getHeader().getResultCode())) {
+                    log.error("API 오류 또는 응답 없음: {}", response != null && response.getHeader() != null ? response.getHeader().getResultMsg() : "응답 없음");
+                    break;
+                }
+                if (response.getBody() == null || response.getBody().getItems() == null || response.getBody().getItems().getItem() == null) {
+                    log.info("수집할 데이터가 더 이상 없습니다.");
+                    break;
+                }
+
+                List<XmlLoanApiResponse.XmlLoanItem> items = response.getBody().getItems().getItem();
+                log.info("페이지 {}에서 {}개 데이터 조회", pageNo, items.size());
+                saveXmlLoanProducts(items);
+
+                totalProcessed += items.size();
+                log.info("페이지 {} 처리 완료, 누적 처리: {}개", pageNo, totalProcessed);
+
+                if (items.size() < numOfRows) {
+                    log.info("모든 데이터 수집 완료 - 총 {}개", totalProcessed);
+                    break;
+                }
+                pageNo++;
+                Thread.sleep(1000);
+
+            } catch (Exception e) {
+                log.error("데이터 수집 중 오류 발생: ", e);
+                break;
+            }
+        } while (true);
+    }
+
+    // XML 대출 상품 API 호출
+    private XmlLoanApiResponse fetchLoanProducts(int pageNo, int numOfRows) throws Exception {
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/LoanProductSearchingInfo/getLoanProductSearchingInfo")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("pageNo", pageNo)
+                .queryParam("numOfRows", numOfRows)
+                .build()
+                .toUriString();
+
+        log.debug("API 호출 URL: {}", url);
+        String xmlResponse = restTemplate.getForObject(url, String.class);
+
+        if (xmlResponse == null || xmlResponse.trim().isEmpty()) {
+            log.error("API로부터 빈 응답을 받았습니다.");
+            return null;
+        }
+        return xmlMapper.readValue(xmlResponse, XmlLoanApiResponse.class);
+    }
+
+    // XML 대출 상품 데이터 저장
+    @Transactional
+    public void saveXmlLoanProducts(List<XmlLoanApiResponse.XmlLoanItem> items) {
+        List<LoanProduct> productsToSave = new ArrayList<>();
+        items.forEach(item -> {
+            try {
+                Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
+
+                LoanProduct product;
+                if (existingProduct.isPresent()) {
+                    // 기존 상품 업데이트
+                    product = existingProduct.get();
+                    updateExistingProduct(item, product);
+                    log.debug("기존 상품 업데이트: {}", item.getSeq());
+                } else {
+                    // 새 상품 생성 - @Builder 사용
+                    product = createNewProduct(item);
+                    log.debug("새 상품 생성: {}", item.getSeq());
+                }
+
+                productsToSave.add(product);
+            } catch (Exception e) {
+                log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
+            }
+        });
+
+        if (!productsToSave.isEmpty()) {
+            loanProductRepository.saveAll(productsToSave);
+            log.info("대출 상품 정보 저장 완료 - {}개", productsToSave.size());
+        }
+    }
+
+    // 새 상품 생성 - @Builder 패턴 사용
+    private LoanProduct createNewProduct(XmlLoanApiResponse.XmlLoanItem item) {
+        return LoanProduct.builder()
+                .sequence(item.getSeq())
+                .productName(truncateString(item.getFinPrdNm(), 255))
+                .loanLimit(item.getLnLmt())
+                .limitOver1000(item.getLnLmt1000Abnml())
+                .limitOver2000(item.getLnLmt2000Abnml())
+                .limitOver3000(item.getLnLmt3000Abnml())
+                .limitOver5000(item.getLnLmt5000Abnml())
+                .limitOver10000(item.getLnLmt10000Abnml())
+                .interestCategory(item.getIrtCtg())
+                .interestRate(item.getIrt())
+                .maxTotalTerm(item.getMaxTotLnTrm())
+                .maxDeferredTerm(item.getMaxDfrmTrm())
+                .maxRepaymentTerm(item.getMaxRdptTrm())
+                .repaymentMethod(item.getRdptMthd())
+                .usage(item.getUsge())
+                .target(item.getTrgt())
+                .institutionCategory(item.getInstCtg())
+                .offeringInstitution(item.getOfrInstNm())
+                .specialTargetConditions(item.getSuprTgtDtlCond())
+                .age(item.getAge())
+                .ageBelow39(item.getAge39Blw())
+                .income(item.getIncm())
+                .handlingInstitution(item.getHdlInst())
+                .build();
+    }
+
+    // 기존 상품 업데이트 - 비즈니스 메서드 사용
+    private void updateExistingProduct(XmlLoanApiResponse.XmlLoanItem item, LoanProduct product) {
+        product.updateFromXmlData(
+                item.getSeq(),
+                truncateString(item.getFinPrdNm(), 255),
+                item.getLnLmt(),
+                item.getLnLmt1000Abnml(),
+                item.getLnLmt2000Abnml(),
+                item.getLnLmt3000Abnml(),
+                item.getLnLmt5000Abnml(),
+                item.getLnLmt10000Abnml(),
+                item.getIrtCtg(),
+                item.getIrt(),
+                item.getMaxTotLnTrm(),
+                item.getMaxDfrmTrm(),
+                item.getMaxRdptTrm(),
+                item.getRdptMthd(),
+                item.getUsge(),
+                item.getTrgt(),
+                item.getInstCtg(),
+                item.getOfrInstNm(),
+                item.getSuprTgtDtlCond(),
+                item.getAge(),
+                item.getAge39Blw(),
+                item.getIncm(),
+                item.getHdlInst()
+        );
+    }
+
+    private String truncateString(String str, int maxLength) {
+        if (str == null) return null;
+        return str.length() > maxLength ? str.substring(0, maxLength) : str;
+    }
+
+    // --- 검색 및 조회 메서드들 ---
+
+    public long getTotalProductCount() {
+        return loanProductRepository.count();
+    }
+
+    public List<LoanProduct> searchByProductName(String productName) {
+        return loanProductRepository.findByProductNameContaining(productName);
+    }
+
+    public List<LoanProduct> searchByInstitution(String institution) {
+        return loanProductRepository.findByHandlingInstitutionContaining(institution);
+    }
+
+    public List<LoanProduct> getProductsByCategory(String category) {
+        return loanProductRepository.findByProductCategory(category);
+    }
+
+    public List<LoanProduct> getAllProducts(int page, int size) {
+        return loanProductRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size)).getContent();
+    }
+
+    // 데이터 수집 상태 확인 메서드
+    @Transactional(readOnly = true)
+    public Map<String, Object> getDataStatus() {
+        Map<String, Object> status = new HashMap<>();
+        long totalProducts = loanProductRepository.count();
+
+        status.put("totalProducts", totalProducts);
+        status.put("isEmpty", totalProducts == 0);
+        status.put("timestamp", System.currentTimeMillis());
+
+        return status;
+    }
+
+    // seq로 특정 상품 상세 조회 메서드
+    @Transactional(readOnly = true)
+    public LoanProduct getProductBySeq(String seq) {
+        return loanProductRepository.findBySequence(seq)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다. SEQ: " + seq));
+    }
+}

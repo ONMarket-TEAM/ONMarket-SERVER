@@ -50,7 +50,10 @@ public class SecurityConfig {
                                 "/api/members/find-id",
                                 "/api/sms/*",
                                 "/api/s3/**",
-                                "/api/auth/email/**"
+                                "/api/auth/email/**",
+                                "/api/public-data/*",
+                                "/api/loan-data/*",
+                                "/api/credit-loans/*"
                         ).permitAll()
                         .requestMatchers("/api/members/me/**").authenticated()
                         .anyRequest().authenticated()
