@@ -54,6 +54,15 @@ public enum ResponseCode {
     TOKEN_EXCHANGE_FAILED(HttpStatus.UNAUTHORIZED, "토큰 교환에 실패했습니다."),
 
     /**
+     * 비밀번호 강도 검증 관련
+     */
+    PASSWORD_REQUIRED(HttpStatus.BAD_REQUEST, "비밀번호를 입력해주세요."),
+    PASSWORD_TOO_SHORT(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이어야 합니다."),
+    PASSWORD_TOO_LONG(HttpStatus.BAD_REQUEST, "비밀번호는 최대 20자 이하여야 합니다."),
+    PASSWORD_COMPLEXITY_INSUFFICIENT(HttpStatus.BAD_REQUEST, "영문 대/소문자, 숫자, 특수문자 중 최소 2가지를 조합해주세요."),
+    PASSWORD_WHITESPACE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "비밀번호에 공백문자를 포함할 수 없습니다."),
+
+    /**
      * 회원정보 수정 관련 응답
      */
     CURRENT_PASSWORD_VERIFY_SUCCESS(HttpStatus.OK, "현재 비밀번호와 일치합니다."),
@@ -96,6 +105,16 @@ public enum ResponseCode {
     // 스케줄러 관련
     SCHEDULER_UPDATE_SUCCESS(HttpStatus.OK, "스케줄러 업데이트 성공"),
     SCHEDULER_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "스케줄러 업데이트 실패"),
+
+    /**
+     * 이메일 인증 관련
+     */
+    MAIL_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "인증 메일을 보내지 못했습니다."),
+    INVALID_MAIL(HttpStatus.BAD_REQUEST, "인증 이메일 발송 이력 없음/인증 시간 만료"),
+    INVALID_CODE(HttpStatus.BAD_REQUEST, "인증코드 불일치"),
+    VERIFICATION_MAIL_SENT(HttpStatus.OK, "인증 메일을 보냈습니다."),
+    VERIFIED_CODE(HttpStatus.OK, "인증코드 일치"),
+    EMAIL_VERIFICATION_REQUIRED(HttpStatus.BAD_REQUEST, "이메일 인증이 필요합니다."),
 
     /**
      * Business response
