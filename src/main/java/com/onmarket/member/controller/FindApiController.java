@@ -20,9 +20,14 @@ public class FindApiController {
 
     @PostMapping("/find-id")
     @Operation(summary = "아이디 찾기", description = "회원가입 시 입력한 이름/휴대폰 번호를 기반으로 이메일을 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "아이디 찾기 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (필수값 누락, 잘못된 전화번호 형식 등)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     public ApiResponse<String> findId(@RequestBody FindIdRequest request) {
         String memberId = memberService.findId(request.getUsername(), request.getPhone());
         return ApiResponse.success(ResponseCode.ID_FIND_SUCCESS, memberId);
     }
-
 }

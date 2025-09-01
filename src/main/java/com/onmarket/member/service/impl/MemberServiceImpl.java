@@ -131,7 +131,13 @@ public class MemberServiceImpl implements MemberService {
         }
 
         return memberRepository.findByUsernameAndPhone(username, phone)
-                .map(Member::getEmail)
+                .map(member -> {
+                    if (member.getStatus().equals("DELETED")) {
+                        throw new BusinessException(ResponseCode.MEMBER_DELETED);
+                    }
+                    return member.getEmail();
+                })
                 .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+
     }
 }
