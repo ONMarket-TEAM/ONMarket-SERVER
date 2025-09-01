@@ -200,26 +200,39 @@ public class CreditLoanService {
 
                     CreditLoanProduct product;
                     if (existing == null) {
-                        product = new CreditLoanProduct();
+
+                        product = CreditLoanProduct.builder()
+                                .dclsMonth(baseInfo.getDclsMonth())
+                                .finCoNo(baseInfo.getFinCoNo())
+                                .korCoNm(baseInfo.getKorCoNm())
+                                .finPrdtCd(baseInfo.getFinPrdtCd())
+                                .finPrdtNm(baseInfo.getFinPrdtNm())
+                                .joinWay(baseInfo.getJoinWay())
+                                .crdtPrdtType(baseInfo.getCrdtPrdtType())
+                                .crdtPrdtTypeNm(baseInfo.getCrdtPrdtTypeNm())
+                                .cbName(baseInfo.getCbName())
+                                .dclsStrtDay(baseInfo.getDclsStrtDay())
+                                .dclsEndDay(baseInfo.getDclsEndDay())
+                                .finCoSubmDay(baseInfo.getFinCoSubmDay())
+                                .build();
                         log.debug("새 상품 생성: {}", baseInfo.getFinPrdtCd());
                     } else {
+                        // 기존 상품 업데이트 - 업데이트 메서드 사용
+                        existing.updateProductInfo(
+                                baseInfo.getDclsMonth(),
+                                baseInfo.getKorCoNm(),
+                                baseInfo.getFinPrdtNm(),
+                                baseInfo.getJoinWay(),
+                                baseInfo.getCrdtPrdtType(),
+                                baseInfo.getCrdtPrdtTypeNm(),
+                                baseInfo.getCbName(),
+                                baseInfo.getDclsStrtDay(),
+                                baseInfo.getDclsEndDay(),
+                                baseInfo.getFinCoSubmDay()
+                        );
                         product = existing;
                         log.debug("기존 상품 업데이트: {}", baseInfo.getFinPrdtCd());
                     }
-
-                    // 데이터 매핑
-                    product.setDclsMonth(baseInfo.getDclsMonth());
-                    product.setFinCoNo(baseInfo.getFinCoNo());
-                    product.setKorCoNm(baseInfo.getKorCoNm());
-                    product.setFinPrdtCd(baseInfo.getFinPrdtCd());
-                    product.setFinPrdtNm(baseInfo.getFinPrdtNm());
-                    product.setJoinWay(baseInfo.getJoinWay());
-                    product.setCrdtPrdtType(baseInfo.getCrdtPrdtType());
-                    product.setCrdtPrdtTypeNm(baseInfo.getCrdtPrdtTypeNm());
-                    product.setCbName(baseInfo.getCbName());
-                    product.setDclsStrtDay(baseInfo.getDclsStrtDay());
-                    product.setDclsEndDay(baseInfo.getDclsEndDay());
-                    product.setFinCoSubmDay(baseInfo.getFinCoSubmDay());
 
                     productsToSave.add(product);
 
@@ -250,7 +263,7 @@ public class CreditLoanService {
 
             response.getResult().getOptionList().forEach(optionInfo -> {
                 try {
-                    // 중복 체크 (옵션)
+                    // 중복 체크
                     boolean exists = optionRepository.existsByFinCoNoAndFinPrdtCdAndCrdtLendRateType(
                             optionInfo.getFinCoNo(),
                             optionInfo.getFinPrdtCd(),
@@ -258,20 +271,23 @@ public class CreditLoanService {
                     );
 
                     if (!exists) {
-                        CreditLoanOption option = new CreditLoanOption();
-                        option.setFinCoNo(optionInfo.getFinCoNo());
-                        option.setFinPrdtCd(optionInfo.getFinPrdtCd());
-                        option.setCrdtLendRateType(optionInfo.getCrdtLendRateType());
-                        option.setCrdtLendRateTypeNm(optionInfo.getCrdtLendRateTypeNm());
-                        option.setCrdtGrad1(optionInfo.getCrdtGrad1());
-                        option.setCrdtGrad4(optionInfo.getCrdtGrad4());
-                        option.setCrdtGrad5(optionInfo.getCrdtGrad5());
-                        option.setCrdtGrad6(optionInfo.getCrdtGrad6());
-                        option.setCrdtGrad10(optionInfo.getCrdtGrad10());
-                        option.setCrdtGrad11(optionInfo.getCrdtGrad11());
-                        option.setCrdtGrad12(optionInfo.getCrdtGrad12());
-                        option.setCrdtGrad13(optionInfo.getCrdtGrad13());
-                        option.setCrdtGradAvg(optionInfo.getCrdtGradAvg());
+                        // @Builder 패턴 사용하여 옵션 생성
+                        CreditLoanOption option = CreditLoanOption.builder()
+                                .finCoNo(optionInfo.getFinCoNo())
+                                .finPrdtCd(optionInfo.getFinPrdtCd())
+                                .crdtLendRateType(optionInfo.getCrdtLendRateType())
+                                .crdtLendRateTypeNm(optionInfo.getCrdtLendRateTypeNm())
+                                .crdtGrad1(optionInfo.getCrdtGrad1())
+                                .crdtGrad4(optionInfo.getCrdtGrad4())
+                                .crdtGrad5(optionInfo.getCrdtGrad5())
+                                .crdtGrad6(optionInfo.getCrdtGrad6())
+                                .crdtGrad10(optionInfo.getCrdtGrad10())
+                                .crdtGrad11(optionInfo.getCrdtGrad11())
+                                .crdtGrad12(optionInfo.getCrdtGrad12())
+                                .crdtGrad13(optionInfo.getCrdtGrad13())
+                                .crdtGradAvg(optionInfo.getCrdtGradAvg())
+                                .creditLoanProduct(null) // 관계 설정이 필요한 경우 추가
+                                .build();
 
                         optionsToSave.add(option);
                         log.debug("새 옵션 추가: {}", optionInfo.getFinPrdtCd());

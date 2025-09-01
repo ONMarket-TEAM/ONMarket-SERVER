@@ -5,12 +5,11 @@ import com.onmarket.common.response.ResponseCode;
 import com.onmarket.loandata.domain.LoanProduct;
 import com.onmarket.loandata.service.LoanProductService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses; // ApiResponses 임포트
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,16 +30,14 @@ public class LoanProductController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "데이터 수집 성공 또는 실패에 대한 처리 결과 응답"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "요청 처리 중 서버 내부 오류 발생")
     })
-    public ResponseEntity<ApiResponse<Void>> fetchAllData() {
+    public ApiResponse<Void> fetchAllData() {
         try {
             log.info("전체 대출상품 데이터 수집 시작");
             loanProductService.fetchAndSaveAllLoanProducts();
-            return ResponseEntity.ok(ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS));
+            return ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS);
         } catch (Exception e) {
             log.error("데이터 수집 실패: ", e);
-            return ResponseEntity
-                    .status(ResponseCode.DATA_FETCH_FAILURE.getHttpStatus())
-                    .body(ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, e.getMessage()));
+            return ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, e.getMessage());
         }
     }
 
@@ -49,9 +46,14 @@ public class LoanProductController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "데이터 상태 조회 성공")
     })
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getDataStatus() {
-        Map<String, Object> status = loanProductService.getDataStatus();
-        return ResponseEntity.ok(ApiResponse.success(ResponseCode.DATA_STATUS_READ_SUCCESS, status));
+    public ApiResponse<Map<String, Object>> getDataStatus() {
+        try {
+            Map<String, Object> status = loanProductService.getDataStatus();
+            return ApiResponse.success(ResponseCode.DATA_STATUS_READ_SUCCESS, status);
+        } catch (Exception e) {
+            log.error("데이터 상태 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/products/all")
@@ -59,11 +61,16 @@ public class LoanProductController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<LoanProduct>>> getAllProducts(
+    public ApiResponse<List<LoanProduct>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<LoanProduct> products = loanProductService.getAllProducts(page, size);
-        return ResponseEntity.ok(ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products));
+        try {
+            List<LoanProduct> products = loanProductService.getAllProducts(page, size);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("전체 대출상품 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/products/search")
@@ -71,10 +78,14 @@ public class LoanProductController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<LoanProduct>>> searchByProductName(
-            @RequestParam String productName) {
-        List<LoanProduct> products = loanProductService.searchByProductName(productName);
-        return ResponseEntity.ok(ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products));
+    public ApiResponse<List<LoanProduct>> searchByProductName(@RequestParam String productName) {
+        try {
+            List<LoanProduct> products = loanProductService.searchByProductName(productName);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("상품명 검색 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/products/institution")
@@ -82,10 +93,14 @@ public class LoanProductController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<LoanProduct>>> searchByInstitution(
-            @RequestParam String institution) {
-        List<LoanProduct> products = loanProductService.searchByInstitution(institution);
-        return ResponseEntity.ok(ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products));
+    public ApiResponse<List<LoanProduct>> searchByInstitution(@RequestParam String institution) {
+        try {
+            List<LoanProduct> products = loanProductService.searchByInstitution(institution);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("취급기관별 상품 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/products/category")
@@ -93,10 +108,14 @@ public class LoanProductController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
     })
-    public ResponseEntity<ApiResponse<List<LoanProduct>>> getProductsByCategory(
-            @RequestParam String category) {
-        List<LoanProduct> products = loanProductService.getProductsByCategory(category);
-        return ResponseEntity.ok(ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products));
+    public ApiResponse<List<LoanProduct>> getProductsByCategory(@RequestParam String category) {
+        try {
+            List<LoanProduct> products = loanProductService.getProductsByCategory(category);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("카테고리별 상품 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/products/{seq}")
@@ -105,15 +124,16 @@ public class LoanProductController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 상세 정보 조회 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 seq의 상품을 찾을 수 없음")
     })
-    public ResponseEntity<ApiResponse<LoanProduct>> getProductBySeq(@PathVariable String seq) {
+    public ApiResponse<LoanProduct> getProductBySeq(@PathVariable String seq) {
         try {
             LoanProduct product = loanProductService.getProductBySeq(seq);
-            return ResponseEntity.ok(ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, product));
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, product);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity
-                    .status(ResponseCode.MEMBER_NOT_FOUND.getHttpStatus()) // 404 Not Found
-                    .body(ApiResponse.fail(ResponseCode.MEMBER_NOT_FOUND, "해당 seq의 상품을 찾을 수 없습니다: " + seq));
+            log.warn("상품 조회 실패 - seq: {}, 오류: {}", seq, e.getMessage());
+            return ApiResponse.fail(ResponseCode.PRODUCT_NOT_FOUND, "해당 seq의 상품을 찾을 수 없습니다: " + seq);
+        } catch (Exception e) {
+            log.error("상품 상세 조회 중 오류 발생: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
         }
     }
-
 }

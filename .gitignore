@@ -45,7 +45,7 @@ out/
 src/main/resources/application-oauth.yml
 src/main/resources/application-prod.yml
 src/main/resources/application-local.yml
-scr/main/resources/application-data.yml
+src/main/resources/application-data.yml
 
 # Ignore all XML files
 *.xml

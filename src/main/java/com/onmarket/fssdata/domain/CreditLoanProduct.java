@@ -1,18 +1,22 @@
 package com.onmarket.fssdata.domain;
 
+import com.onmarket.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "credit_loan_products")
-@Data
-public class CreditLoanProduct {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class CreditLoanProduct extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -58,26 +62,43 @@ public class CreditLoanProduct {
     @EqualsAndHashCode.Exclude
     private List<CreditLoanOption> options = new ArrayList<>();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    @Builder
+    public CreditLoanProduct(String dclsMonth, String finCoNo, String korCoNm, String finPrdtCd,
+                             String finPrdtNm, String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
+                             String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay) {
+        this.dclsMonth = dclsMonth;
+        this.finCoNo = finCoNo;
+        this.korCoNm = korCoNm;
+        this.finPrdtCd = finPrdtCd;
+        this.finPrdtNm = finPrdtNm;
+        this.joinWay = joinWay;
+        this.crdtPrdtType = crdtPrdtType;
+        this.crdtPrdtTypeNm = crdtPrdtTypeNm;
+        this.cbName = cbName;
+        this.dclsStrtDay = dclsStrtDay;
+        this.dclsEndDay = dclsEndDay;
+        this.finCoSubmDay = finCoSubmDay;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    // 비즈니스 로직 - 상품 정보 업데이트
+    public void updateProductInfo(String dclsMonth, String korCoNm, String finPrdtNm,
+                                  String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
+                                  String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay) {
+        this.dclsMonth = dclsMonth;
+        this.korCoNm = korCoNm;
+        this.finPrdtNm = finPrdtNm;
+        this.joinWay = joinWay;
+        this.crdtPrdtType = crdtPrdtType;
+        this.crdtPrdtTypeNm = crdtPrdtTypeNm;
+        this.cbName = cbName;
+        this.dclsStrtDay = dclsStrtDay;
+        this.dclsEndDay = dclsEndDay;
+        this.finCoSubmDay = finCoSubmDay;
     }
 
     // == 연관관계 편의 메서드 == //
     public void addOption(CreditLoanOption option) {
         this.options.add(option);
-        option.setCreditLoanProduct(this);
+        option.updateCreditLoanProduct(this);
     }
 }

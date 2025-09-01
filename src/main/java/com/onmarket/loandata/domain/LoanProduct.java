@@ -1,13 +1,17 @@
 package com.onmarket.loandata.domain;
 
+import com.onmarket.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
 @Entity
 @Table(name = "loan_product")
-@Data
-public class LoanProduct {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class LoanProduct extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +43,10 @@ public class LoanProduct {
     @Column(name = "grn_inst")
     private String guaranteeInstitution; // 보증 기관
 
-    @Column(name = "hdl_inst") // 수정: hdlinst -> hdl_inst
+    @Column(name = "hdl_inst")
     private String handlingInstitution; // 취급 기관
 
-    @Column(name = "hdl_inst_dtl_vw", columnDefinition = "TEXT") // 수정: hdlinstdtlvw -> hdl_inst_dtl_vw
+    @Column(name = "hdl_inst_dtl_vw", columnDefinition = "TEXT")
     private String handlingInstitutionDetailView; // 취급 기관 상세
 
     // --- 상환 관련 ---
@@ -113,7 +117,7 @@ public class LoanProduct {
     @Column(name = "crdt_sc")
     private String creditScore; // 기본 신용 등급 조건
 
-    @Column(name = "crdt_sc_0") // 수정: crdt_sc0 -> crdt_sc_0
+    @Column(name = "crdt_sc_0")
     private String creditScore0;
 
     @Column(name = "crdt_sc_1")
@@ -171,7 +175,7 @@ public class LoanProduct {
     @Column(name = "supr_tgt_dtl_cond", columnDefinition = "TEXT")
     private String specialTargetConditions; // 특별 대상 조건
 
-    @Column(name = "etc_ref_sbjc", columnDefinition = "TEXT") // 수정: etcrefsbjc -> etc_ref_sbjc
+    @Column(name = "etc_ref_sbjc", columnDefinition = "TEXT")
     private String otherReference; // 기타 참고사항
 
     @Column(name = "rpymd_cfe")
@@ -192,24 +196,94 @@ public class LoanProduct {
     @Column(name = "kinfa_prd_etc")
     private String kinfaProductEtc; // 추가 정보
 
-    @Column(name = "rlt_site") // 수정: rltsite -> rlt_site
+    @Column(name = "rlt_site")
     private String relatedSite; // 관련 사이트 URL
 
-    // --- 생성/수정일 ---
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    @Builder
+    public LoanProduct(String sequence, String productName, String usage, String target,
+                       String targetFilter, String institutionCategory, String offeringInstitution,
+                       String guaranteeInstitution, String handlingInstitution, String handlingInstitutionDetailView,
+                       String repaymentMethod, String interestCategory, String interestRate,
+                       String loanLimit, String limitOver1000, String limitOver2000, String limitOver3000,
+                       String limitOver5000, String limitOver10000, String maxTotalTerm, String maxDeferredTerm,
+                       String maxRepaymentTerm, String age, String ageBelow39, String ageAbove40, String ageAbove60,
+                       String income, String incomeCondition, String incomeConditionYes, String incomeConditionNo,
+                       String creditScore, String specialTargetConditions, String otherReference,
+                       String repaymentFee, String loanInsuranceCost, String productCategory,
+                       String productOperationPeriod, String isKinfaProduct, String kinfaProductEtc, String relatedSite) {
+        this.sequence = sequence;
+        this.productName = productName;
+        this.usage = usage;
+        this.target = target;
+        this.targetFilter = targetFilter;
+        this.institutionCategory = institutionCategory;
+        this.offeringInstitution = offeringInstitution;
+        this.guaranteeInstitution = guaranteeInstitution;
+        this.handlingInstitution = handlingInstitution;
+        this.handlingInstitutionDetailView = handlingInstitutionDetailView;
+        this.repaymentMethod = repaymentMethod;
+        this.interestCategory = interestCategory;
+        this.interestRate = interestRate;
+        this.loanLimit = loanLimit;
+        this.limitOver1000 = limitOver1000;
+        this.limitOver2000 = limitOver2000;
+        this.limitOver3000 = limitOver3000;
+        this.limitOver5000 = limitOver5000;
+        this.limitOver10000 = limitOver10000;
+        this.maxTotalTerm = maxTotalTerm;
+        this.maxDeferredTerm = maxDeferredTerm;
+        this.maxRepaymentTerm = maxRepaymentTerm;
+        this.age = age;
+        this.ageBelow39 = ageBelow39;
+        this.ageAbove40 = ageAbove40;
+        this.ageAbove60 = ageAbove60;
+        this.income = income;
+        this.incomeCondition = incomeCondition;
+        this.incomeConditionYes = incomeConditionYes;
+        this.incomeConditionNo = incomeConditionNo;
+        this.creditScore = creditScore;
+        this.specialTargetConditions = specialTargetConditions;
+        this.otherReference = otherReference;
+        this.repaymentFee = repaymentFee;
+        this.loanInsuranceCost = loanInsuranceCost;
+        this.productCategory = productCategory;
+        this.productOperationPeriod = productOperationPeriod;
+        this.isKinfaProduct = isKinfaProduct;
+        this.kinfaProductEtc = kinfaProductEtc;
+        this.relatedSite = relatedSite;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    // 비즈니스 로직 - XML 데이터로부터 상품 정보 업데이트
+    public void updateFromXmlData(String sequence, String productName, String loanLimit,
+                                  String limitOver1000, String limitOver2000, String limitOver3000,
+                                  String limitOver5000, String limitOver10000, String interestCategory,
+                                  String interestRate, String maxTotalTerm, String maxDeferredTerm,
+                                  String maxRepaymentTerm, String repaymentMethod, String usage,
+                                  String target, String institutionCategory, String offeringInstitution,
+                                  String specialTargetConditions, String age, String ageBelow39,
+                                  String income, String handlingInstitution) {
+        this.sequence = sequence;
+        this.productName = productName;
+        this.loanLimit = loanLimit;
+        this.limitOver1000 = limitOver1000;
+        this.limitOver2000 = limitOver2000;
+        this.limitOver3000 = limitOver3000;
+        this.limitOver5000 = limitOver5000;
+        this.limitOver10000 = limitOver10000;
+        this.interestCategory = interestCategory;
+        this.interestRate = interestRate;
+        this.maxTotalTerm = maxTotalTerm;
+        this.maxDeferredTerm = maxDeferredTerm;
+        this.maxRepaymentTerm = maxRepaymentTerm;
+        this.repaymentMethod = repaymentMethod;
+        this.usage = usage;
+        this.target = target;
+        this.institutionCategory = institutionCategory;
+        this.offeringInstitution = offeringInstitution;
+        this.specialTargetConditions = specialTargetConditions;
+        this.age = age;
+        this.ageBelow39 = ageBelow39;
+        this.income = income;
+        this.handlingInstitution = handlingInstitution;
     }
 }

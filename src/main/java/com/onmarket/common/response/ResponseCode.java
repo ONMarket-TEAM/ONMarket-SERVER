@@ -160,9 +160,16 @@ public enum ResponseCode {
      */
     DATA_FETCH_SUCCESS(HttpStatus.OK, "데이터 수집에 성공했습니다."),
     DATA_STATUS_READ_SUCCESS(HttpStatus.OK, "데이터 상태 조회에 성공했습니다."),
-    PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
     OPTION_READ_SUCCESS(HttpStatus.OK, "상품 옵션 조회에 성공했습니다."),
-    DATA_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "데이터 수집에 실패했습니다.");
+    DATA_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "데이터 수집에 실패했습니다."),
+
+    /**
+     * Product response
+     */
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+    PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
+    PRODUCT_FETCH_SUCCESS(HttpStatus.OK, "상품 데이터 수집에 성공했습니다."),
+    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

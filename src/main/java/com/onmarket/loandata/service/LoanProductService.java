@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -99,47 +100,88 @@ public class LoanProductService {
         List<LoanProduct> productsToSave = new ArrayList<>();
         items.forEach(item -> {
             try {
-                LoanProduct product = loanProductRepository.findBySequence(item.getSeq())
-                        .orElse(new LoanProduct());
-                mapXmlLoanItemToProduct(item, product);
+                Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
+
+                LoanProduct product;
+                if (existingProduct.isPresent()) {
+                    // 기존 상품 업데이트
+                    product = existingProduct.get();
+                    updateExistingProduct(item, product);
+                    log.debug("기존 상품 업데이트: {}", item.getSeq());
+                } else {
+                    // 새 상품 생성 - @Builder 사용
+                    product = createNewProduct(item);
+                    log.debug("새 상품 생성: {}", item.getSeq());
+                }
+
                 productsToSave.add(product);
             } catch (Exception e) {
                 log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
             }
         });
+
         if (!productsToSave.isEmpty()) {
             loanProductRepository.saveAll(productsToSave);
             log.info("대출 상품 정보 저장 완료 - {}개", productsToSave.size());
         }
     }
 
-    // XML DTO를 Entity로 매핑
-    private void mapXmlLoanItemToProduct(XmlLoanApiResponse.XmlLoanItem item, LoanProduct product) {
-        product.setSequence(item.getSeq());
-        product.setProductName(truncateString(item.getFinPrdNm(), 255));
-        product.setLoanLimit(item.getLnLmt());
-        product.setLimitOver1000(item.getLnLmt1000Abnml());
-        product.setLimitOver2000(item.getLnLmt2000Abnml());
-        product.setLimitOver3000(item.getLnLmt3000Abnml());
-        product.setLimitOver5000(item.getLnLmt5000Abnml());
-        product.setLimitOver10000(item.getLnLmt10000Abnml());
-        product.setInterestCategory(item.getIrtCtg());
-        product.setInterestRate(item.getIrt());
-        product.setMaxTotalTerm(item.getMaxTotLnTrm());
-        product.setMaxDeferredTerm(item.getMaxDfrmTrm());
-        product.setMaxRepaymentTerm(item.getMaxRdptTrm());
-        product.setRepaymentMethod(item.getRdptMthd());
-        product.setUsage(item.getUsge());
-        product.setTarget(item.getTrgt());
-        product.setInstitutionCategory(item.getInstCtg());
-        product.setOfferingInstitution(item.getOfrInstNm());
-//        product.setRsdAreaPamtEqltIstm(item.getRsdAreaPamtEqltIstm());
-        product.setSpecialTargetConditions(item.getSuprTgtDtlCond());
-        product.setAge(item.getAge());
-        product.setAgeBelow39(item.getAge39Blw());
-        product.setIncome(item.getIncm());
-        product.setHandlingInstitution(item.getHdlInst());
-//        product.setJnMthd(item.getJnMthd());
+    // 새 상품 생성 - @Builder 패턴 사용
+    private LoanProduct createNewProduct(XmlLoanApiResponse.XmlLoanItem item) {
+        return LoanProduct.builder()
+                .sequence(item.getSeq())
+                .productName(truncateString(item.getFinPrdNm(), 255))
+                .loanLimit(item.getLnLmt())
+                .limitOver1000(item.getLnLmt1000Abnml())
+                .limitOver2000(item.getLnLmt2000Abnml())
+                .limitOver3000(item.getLnLmt3000Abnml())
+                .limitOver5000(item.getLnLmt5000Abnml())
+                .limitOver10000(item.getLnLmt10000Abnml())
+                .interestCategory(item.getIrtCtg())
+                .interestRate(item.getIrt())
+                .maxTotalTerm(item.getMaxTotLnTrm())
+                .maxDeferredTerm(item.getMaxDfrmTrm())
+                .maxRepaymentTerm(item.getMaxRdptTrm())
+                .repaymentMethod(item.getRdptMthd())
+                .usage(item.getUsge())
+                .target(item.getTrgt())
+                .institutionCategory(item.getInstCtg())
+                .offeringInstitution(item.getOfrInstNm())
+                .specialTargetConditions(item.getSuprTgtDtlCond())
+                .age(item.getAge())
+                .ageBelow39(item.getAge39Blw())
+                .income(item.getIncm())
+                .handlingInstitution(item.getHdlInst())
+                .build();
+    }
+
+    // 기존 상품 업데이트 - 비즈니스 메서드 사용
+    private void updateExistingProduct(XmlLoanApiResponse.XmlLoanItem item, LoanProduct product) {
+        product.updateFromXmlData(
+                item.getSeq(),
+                truncateString(item.getFinPrdNm(), 255),
+                item.getLnLmt(),
+                item.getLnLmt1000Abnml(),
+                item.getLnLmt2000Abnml(),
+                item.getLnLmt3000Abnml(),
+                item.getLnLmt5000Abnml(),
+                item.getLnLmt10000Abnml(),
+                item.getIrtCtg(),
+                item.getIrt(),
+                item.getMaxTotLnTrm(),
+                item.getMaxDfrmTrm(),
+                item.getMaxRdptTrm(),
+                item.getRdptMthd(),
+                item.getUsge(),
+                item.getTrgt(),
+                item.getInstCtg(),
+                item.getOfrInstNm(),
+                item.getSuprTgtDtlCond(),
+                item.getAge(),
+                item.getAge39Blw(),
+                item.getIncm(),
+                item.getHdlInst()
+        );
     }
 
     private String truncateString(String str, int maxLength) {
@@ -147,7 +189,7 @@ public class LoanProductService {
         return str.length() > maxLength ? str.substring(0, maxLength) : str;
     }
 
-    // --- 검색 및 조회 메서드
+    // --- 검색 및 조회 메서드들 ---
 
     public long getTotalProductCount() {
         return loanProductRepository.count();
@@ -168,6 +210,7 @@ public class LoanProductService {
     public List<LoanProduct> getAllProducts(int page, int size) {
         return loanProductRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size)).getContent();
     }
+
     // 데이터 수집 상태 확인 메서드
     @Transactional(readOnly = true)
     public Map<String, Object> getDataStatus() {
@@ -187,6 +230,4 @@ public class LoanProductService {
         return loanProductRepository.findBySequence(seq)
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다. SEQ: " + seq));
     }
-
-
 }

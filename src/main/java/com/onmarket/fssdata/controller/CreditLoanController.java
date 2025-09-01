@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -34,19 +33,17 @@ public class CreditLoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "데이터 수집 및 저장 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "외부 API 호출 또는 데이터베이스 저장 중 서버 내부 오류 발생")
     })
-    public ResponseEntity<ApiResponse<Map<String, Object>>> fetchData() {
+    public ApiResponse<Map<String, Object>> fetchData() {
         try {
             log.info("전체 권역 데이터 수집 시작");
             creditLoanService.fetchAndSaveAllCreditLoanData();
 
             Map<String, Object> data = new HashMap<>();
             data.put("timestamp", System.currentTimeMillis());
-            return ResponseEntity.ok(ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS, data));
+            return ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS, data);
         } catch (Exception e) {
             log.error("데이터 수집 실패: ", e);
-            return ResponseEntity
-                    .status(ResponseCode.DATA_FETCH_FAILURE.getHttpStatus())
-                    .body(ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, e.getMessage()));
+            return ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, e.getMessage());
         }
     }
 
@@ -58,12 +55,10 @@ public class CreditLoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "존재하지 않는 금융권역 코드(topFinGrpNo) 요청"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "외부 API 호출 또는 데이터베이스 저장 중 서버 내부 오류 발생")
     })
-    public ResponseEntity<ApiResponse<Map<String, Object>>> fetchDataByTopFinGrp(@PathVariable String topFinGrpNo) {
+    public ApiResponse<Map<String, Object>> fetchDataByTopFinGrp(@PathVariable String topFinGrpNo) {
         String sectorName = getSectorName(topFinGrpNo);
         if ("알 수 없는 권역".equals(sectorName)) {
-            return ResponseEntity
-                    .status(ResponseCode.DATA_FETCH_FAILURE.getHttpStatus())
-                    .body(ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, "유효하지 않은 금융권역 코드입니다."));
+            return ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, "유효하지 않은 금융권역 코드입니다.");
         }
 
         try {
@@ -74,12 +69,10 @@ public class CreditLoanController {
             data.put("topFinGrpNo", topFinGrpNo);
             data.put("sectorName", sectorName);
 
-            return ResponseEntity.ok(ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS, data));
+            return ApiResponse.success(ResponseCode.DATA_FETCH_SUCCESS, data);
         } catch (Exception e) {
             log.error("권역 {} 데이터 수집 실패: ", topFinGrpNo, e);
-            return ResponseEntity
-                    .status(ResponseCode.SERVER_ERROR.getHttpStatus()) // 500 에러로 명시
-                    .body(ApiResponse.fail(ResponseCode.DATA_FETCH_FAILURE, e.getMessage()));
+            return ApiResponse.fail(ResponseCode.SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -91,15 +84,20 @@ public class CreditLoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "데이터베이스 조회 중 서버 내부 오류 발생")
     })
     public ApiResponse<Map<String, Object>> getDataStatus() {
-        Map<String, Object> status = new HashMap<>();
-        long totalProducts = creditLoanService.getTotalProductCount();
-        long totalOptions = creditLoanService.getTotalOptionCount();
+        try {
+            Map<String, Object> status = new HashMap<>();
+            long totalProducts = creditLoanService.getTotalProductCount();
+            long totalOptions = creditLoanService.getTotalOptionCount();
 
-        status.put("totalProducts", totalProducts);
-        status.put("totalOptions", totalOptions);
-        status.put("isEmpty", totalProducts == 0);
+            status.put("totalProducts", totalProducts);
+            status.put("totalOptions", totalOptions);
+            status.put("isEmpty", totalProducts == 0);
 
-        return ApiResponse.success(ResponseCode.DATA_STATUS_READ_SUCCESS, status);
+            return ApiResponse.success(ResponseCode.DATA_STATUS_READ_SUCCESS, status);
+        } catch (Exception e) {
+            log.error("데이터 상태 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     // 사용자용 API
@@ -112,8 +110,13 @@ public class CreditLoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "데이터베이스 조회 중 서버 내부 오류 발생")
     })
     public ApiResponse<List<CreditLoanProduct>> getProductsByCompany(@RequestParam String companyName) {
-        List<CreditLoanProduct> products = creditLoanService.getProductsByCompany(companyName);
-        return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        try {
+            List<CreditLoanProduct> products = creditLoanService.getProductsByCompany(companyName);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("금융회사별 상품 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     // 상품별 금리 옵션 조회
@@ -124,8 +127,13 @@ public class CreditLoanController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "데이터베이스 조회 중 서버 내부 오류 발생")
     })
     public ApiResponse<List<CreditLoanOption>> getOptionsByProduct(@PathVariable String finPrdtCd) {
-        List<CreditLoanOption> options = creditLoanService.getOptionsByProduct(finPrdtCd);
-        return ApiResponse.success(ResponseCode.OPTION_READ_SUCCESS, options);
+        try {
+            List<CreditLoanOption> options = creditLoanService.getOptionsByProduct(finPrdtCd);
+            return ApiResponse.success(ResponseCode.OPTION_READ_SUCCESS, options);
+        } catch (Exception e) {
+            log.error("상품별 옵션 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
 
     // 모든 상품 조회 (페이징)
@@ -138,10 +146,14 @@ public class CreditLoanController {
     public ApiResponse<List<CreditLoanProduct>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<CreditLoanProduct> products = creditLoanService.getAllProducts(page, size);
-        return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        try {
+            List<CreditLoanProduct> products = creditLoanService.getAllProducts(page, size);
+            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+        } catch (Exception e) {
+            log.error("전체 상품 조회 실패: ", e);
+            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+        }
     }
-
 
     private String getSectorName(String topFinGrpNo) {
         switch (topFinGrpNo) {
