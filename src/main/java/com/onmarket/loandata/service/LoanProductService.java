@@ -199,13 +199,13 @@ public class LoanProductService {
         return loanProductRepository.findByProductNameContaining(productName);
     }
 
-    public List<LoanProduct> searchByInstitution(String institution) {
-        return loanProductRepository.findByHandlingInstitutionContaining(institution);
-    }
+//    public List<LoanProduct> searchByInstitution(String institution) {
+//        return loanProductRepository.findByHandlingInstitutionContaining(institution);
+//    }
 
-    public List<LoanProduct> getProductsByCategory(String category) {
-        return loanProductRepository.findByProductCategory(category);
-    }
+//    public List<LoanProduct> getProductsByCategory(String category) {
+//        return loanProductRepository.findByProductCategory(category);
+//    }
 
     public List<LoanProduct> getAllProducts(int page, int size) {
         return loanProductRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size)).getContent();

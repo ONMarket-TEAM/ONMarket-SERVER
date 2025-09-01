@@ -19,10 +19,10 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long> 
     List<LoanProduct> findByProductNameContaining(String productName);
 
     // 취급기관명으로 검색
-    List<LoanProduct> findByHandlingInstitutionContaining(String handlingInstitution);
+//    List<LoanProduct> findByHandlingInstitutionContaining(String handlingInstitution);
 
-    // 상품 카테고리로 검색
-    List<LoanProduct> findByProductCategory(String productCategory);
+//    // 상품 카테고리로 검색
+//    List<LoanProduct> findByProductCategory(String productCategory);
 
     // 대출한도 검색
     List<LoanProduct> findByLoanLimitContaining(String loanLimit);
@@ -39,8 +39,8 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long> 
 
     List<LoanProduct> findByTargetContaining(String target);
 
-    @Query("SELECT DISTINCT p.productCategory FROM LoanProduct p WHERE p.productCategory IS NOT NULL")
-    List<String> findAllCategories();
+//    @Query("SELECT DISTINCT p.productCategory FROM LoanProduct p WHERE p.productCategory IS NOT NULL")
+//    List<String> findAllCategories();
 
 
     @Query("SELECT DISTINCT p.offeringInstitution FROM LoanProduct p WHERE p.offeringInstitution IS NOT NULL ORDER BY p.offeringInstitution")
