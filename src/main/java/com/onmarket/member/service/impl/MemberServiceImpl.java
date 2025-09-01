@@ -116,4 +116,23 @@ public class MemberServiceImpl implements MemberService {
     private boolean hasText(String s) {
         return s != null && !s.trim().isEmpty();
     }
+
+    /** 이름/휴대폰 기반으로 이메일 찾기 */
+    @Override
+    @Transactional(readOnly = true)
+    public String findId(String username, String phone) {
+        if (!hasText(username) || !hasText(phone)) {
+            throw new ValidationException(ResponseCode.MISSING_REQUIRED_FIELDS);
+        }
+
+        return memberRepository.findByUsernameAndPhone(username, phone)
+                .map(member -> {
+                    if (member.getStatus().equals("DELETED")) {
+                        throw new BusinessException(ResponseCode.MEMBER_DELETED);
+                    }
+                    return member.getEmail();
+                })
+                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+
+    }
 }
