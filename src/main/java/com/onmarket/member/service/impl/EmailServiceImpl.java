@@ -32,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
     private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.mail.username}")
-    private String from; // 보내는 메일 주소
+    private String from;
 
     /** 인증코드 생성 */
     private String createCode() {
@@ -105,8 +105,7 @@ public class EmailServiceImpl implements EmailService {
         if (!saved.equals(code)) {
             throw new BusinessException(ResponseCode.INVALID_CODE);
         }
-        // 성공 시 1회성 사용을 위해 즉시 삭제
-//        delete(email);
+
         redis.delete(email);
         redis.opsForValue().set(email + ":verified", "true", VERIFIED_TTL);
     }
@@ -173,7 +172,7 @@ public class EmailServiceImpl implements EmailService {
             throw new BusinessException(ResponseCode.PASSWORD_COMPLEXITY_INSUFFICIENT);
         }
 
-        // 5. 공백 문자 검증
+        // 3. 공백 문자 검증
         if (password.contains(" ") || password.contains("\t") || password.contains("\n")) {
             throw new BusinessException(ResponseCode.PASSWORD_WHITESPACE_NOT_ALLOWED);
         }
