@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
                                 "/swagger-ui-onmarket.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -45,7 +47,10 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/validation/check/*",
+                                "/api/members/find-id",
                                 "/api/sms/*",
+                                "/api/s3/**",
+                                "/api/auth/email/**",
                                 "/api/public-data/*",
                                 "/api/loan-data/*",
                                 "/api/credit-loans/*"

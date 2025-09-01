@@ -11,13 +11,13 @@ import java.time.LocalDate;
 @Setter
 public class SignupRequest {
 
-    @Schema(description = "로그인 아이디", example = "testuser")
+    @Schema(description = "이름", example = "홍길동")
     private String username;
 
     @Schema(description = "비밀번호 (8자 이상, 영문/숫자/특수문자 포함)", example = "123456789!")
     private String password;
 
-    @Schema(description = "사용자 닉네임", example = "홍길동")
+    @Schema(description = "사용자 닉네임", example = "testuser")
     private String nickname;
 
     @Schema(description = "이메일 주소", example = "test@test.com")

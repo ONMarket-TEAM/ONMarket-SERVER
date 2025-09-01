@@ -11,7 +11,6 @@ import com.onmarket.business.dto.BusinessResponse;
 import com.onmarket.business.exception.BusinessException;
 import com.onmarket.business.repository.BusinessRepository;
 import com.onmarket.member.domain.Member;
-import com.onmarket.member.repository.MemberRepository;
 import com.onmarket.member.service.MemberService;
 import com.onmarket.common.response.ResponseCode;
 import com.onmarket.business.service.BusinessService;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
-    private final MemberRepository memberRepository;
     private final MemberService memberService;
 
     @Override
@@ -147,8 +145,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     // ===== 내부 유틸 =====
     private Member findMember(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
+        return memberService.findByEmail(email);
     }
 
     private Business findOwnedBusiness(Member owner, Long businessId) {

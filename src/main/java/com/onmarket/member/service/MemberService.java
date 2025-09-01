@@ -19,4 +19,7 @@ public interface MemberService {
 
     /** 회원정보 수정(이메일 기반) */
     Member updateMember(String email, MemberUpdateRequest request);
+
+    /** 이메일/휴대폰 기반으로 아이디 찾기 */
+    String findId(String userName, String phone);
 }
