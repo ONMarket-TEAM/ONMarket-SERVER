@@ -14,6 +14,9 @@ public class BusinessResponse {
     @Schema(description = "사업장 ID", example = "101")
     private Long businessId;
 
+    @Schema(description = "사업장 이름", example = "OOO 주식회사")
+    private String businessName;
+
     @Schema(description = "산업 분야", example = "SERVICE")
     private Industry industry;
 
@@ -38,6 +41,7 @@ public class BusinessResponse {
     public static BusinessResponse from(Business b) {
         return new BusinessResponse(
                 b.getBusinessId(),
+                b.getBusinessName(),
                 b.getIndustry(),
                 b.getBusinessType(),
                 b.getRegionCodeId(),
