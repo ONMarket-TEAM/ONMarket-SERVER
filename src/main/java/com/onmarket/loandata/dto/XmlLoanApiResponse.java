@@ -1,5 +1,6 @@
 package com.onmarket.loandata.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -8,7 +9,9 @@ import java.util.List;
 
 @Data
 @JacksonXmlRootElement(localName = "response")
+@JsonIgnoreProperties(ignoreUnknown = true)  // 이 줄 추가
 public class XmlLoanApiResponse {
+
 
     @JacksonXmlProperty(localName = "header")
     private Header header;
