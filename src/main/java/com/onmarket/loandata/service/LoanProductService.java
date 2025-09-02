@@ -94,35 +94,44 @@ public class LoanProductService {
         return xmlMapper.readValue(xmlResponse, XmlLoanApiResponse.class);
     }
 
-    // XML 대출 상품 데이터 저장
+    // XML 대출 상품 데이터 저장 및 필터링
     @Transactional
     public void saveXmlLoanProducts(List<XmlLoanApiResponse.XmlLoanItem> items) {
         List<LoanProduct> productsToSave = new ArrayList<>();
         items.forEach(item -> {
-            try {
-                Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
+            // 필터링 조건 추가: target 또는 specialTargetConditions에 특정 키워드가 포함된 경우만 저장
+            String target = item.getTrgt() != null ? item.getTrgt() : "";
+            String suprTgtDtlCond = item.getSuprTgtDtlCond() != null ? item.getSuprTgtDtlCond() : "";
 
-                LoanProduct product;
-                if (existingProduct.isPresent()) {
-                    // 기존 상품 업데이트
-                    product = existingProduct.get();
-                    updateExistingProduct(item, product);
-                    log.debug("기존 상품 업데이트: {}", item.getSeq());
-                } else {
-                    // 새 상품 생성 - @Builder 사용
-                    product = createNewProduct(item);
-                    log.debug("새 상품 생성: {}", item.getSeq());
+            if (target.contains("사업자") || target.contains("기업") || target.contains("소상공인") || target.contains("청년 창업자") ||
+                    suprTgtDtlCond.contains("사업자") || suprTgtDtlCond.contains("기업") || suprTgtDtlCond.contains("소상공인") || suprTgtDtlCond.contains("청년 창업자")) {
+                try {
+                    Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
+
+                    LoanProduct product;
+                    if (existingProduct.isPresent()) {
+                        // 기존 상품 업데이트
+                        product = existingProduct.get();
+                        updateExistingProduct(item, product);
+                        log.debug("기존 상품 업데이트: {}", item.getSeq());
+                    } else {
+                        // 새 상품 생성 - @Builder 사용
+                        product = createNewProduct(item);
+                        log.debug("새 상품 생성: {}", item.getSeq());
+                    }
+
+                    productsToSave.add(product);
+                } catch (Exception e) {
+                    log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
                 }
-
-                productsToSave.add(product);
-            } catch (Exception e) {
-                log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
+            } else {
+                log.debug("필터링 조건에 해당하지 않아 제외: {}", item.getSeq());
             }
         });
 
         if (!productsToSave.isEmpty()) {
             loanProductRepository.saveAll(productsToSave);
-            log.info("대출 상품 정보 저장 완료 - {}개", productsToSave.size());
+            log.info("필터링된 대출 상품 정보 저장 완료 - {}개", productsToSave.size());
         }
     }
 
@@ -198,14 +207,6 @@ public class LoanProductService {
     public List<LoanProduct> searchByProductName(String productName) {
         return loanProductRepository.findByProductNameContaining(productName);
     }
-
-//    public List<LoanProduct> searchByInstitution(String institution) {
-//        return loanProductRepository.findByHandlingInstitutionContaining(institution);
-//    }
-
-//    public List<LoanProduct> getProductsByCategory(String category) {
-//        return loanProductRepository.findByProductCategory(category);
-//    }
 
     public List<LoanProduct> getAllProducts(int page, int size) {
         return loanProductRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size)).getContent();

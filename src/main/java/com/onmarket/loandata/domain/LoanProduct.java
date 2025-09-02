@@ -181,8 +181,8 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "rpymd_cfe")
     private String repaymentFee; // 상환 수수료
 
-    @Column(name = "ln_icdcst")
-    private String loanInsuranceCost; // 보증료율
+//    @Column(name = "ln_icdcst")
+//    private String loanInsuranceCost; // 보증료율
 
 //    @Column(name = "prd_ctg")
 //    private String productCategory; // 상품 카테고리
@@ -245,7 +245,7 @@ public class LoanProduct extends BaseTimeEntity {
         this.specialTargetConditions = specialTargetConditions;
         this.otherReference = otherReference;
         this.repaymentFee = repaymentFee;
-        this.loanInsuranceCost = loanInsuranceCost;
+//        this.loanInsuranceCost = loanInsuranceCost;
 //        this.productCategory = productCategory;
 //        this.productOperationPeriod = productOperationPeriod;
 //        this.isKinfaProduct = isKinfaProduct;

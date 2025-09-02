@@ -18,12 +18,6 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long> 
     // 상품명으로 검색
     List<LoanProduct> findByProductNameContaining(String productName);
 
-    // 취급기관명으로 검색
-//    List<LoanProduct> findByHandlingInstitutionContaining(String handlingInstitution);
-
-//    // 상품 카테고리로 검색
-//    List<LoanProduct> findByProductCategory(String productCategory);
-
     // 대출한도 검색
     List<LoanProduct> findByLoanLimitContaining(String loanLimit);
 
@@ -34,15 +28,23 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long> 
     @Query("SELECT p FROM LoanProduct p ORDER BY p.createdAt DESC")
     List<LoanProduct> findRecentProducts(Pageable pageable);
 
-
     List<LoanProduct> findByOfferingInstitutionContaining(String offeringInstitution);
 
     List<LoanProduct> findByTargetContaining(String target);
 
-//    @Query("SELECT DISTINCT p.productCategory FROM LoanProduct p WHERE p.productCategory IS NOT NULL")
-//    List<String> findAllCategories();
-
-
     @Query("SELECT DISTINCT p.offeringInstitution FROM LoanProduct p WHERE p.offeringInstitution IS NOT NULL ORDER BY p.offeringInstitution")
     List<String> findAllInstitutions();
+
+    /**
+     * trgt, suprTgtDtlCond 컬럼에서 특정 키워드를 포함하는 상품을 모두 검색
+     * @param keyword1 사업자
+     * @param keyword2 기업
+     * @param keyword3 소상공인
+     * @param keyword4 청년 창업자
+     * @return 필터링된 LoanProduct 리스트
+     */
+    @Query("SELECT p FROM LoanProduct p " +
+            "WHERE p.target LIKE %:keyword1% OR p.target LIKE %:keyword2% OR p.target LIKE %:keyword3% OR p.target LIKE %:keyword4% " +
+            "OR p.specialTargetConditions LIKE %:keyword1% OR p.specialTargetConditions LIKE %:keyword2% OR p.specialTargetConditions LIKE %:keyword3% OR p.specialTargetConditions LIKE %:keyword4%")
+    List<LoanProduct> findByKeywordsInTrgtOrSuprTgtDtlCond(String keyword1, String keyword2, String keyword3, String keyword4);
 }
