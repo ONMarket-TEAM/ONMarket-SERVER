@@ -43,11 +43,11 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "grn_inst")
     private String guaranteeInstitution; // 보증 기관
 
-    @Column(name = "hdl_inst")
-    private String handlingInstitution; // 취급 기관
-
-    @Column(name = "hdl_inst_dtl_vw", columnDefinition = "TEXT")
-    private String handlingInstitutionDetailView; // 취급 기관 상세
+//    @Column(name = "hdl_inst")
+//    private String handlingInstitution; // 취급 기관
+//
+//    @Column(name = "hdl_inst_dtl_vw", columnDefinition = "TEXT")
+//    private String handlingInstitutionDetailView; // 취급 기관 상세
 
     // --- 상환 관련 ---
     @Column(name = "rdpt_mthd")
@@ -94,83 +94,83 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "age_39_blw")
     private String ageBelow39; // 39세 이하 가능 여부
 
-    @Column(name = "age_40_abnml")
-    private String ageAbove40; // 40세 이상 가능 여부
-
-    @Column(name = "age_60_abnml")
-    private String ageAbove60; // 60세 이상 가능 여부
+//    @Column(name = "age_40_abnml")
+//    private String ageAbove40; // 40세 이상 가능 여부
+//
+//    @Column(name = "age_60_abnml")
+//    private String ageAbove60; // 60세 이상 가능 여부
 
     // --- 소득 조건 ---
-    @Column(name = "incm", columnDefinition = "TEXT")
-    private String income; // 소득 조건
-
-    @Column(name = "incm_cnd", columnDefinition = "TEXT")
-    private String incomeCondition; // 소득 조건 전체
-
-    @Column(name = "incm_cnd_y", columnDefinition = "TEXT")
-    private String incomeConditionYes; // 소득 조건 만족
-
-    @Column(name = "incm_cnd_n", columnDefinition = "TEXT")
-    private String incomeConditionNo; // 소득 조건 불만족
+//    @Column(name = "incm", columnDefinition = "TEXT")
+//    private String income; // 소득 조건
+//
+//    @Column(name = "incm_cnd", columnDefinition = "TEXT")
+//    private String incomeCondition; // 소득 조건 전체
+//
+//    @Column(name = "incm_cnd_y", columnDefinition = "TEXT")
+//    private String incomeConditionYes; // 소득 조건 만족
+//
+//    @Column(name = "incm_cnd_n", columnDefinition = "TEXT")
+//    private String incomeConditionNo; // 소득 조건 불만족
 
     // --- 신용 조건 ---
-    @Column(name = "crdt_sc")
-    private String creditScore; // 기본 신용 등급 조건
+//    @Column(name = "crdt_sc")
+//    private String creditScore; // 기본 신용 등급 조건
 
-    @Column(name = "crdt_sc_0")
-    private String creditScore0;
-
-    @Column(name = "crdt_sc_1")
-    private String creditScore1;
-
-    @Column(name = "crdt_sc_2")
-    private String creditScore2;
-
-    @Column(name = "crdt_sc_3")
-    private String creditScore3;
-
-    @Column(name = "crdt_sc_4")
-    private String creditScore4;
-
-    @Column(name = "crdt_sc_5")
-    private String creditScore5;
-
-    @Column(name = "crdt_sc_6")
-    private String creditScore6;
-
-    @Column(name = "crdt_sc_7")
-    private String creditScore7;
-
-    @Column(name = "crdt_sc_8")
-    private String creditScore8;
-
-    @Column(name = "crdt_sc_9")
-    private String creditScore9;
-
-    @Column(name = "crdt_sc_1_5")
-    private String creditScore15;
-
-    @Column(name = "crdt_sc_6_0")
-    private String creditScore60;
+//    @Column(name = "crdt_sc_0")
+//    private String creditScore0;
+//
+//    @Column(name = "crdt_sc_1")
+//    private String creditScore1;
+//
+//    @Column(name = "crdt_sc_2")
+//    private String creditScore2;
+//
+//    @Column(name = "crdt_sc_3")
+//    private String creditScore3;
+//
+//    @Column(name = "crdt_sc_4")
+//    private String creditScore4;
+//
+//    @Column(name = "crdt_sc_5")
+//    private String creditScore5;
+//
+//    @Column(name = "crdt_sc_6")
+//    private String creditScore6;
+//
+//    @Column(name = "crdt_sc_7")
+//    private String creditScore7;
+//
+//    @Column(name = "crdt_sc_8")
+//    private String creditScore8;
+//
+//    @Column(name = "crdt_sc_9")
+//    private String creditScore9;
+//
+//    @Column(name = "crdt_sc_1_5")
+//    private String creditScore15;
+//
+//    @Column(name = "crdt_sc_6_0")
+//    private String creditScore60;
 
     // --- 기타 조건 및 정보 ---
-    @Column(name = "anin")
-    private String anin; // 보증 관련 정보
+//    @Column(name = "anin")
+//    private String anin; // 보증 관련 정보
 
-    @Column(name = "cnpl")
-    private String contactInfoDetail; // 상담 연락처
+//    @Column(name = "cnpl")
+//    private String contactInfoDetail; // 상담 연락처
 
-    @Column(name = "rfrc_cnpl")
-    private String referenceContact; // 참고 연락처
-
-    @Column(name = "hous_ar")
-    private String housingArea; // 주거 면적
-
-    @Column(name = "hous_hold_cnt")
-    private String householdCount; // 가구 인원
-
-    @Column(name = "ln_tgt_hous")
-    private String loanTargetHousing; // 대출 대상 주택
+//    @Column(name = "rfrc_cnpl")
+//    private String referenceContact; // 참고 연락처
+//
+//    @Column(name = "hous_ar")
+//    private String housingArea; // 주거 면적
+//
+//    @Column(name = "hous_hold_cnt")
+//    private String householdCount; // 가구 인원
+//
+//    @Column(name = "ln_tgt_hous")
+//    private String loanTargetHousing; // 대출 대상 주택
 
     @Column(name = "supr_tgt_dtl_cond", columnDefinition = "TEXT")
     private String specialTargetConditions; // 특별 대상 조건
@@ -181,20 +181,20 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "rpymd_cfe")
     private String repaymentFee; // 상환 수수료
 
-    @Column(name = "ln_icdcst")
-    private String loanInsuranceCost; // 보증료율
+//    @Column(name = "ln_icdcst")
+//    private String loanInsuranceCost; // 보증료율
 
-    @Column(name = "prd_ctg")
-    private String productCategory; // 상품 카테고리
+//    @Column(name = "prd_ctg")
+//    private String productCategory; // 상품 카테고리
+//
+//    @Column(name = "prd_opr_prid")
+//    private String productOperationPeriod; // 운영 기간
 
-    @Column(name = "prd_opr_prid")
-    private String productOperationPeriod; // 운영 기간
-
-    @Column(name = "kinfa_prd_yn")
-    private String isKinfaProduct; // 근로복지공단 관련 여부 (Y/N)
-
-    @Column(name = "kinfa_prd_etc")
-    private String kinfaProductEtc; // 추가 정보
+//    @Column(name = "kinfa_prd_yn")
+//    private String isKinfaProduct; // 근로복지공단 관련 여부 (Y/N)
+//
+//    @Column(name = "kinfa_prd_etc")
+//    private String kinfaProductEtc; // 추가 정보
 
     @Column(name = "rlt_site")
     private String relatedSite; // 관련 사이트 URL
@@ -219,8 +219,8 @@ public class LoanProduct extends BaseTimeEntity {
         this.institutionCategory = institutionCategory;
         this.offeringInstitution = offeringInstitution;
         this.guaranteeInstitution = guaranteeInstitution;
-        this.handlingInstitution = handlingInstitution;
-        this.handlingInstitutionDetailView = handlingInstitutionDetailView;
+//        this.handlingInstitution = handlingInstitution;
+//        this.handlingInstitutionDetailView = handlingInstitutionDetailView;
         this.repaymentMethod = repaymentMethod;
         this.interestCategory = interestCategory;
         this.interestRate = interestRate;
@@ -235,24 +235,27 @@ public class LoanProduct extends BaseTimeEntity {
         this.maxRepaymentTerm = maxRepaymentTerm;
         this.age = age;
         this.ageBelow39 = ageBelow39;
-        this.ageAbove40 = ageAbove40;
-        this.ageAbove60 = ageAbove60;
-        this.income = income;
-        this.incomeCondition = incomeCondition;
-        this.incomeConditionYes = incomeConditionYes;
-        this.incomeConditionNo = incomeConditionNo;
-        this.creditScore = creditScore;
+//        this.ageAbove40 = ageAbove40;
+//        this.ageAbove60 = ageAbove60;
+//        this.income = income;
+//        this.incomeCondition = incomeCondition;
+//        this.incomeConditionYes = incomeConditionYes;
+//        this.incomeConditionNo = incomeConditionNo;
+//        this.creditScore = creditScore;
         this.specialTargetConditions = specialTargetConditions;
         this.otherReference = otherReference;
         this.repaymentFee = repaymentFee;
-        this.loanInsuranceCost = loanInsuranceCost;
-        this.productCategory = productCategory;
-        this.productOperationPeriod = productOperationPeriod;
-        this.isKinfaProduct = isKinfaProduct;
-        this.kinfaProductEtc = kinfaProductEtc;
+//        this.loanInsuranceCost = loanInsuranceCost;
+//        this.productCategory = productCategory;
+//        this.productOperationPeriod = productOperationPeriod;
+//        this.isKinfaProduct = isKinfaProduct;
+//        this.kinfaProductEtc = kinfaProductEtc;
         this.relatedSite = relatedSite;
     }
 
+    public void setRelatedSite(String relatedSite) {
+        this.relatedSite = relatedSite;
+    }
     // 비즈니스 로직 - XML 데이터로부터 상품 정보 업데이트
     public void updateFromXmlData(String sequence, String productName, String loanLimit,
                                   String limitOver1000, String limitOver2000, String limitOver3000,
@@ -283,7 +286,9 @@ public class LoanProduct extends BaseTimeEntity {
         this.specialTargetConditions = specialTargetConditions;
         this.age = age;
         this.ageBelow39 = ageBelow39;
-        this.income = income;
-        this.handlingInstitution = handlingInstitution;
+//        this.income = income;
+//        this.handlingInstitution = handlingInstitution;
+
+
     }
 }
