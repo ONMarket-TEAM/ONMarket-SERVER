@@ -182,10 +182,69 @@ public class CreditLoanService {
         } while (pageNo <= maxPageNo);
     }
 
+    private String getBankSite(String korCoNm) {
+        return switch (korCoNm) {
+            case "우리은행" -> "https://www.wooribank.com";
+            case "한국스탠다드차타드은행" -> "https://www.sc.co.kr";
+            case "한국씨티은행" -> "https://www.citibank.co.kr";
+            case "아이엠뱅크" -> "https://www.im.bank";
+            case "부산은행" -> "https://www.busanbank.co.kr";
+            case "광주은행" -> "https://www.kjbank.com";
+            case "제주은행" -> "https://www.ejbank.co.kr";
+            case "전북은행" -> "https://www.jbbank.co.kr";
+            case "경남은행" -> "https://www.knbank.co.kr";
+            case "중소기업은행" -> "https://www.ibk.co.kr";
+            case "한국산업은행" -> "https://www.kdb.co.kr";
+            case "국민은행" -> "https://www.kbstar.com";
+            case "신한은행" -> "https://www.shinhan.com";
+            case "농협은행주식회사" -> "https://www.nonghyup.com";
+            case "주식회사 하나은행" -> "https://www.kebhana.com";
+            case "주식회사 케이뱅크" -> "https://www.kbanknow.com";
+            case "수협은행" -> "https://www.suhyup-bank.co.kr";
+            case "주식회사 카카오뱅크" -> "https://www.kakaobank.com";
+            case "토스뱅크 주식회사" -> "https://tossbank.com";
+            case "애큐온저축은행" -> "https://www.aqbank.co.kr";
+            case "OSB저축은행" -> "https://www.osb.co.kr";
+            case "디비저축은행" -> "https://www.dbsave.co.kr";
+            case "키움예스저축은행" -> "https://www.kiwoomyessb.com";
+            case "SBI저축은행" -> "https://www.sbisb.co.kr";
+            case "다올저축은행" -> "https://www.daolsb.com";
+            case "고려저축은행" -> "https://www.koreasb.com";
+            case "DH저축은행" -> "https://www.dhsb.co.kr";
+            case "모아저축은행" -> "https://www.moasb.co.kr";
+            case "키움저축은행" -> "https://www.kiwombank.co.kr";
+            case "세람저축은행" -> "https://www.seramsb.co.kr";
+            case "페퍼저축은행" -> "https://www.peppersb.com";
+            case "한화저축은행" -> "https://www.hanwhasb.com";
+            case "우리금융저축은행" -> "https://www.woorifinancesb.com";
+            case "청주저축은행" -> "https://www.cjsb.co.kr";
+            case "한성저축은행" -> "https://www.hansungsb.co.kr";
+            case "상상인플러스저축은행" -> "https://www.sangsanginsb.com";
+            case "스타저축은행" -> "https://www.starsb.co.kr";
+            case "동양저축은행" -> "https://www.dongyangsb.com";
+            case "스마트저축은행" -> "https://www.smartsb.co.kr";
+            case "한국투자저축은행" -> "https://www.koreainvestsb.com";
+            case "JT저축은행" -> "https://www.jtsb.co.kr";
+            case "엔에이치저축은행" -> "https://www.nhsb.co.kr";
+            case "IBK저축은행" -> "https://www.ibksb.co.kr";
+            case "BNK저축은행" -> "https://www.bnksb.co.kr";
+            case "KB저축은행" -> "https://www.kbsb.co.kr";
+            case "하나저축은행" -> "https://www.hanasb.co.kr";
+            case "JT친애저축은행" -> "https://www.jtchinaesb.com";
+            case "신한저축은행" -> "https://www.shinhansb.com";
+            case "웰컴저축은행" -> "https://www.welcomebank.co.kr";
+            case "OK저축은행" -> "https://www.okbank.co.kr";
+
+            default -> null;
+        };
+    }
+
+
     // 데이터베이스에 저장
     @Transactional
     public void saveCreditLoanData(CreditLoanApiResponse response) {
         log.debug("데이터 저장 시작");
+
 
         // 기본 상품 정보 저장
         if (response.getResult().getBaseList() != null && !response.getResult().getBaseList().isEmpty()) {
@@ -200,6 +259,7 @@ public class CreditLoanService {
 
                     CreditLoanProduct product;
                     if (existing == null) {
+                        String rltSite = getBankSite(baseInfo.getKorCoNm());
 
                         product = CreditLoanProduct.builder()
                                 .dclsMonth(baseInfo.getDclsMonth())
@@ -214,6 +274,7 @@ public class CreditLoanService {
                                 .dclsStrtDay(baseInfo.getDclsStrtDay())
                                 .dclsEndDay(baseInfo.getDclsEndDay())
                                 .finCoSubmDay(baseInfo.getFinCoSubmDay())
+                                .rltSite(rltSite)
                                 .build();
                         log.debug("새 상품 생성: {}", baseInfo.getFinPrdtCd());
                     } else {
@@ -228,7 +289,10 @@ public class CreditLoanService {
                                 baseInfo.getCbName(),
                                 baseInfo.getDclsStrtDay(),
                                 baseInfo.getDclsEndDay(),
-                                baseInfo.getFinCoSubmDay()
+                                baseInfo.getFinCoSubmDay(),
+                                getBankSite(baseInfo.getKorCoNm())
+
+
                         );
                         product = existing;
                         log.debug("기존 상품 업데이트: {}", baseInfo.getFinPrdtCd());
