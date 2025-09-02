@@ -13,6 +13,9 @@ public class BusinessRequest {
     @Schema(description = "산업 분야", example = "SERVICE")
     private Industry industry;
 
+    @Schema(description = "사업장 이름", example = "OOO 주식회사")
+    private String businessName;
+
     @Schema(description = "사업장 유형", example = "CORPORATE")
     private BusinessType businessType;
 

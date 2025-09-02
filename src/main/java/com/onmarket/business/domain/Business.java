@@ -27,6 +27,9 @@ public class Business extends BaseTimeEntity {
     @Column(nullable = false)
     private Industry industry;
 
+    @Column(name = "business_name", length = 100, nullable = false)
+    private String businessName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "business_type", nullable = false)
     private BusinessType businessType;

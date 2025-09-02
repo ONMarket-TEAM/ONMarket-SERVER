@@ -68,9 +68,13 @@ public enum ResponseCode {
     CURRENT_PASSWORD_VERIFY_SUCCESS(HttpStatus.OK, "현재 비밀번호와 일치합니다."),
     UPDATE_PROFILE_SUCCESS(HttpStatus.OK, "회원정보 수정 완료"),
     REQUIRED_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호를 입력해주세요"),
+    REQUIRED_NEW_PASSWORD(HttpStatus.BAD_REQUEST, "새 비밀번호를 입력해주세요."),
     NEW_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "새 비밀번호 확인이 일치하지 않습니다."),
     SOCIAL_ACCOUNT_PASSWORD_VERIFICATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 검증 불가"),
     SOCIAL_ACCOUNT_PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "소셜 로그인은 비밀번호 변경 불가"),
+    INVALID_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
+    INVALID_IMAGE_KEY(HttpStatus.BAD_REQUEST, "유효하지 않은 이미지 키입니다."),
+    PROFILE_IMAGE_DELETE_SUCCESS(HttpStatus.OK, "프로필 이미지가 성공적으로 삭제되었습니다."),
 
 
     /**

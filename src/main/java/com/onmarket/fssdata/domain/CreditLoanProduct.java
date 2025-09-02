@@ -62,6 +62,9 @@ public class CreditLoanProduct extends BaseTimeEntity {
     @Column(name = "fin_co_subm_day")
     private String finCoSubmDay; // 금융회사 제출일 (YYYYMMDD)
 
+    @Column(name = "rlt_site")
+    private String rltSite; // 금융회사 홈페이지 URL
+
     // 해당 상품의 금리 옵션들 (양방향 연관관계)
     @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY)
     @ToString.Exclude  // toString 무한루프 방지
@@ -71,7 +74,7 @@ public class CreditLoanProduct extends BaseTimeEntity {
     @Builder
     public CreditLoanProduct(String dclsMonth, String finCoNo, String korCoNm, String finPrdtCd,
                              String finPrdtNm, String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
-                             String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay) {
+                             String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay, String rltSite) {
         this.dclsMonth = dclsMonth;
         this.finCoNo = finCoNo;
         this.korCoNm = korCoNm;
@@ -84,6 +87,8 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsStrtDay = dclsStrtDay;
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
+        this.rltSite = rltSite;
+
     }
 
     /**
@@ -91,7 +96,7 @@ public class CreditLoanProduct extends BaseTimeEntity {
      */
     public void updateProductInfo(String dclsMonth, String korCoNm, String finPrdtNm,
                                   String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
-                                  String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay) {
+                                  String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay, String rltSite) {
         this.dclsMonth = dclsMonth;
         this.korCoNm = korCoNm;
         this.finPrdtNm = finPrdtNm;
@@ -102,6 +107,8 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsStrtDay = dclsStrtDay;
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
+        this.rltSite = rltSite;
+
     }
 
     /**

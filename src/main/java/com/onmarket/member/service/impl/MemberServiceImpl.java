@@ -97,20 +97,62 @@ public class MemberServiceImpl implements MemberService {
             if (m.getSocialProvider() != null) {
                 throw new BusinessException(ResponseCode.SOCIAL_ACCOUNT_PASSWORD_CHANGE_NOT_ALLOWED);
             }
-            if (!hasText(request.getCurrentPassword())) {
-                throw new ValidationException(ResponseCode.REQUIRED_CURRENT_PASSWORD);
+
+            // 새 비밀번호 확인
+            if (!hasText(request.getNewPassword()) || !hasText(request.getConfirmNewPassword())) {
+                throw new ValidationException(ResponseCode.REQUIRED_NEW_PASSWORD);
             }
-            if (m.getPassword() == null || !passwordEncoder.matches(request.getCurrentPassword(), m.getPassword())) {
-                throw new ValidationException(ResponseCode.PASSWORD_MISMATCH);
-            }
+
             if (!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())) {
                 throw new ValidationException(ResponseCode.NEW_PASSWORD_MISMATCH);
             }
-            m.changePassword(passwordEncoder.encode(request.getNewPassword())); // 도메인 메서드 사용
+
+            // 비밀번호 복잡성 검증 (서버에서도 체크)
+            validatePasswordStrength(request.getNewPassword());
+
+            m.changePassword(passwordEncoder.encode(request.getNewPassword()));
         }
 
         // JPA dirty checking으로 자동 반영
         return m;
+    }
+
+    /**
+     * 비밀번호 복잡성 검증
+     */
+    private void validatePasswordStrength(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new BusinessException(ResponseCode.PASSWORD_REQUIRED);
+        }
+
+        // 1. 길이 검증 (8~20자)
+        if (password.length() < 8) {
+            throw new BusinessException(ResponseCode.PASSWORD_TOO_SHORT);
+        }
+        if (password.length() > 20) {
+            throw new BusinessException(ResponseCode.PASSWORD_TOO_LONG);
+        }
+
+        // 2. 복잡성 검증 - 최소 2가지 문자 조합 필요
+        int complexity = 0;
+        boolean hasLowercase = password.matches(".*[a-z].*");
+        boolean hasUppercase = password.matches(".*[A-Z].*");
+        boolean hasDigit = password.matches(".*\\d.*");
+        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+
+        if (hasLowercase) complexity++;
+        if (hasUppercase) complexity++;
+        if (hasDigit) complexity++;
+        if (hasSpecialChar) complexity++;
+
+        if (complexity < 2) {
+            throw new BusinessException(ResponseCode.PASSWORD_COMPLEXITY_INSUFFICIENT);
+        }
+
+        // 3. 공백 문자 검증
+        if (password.contains(" ") || password.contains("\t") || password.contains("\n")) {
+            throw new BusinessException(ResponseCode.PASSWORD_WHITESPACE_NOT_ALLOWED);
+        }
     }
 
     private boolean hasText(String s) {

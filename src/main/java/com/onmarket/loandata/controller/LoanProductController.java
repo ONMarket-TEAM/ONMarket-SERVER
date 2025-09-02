@@ -88,35 +88,35 @@ public class LoanProductController {
         }
     }
 
-    @GetMapping("/products/institution")
-    @Operation(summary = "취급기관별 상품 조회", description = "특정 취급기관의 대출상품 조회")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
-    })
-    public ApiResponse<List<LoanProduct>> searchByInstitution(@RequestParam String institution) {
-        try {
-            List<LoanProduct> products = loanProductService.searchByInstitution(institution);
-            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
-        } catch (Exception e) {
-            log.error("취급기관별 상품 조회 실패: ", e);
-            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
-        }
-    }
+//    @GetMapping("/products/institution")
+//    @Operation(summary = "취급기관별 상품 조회", description = "특정 취급기관의 대출상품 조회")
+//    @ApiResponses({
+//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
+//    })
+//    public ApiResponse<List<LoanProduct>> searchByInstitution(@RequestParam String institution) {
+//        try {
+//            List<LoanProduct> products = loanProductService.searchByInstitution(institution);
+//            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+//        } catch (Exception e) {
+//            log.error("취급기관별 상품 조회 실패: ", e);
+//            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+//        }
+//    }
 
-    @GetMapping("/products/category")
-    @Operation(summary = "카테고리별 상품 조회", description = "상품 카테고리별 대출상품 조회")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
-    })
-    public ApiResponse<List<LoanProduct>> getProductsByCategory(@RequestParam String category) {
-        try {
-            List<LoanProduct> products = loanProductService.getProductsByCategory(category);
-            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
-        } catch (Exception e) {
-            log.error("카테고리별 상품 조회 실패: ", e);
-            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
-        }
-    }
+//    @GetMapping("/products/category")
+//    @Operation(summary = "카테고리별 상품 조회", description = "상품 카테고리별 대출상품 조회")
+//    @ApiResponses({
+//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
+//    })
+//    public ApiResponse<List<LoanProduct>> getProductsByCategory(@RequestParam String category) {
+//        try {
+//            List<LoanProduct> products = loanProductService.getProductsByCategory(category);
+//            return ApiResponse.success(ResponseCode.PRODUCT_READ_SUCCESS, products);
+//        } catch (Exception e) {
+//            log.error("카테고리별 상품 조회 실패: ", e);
+//            return ApiResponse.fail(ResponseCode.DATABASE_ERROR, e.getMessage());
+//        }
+//    }
 
     @GetMapping("/products/{seq}")
     @Operation(summary = "상품 상세 조회", description = "특정 대출상품의 상세 정보 조회")

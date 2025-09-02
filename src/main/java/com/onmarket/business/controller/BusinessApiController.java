@@ -1,7 +1,6 @@
 package com.onmarket.business.controller;
 
-import com.onmarket.business.domain.Business;
-import com.onmarket.business.domain.BusinessUpdateRequest;
+import com.onmarket.business.dto.BusinessUpdateRequest;
 import com.onmarket.business.dto.BusinessRequest;
 import com.onmarket.business.dto.BusinessResponse;
 import com.onmarket.business.service.BusinessService;
