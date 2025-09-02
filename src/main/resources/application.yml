@@ -6,7 +6,11 @@ server:
       charset: utf-8
       enabled: true
 
+
 spring:
+  config:
+    import: optional:application-data.yml
+
   profiles:
     active: local
     include: oauth
@@ -15,6 +19,12 @@ spring:
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
+  codec:
+    max-in-memory-size: 10MB
+  mvc:
+    async:
+      request-timeout: -1 # 응답 대기 시간 연장
+
 
 springdoc:
   packages-to-scan: com.onmarket
@@ -35,3 +45,8 @@ springdoc:
     user:
       name: test
       password: 1234
+
+
+
+
+

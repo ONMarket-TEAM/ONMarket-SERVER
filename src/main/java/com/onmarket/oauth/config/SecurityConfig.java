@@ -49,7 +49,11 @@ public class SecurityConfig {
                                 "/api/validation/check/*",
                                 "/api/members/find-id",
                                 "/api/sms/*",
-                                "/api/auth/email/**"
+                                "/api/s3/**",
+                                "/api/auth/email/**",
+                                "/api/support-products/*",
+                                "/api/loan-products/*",
+                                "/api/credit-loans/*"
                         ).permitAll()
                         .requestMatchers("/api/members/me/**").authenticated()
                         .anyRequest().authenticated()
