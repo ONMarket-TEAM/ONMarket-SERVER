@@ -44,6 +44,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         Business business = Business.builder()
                 .member(member)
+                .businessName(request.getBusinessName())
                 .industry(request.getIndustry())
                 .businessType(request.getBusinessType())
                 .regionCodeId(request.getRegionCodeId())
@@ -88,6 +89,7 @@ public class BusinessServiceImpl implements BusinessService {
     private BusinessResponse toResponse(Business b) {
         return new BusinessResponse(
                 b.getBusinessId(),
+                b.getBusinessName(),
                 b.getIndustry(),
                 b.getBusinessType(),
                 b.getRegionCodeId(),

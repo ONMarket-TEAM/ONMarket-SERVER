@@ -47,7 +47,6 @@ public class SignupServiceImpl implements SignupService {
                 .profileImage(request.getProfileImage())
                 .birthDate(request.getBirthDate())
                 .gender(request.getGender())
-                .mainBusinessId(request.getMainBusinessId())
                 .status(MemberStatus.ACTIVE)
                 .build();
 
