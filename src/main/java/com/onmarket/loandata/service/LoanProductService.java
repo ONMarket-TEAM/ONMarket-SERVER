@@ -94,49 +94,43 @@ public class LoanProductService {
         return xmlMapper.readValue(xmlResponse, XmlLoanApiResponse.class);
     }
 
-    // XML 대출 상품 데이터 저장 및 필터링
+    // XML 대출 상품 데이터 저장
     @Transactional
     public void saveXmlLoanProducts(List<XmlLoanApiResponse.XmlLoanItem> items) {
         List<LoanProduct> productsToSave = new ArrayList<>();
         items.forEach(item -> {
-            // 필터링 조건 추가: target 또는 specialTargetConditions에 특정 키워드가 포함된 경우만 저장
-            String target = item.getTrgt() != null ? item.getTrgt() : "";
-            String suprTgtDtlCond = item.getSuprTgtDtlCond() != null ? item.getSuprTgtDtlCond() : "";
+            try {
+                Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
 
-            if (target.contains("사업자") || target.contains("기업") || target.contains("소상공인") || target.contains("청년 창업자") ||
-                    suprTgtDtlCond.contains("사업자") || suprTgtDtlCond.contains("기업") || suprTgtDtlCond.contains("소상공인") || suprTgtDtlCond.contains("청년 창업자")) {
-                try {
-                    Optional<LoanProduct> existingProduct = loanProductRepository.findBySequence(item.getSeq());
-
-                    LoanProduct product;
-                    if (existingProduct.isPresent()) {
-                        // 기존 상품 업데이트
-                        product = existingProduct.get();
-                        updateExistingProduct(item, product);
-                        log.debug("기존 상품 업데이트: {}", item.getSeq());
-                    } else {
-                        // 새 상품 생성 - @Builder 사용
-                        product = createNewProduct(item);
-                        log.debug("새 상품 생성: {}", item.getSeq());
-                    }
-
-                    productsToSave.add(product);
-                } catch (Exception e) {
-                    log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
+                LoanProduct product;
+                if (existingProduct.isPresent()) {
+                    // 기존 상품 업데이트
+                    product = existingProduct.get();
+                    updateExistingProduct(item, product);
+                    log.debug("기존 상품 업데이트: {}", item.getSeq());
+                } else {
+                    // 새 상품 생성 - @Builder 사용
+                    product = createNewProduct(item);
+                    log.debug("새 상품 생성: {}", item.getSeq());
                 }
-            } else {
-                log.debug("필터링 조건에 해당하지 않아 제외: {}", item.getSeq());
+
+                productsToSave.add(product);
+            } catch (Exception e) {
+                log.error("상품 매핑 실패: {} - {}", item.getSeq(), e.getMessage());
             }
         });
 
         if (!productsToSave.isEmpty()) {
             loanProductRepository.saveAll(productsToSave);
-            log.info("필터링된 대출 상품 정보 저장 완료 - {}개", productsToSave.size());
+            log.info("대출 상품 정보 저장 완료 - {}개", productsToSave.size());
         }
     }
 
     // 새 상품 생성 - @Builder 패턴 사용
     private LoanProduct createNewProduct(XmlLoanApiResponse.XmlLoanItem item) {
+        // 기관명에 따른 신청 URL 자동 설정
+        String applicationUrl = generateApplicationUrl(item.getOfrInstNm());
+
         return LoanProduct.builder()
                 .sequence(item.getSeq())
                 .productName(truncateString(item.getFinPrdNm(), 255))
@@ -161,11 +155,18 @@ public class LoanProductService {
                 .ageBelow39(item.getAge39Blw())
                 .income(item.getIncm())
                 .handlingInstitution(item.getHdlInst())
+                .relatedSite(applicationUrl)
                 .build();
     }
 
     // 기존 상품 업데이트 - 비즈니스 메서드 사용
     private void updateExistingProduct(XmlLoanApiResponse.XmlLoanItem item, LoanProduct product) {
+        // 기존 상품의 URL이 없는 경우에만 새로 설정 (수동 설정된 URL 보호)
+        if (product.getRelatedSite() == null || product.getRelatedSite().isEmpty()) {
+            String applicationUrl = generateApplicationUrl(item.getOfrInstNm());
+            product.setRelatedSite(applicationUrl);
+        }
+
         product.updateFromXmlData(
                 item.getSeq(),
                 truncateString(item.getFinPrdNm(), 255),
@@ -198,6 +199,113 @@ public class LoanProductService {
         return str.length() > maxLength ? str.substring(0, maxLength) : str;
     }
 
+    /**
+     * 기관명에 따른 신청 URL 생성
+     * 각 기관별로 적절한 신청 페이지 URL 매핑
+     */
+    private String generateApplicationUrl(String institutionName) {
+        if (institutionName == null) {
+            return null;
+        }
+
+        // 서민금융진흥원
+        if (institutionName.contains("서민금융진흥원") ||
+                institutionName.contains("미소금융") ||
+                institutionName.contains("서민금융")) {
+            return "https://www.kinfa.or.kr/main.do"; // 서민금융 잇다 앱
+        }
+
+        // 신용보증재단들
+        if (institutionName.contains("신용보증재단")) {
+            return "https://www.koreg.or.kr/"; // 신용보증재단중앙회
+        }
+
+        // 개별 지역 신용보증재단
+        if (institutionName.contains("서울신용보증재단")) {
+            return "https://www.seoulshinbo.co.kr/";
+        } else if (institutionName.contains("울산신용보증재단")) {
+            return "https://www.ulsanshinbo.co.kr/main/";
+        } else if (institutionName.contains("전남신용보증재단")) {
+            return "https://www.jnsinbo.or.kr/jnsinbo/intro.do";
+        } else if (institutionName.contains("대전신용보증재단")) {
+            return "https://www.sinbo.or.kr/";
+        } else if (institutionName.contains("광주신용보증재단")) {
+            return "https://www.gjsinbo.or.kr/";
+        } else if (institutionName.contains("부산신용보증재단")) {
+            return "https://www.busansinbo.or.kr/main.do";
+        } else if (institutionName.contains("전북신용보증재단")) {
+            return "https://www.jbcredit.or.kr/";
+        } else if (institutionName.contains("충북신용보증재단")) {
+            return "https://www.cbsig.or.kr/";
+        } else if (institutionName.contains("충남신용보증재단")) {
+            return "https://www.cbsinbo.or.kr/";
+        } else if (institutionName.contains("강원신용보증재단")) {
+            return "https://www.gwsinbo.or.kr/main/intro.php";
+        } else if (institutionName.contains("경기신용보증재단")) {
+            return "https://www.gcgf.or.kr/gcgf/intro.do";
+        } else if (institutionName.contains("경남신용보증재단")) {
+            return "https://www.gnsinbo.or.kr/";
+        } else if (institutionName.contains("경북신용보증재단")) {
+            return "https://gbsinbo.co.kr/";
+        } else if (institutionName.contains("대구신용보증재단")) {
+            return "https://www.ttg.co.kr/";
+        } else if (institutionName.contains("세종신용보증재단")) {
+            return "https://www.sjsinbo.or.kr/";
+        } else if (institutionName.contains("인천신용보증재단")) {
+            return "https://www.icsinbo.or.kr/";
+        } else if (institutionName.contains("제주신용보증재단")) {
+            return "https://www.jcgf.or.kr/index2.php";
+        }
+
+        // 정부기관/공단
+        if (institutionName.contains("근로복지공단")) {
+            return "https://www.comwel.or.kr/";
+        } else if (institutionName.contains("소상공인시장진흥공단")) {
+            return "https://www.semas.or.kr/";
+        } else if (institutionName.contains("충청북도기업진흥원")) {
+            return "https://www.cbtp.or.kr/";
+        } else if (institutionName.contains("경남투자경제진흥원")) {
+            return "https://giba.or.kr/intro/NR_index.do";
+        }
+
+        // 주택금융 관련
+        if (institutionName.contains("주택도시보증공사")) {
+            return "https://www.khug.or.kr/";
+        } else if (institutionName.contains("한국주택금융공사")) {
+            return "https://www.khug.or.kr/index_hug_in.jsp";
+        } else if (institutionName.contains("주택도시기금")) {
+            return "https://nhuf.molit.go.kr/";
+        }
+
+        // 신협
+        if (institutionName.contains("신협")) {
+            return "https://www.cu.co.kr/";
+        }
+
+        // 은행
+        if (institutionName.contains("BNK경남은행")) {
+            return "https://www.bnksum.co.kr/";
+        } else if (institutionName.contains("IBK기업은행")) {
+            return "https://www.knbank.co.kr/ib20/mnu/BHP000000000001";
+        } else if (institutionName.contains("국민은행")) {
+            return "https://www.kbstar.com";
+        } else if (institutionName.contains("신한은행")) {
+            return "https://www.shinhan.com";
+        } else if (institutionName.contains("우리은행")) {
+            return "https://www.wooribank.com";
+        } else if (institutionName.contains("하나은행")) {
+            return "https://www.kebhana.com/";
+        }
+
+        // 기타 보증기관
+        if (institutionName.contains("SGI서울보증")) {
+            return "https://www.sgic.co.kr/";
+        }
+
+        // 기본 URL (정부24 대출상품 페이지)
+        return "https://www.gov.kr/portal/onestopSvc/lonGoods";
+    }
+
     // --- 검색 및 조회 메서드들 ---
 
     public long getTotalProductCount() {
@@ -207,6 +315,8 @@ public class LoanProductService {
     public List<LoanProduct> searchByProductName(String productName) {
         return loanProductRepository.findByProductNameContaining(productName);
     }
+
+
 
     public List<LoanProduct> getAllProducts(int page, int size) {
         return loanProductRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size)).getContent();

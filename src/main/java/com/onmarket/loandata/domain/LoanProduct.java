@@ -253,6 +253,9 @@ public class LoanProduct extends BaseTimeEntity {
         this.relatedSite = relatedSite;
     }
 
+    public void setRelatedSite(String relatedSite) {
+        this.relatedSite = relatedSite;
+    }
     // 비즈니스 로직 - XML 데이터로부터 상품 정보 업데이트
     public void updateFromXmlData(String sequence, String productName, String loanLimit,
                                   String limitOver1000, String limitOver2000, String limitOver3000,
@@ -285,5 +288,7 @@ public class LoanProduct extends BaseTimeEntity {
         this.ageBelow39 = ageBelow39;
 //        this.income = income;
 //        this.handlingInstitution = handlingInstitution;
+
+
     }
 }
