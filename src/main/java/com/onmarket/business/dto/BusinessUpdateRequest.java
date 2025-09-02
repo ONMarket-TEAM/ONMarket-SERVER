@@ -1,4 +1,4 @@
-package com.onmarket.business.domain;
+package com.onmarket.business.dto;
 
 import com.onmarket.business.domain.enums.AnnualRevenue;
 import com.onmarket.business.domain.enums.BusinessType;

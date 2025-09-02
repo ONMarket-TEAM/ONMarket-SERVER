@@ -1,7 +1,7 @@
 package com.onmarket.business.service.impl;
 
 import com.onmarket.business.domain.Business;
-import com.onmarket.business.domain.BusinessUpdateRequest;
+import com.onmarket.business.dto.BusinessUpdateRequest;
 import com.onmarket.business.domain.enums.AnnualRevenue;
 import com.onmarket.business.domain.enums.BusinessStatus;
 import com.onmarket.business.domain.enums.BusinessType;
