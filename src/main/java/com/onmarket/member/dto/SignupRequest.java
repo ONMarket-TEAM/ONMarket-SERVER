@@ -35,4 +35,7 @@ public class SignupRequest {
     @Schema(description = "성별 (MALE, FEMALE, OTHER)", example = "MALE")
     private Gender gender;
 
+    @Schema(description = "주 사업장 ID", example = "1")
+    private Long mainBusinessId;
+
 }
