@@ -53,10 +53,6 @@ src/main/resources/application-oauth.yml
 src/main/resources/application-prod.yml
 src/main/resources/application-local.yml
 src/main/resources/application-data.yml
-<<<<<<< HEAD
-
-=======
->>>>>>> d67c786598453a6ff795690a391e11abfd64f98b
 
 # Ignore all XML files
 *.xml
