@@ -64,9 +64,14 @@ public class Member extends BaseTimeEntity {
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 20, nullable = false)
+    private Role role;
+
     @PrePersist
     protected void onCreate() {
         if (this.status == null) this.status = MemberStatus.ACTIVE;
+        if (this.role == null) this.role = Role.USER;  // 기본값 USER
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -96,4 +101,11 @@ public class Member extends BaseTimeEntity {
     public void changeStatus(MemberStatus status) {
         this.status = status;
     }
+
+    /** 역할 변경 */
+    public void changeRole(Role role) {
+        this.role = role;
+        this.refreshToken = null;
+    }
+
 }

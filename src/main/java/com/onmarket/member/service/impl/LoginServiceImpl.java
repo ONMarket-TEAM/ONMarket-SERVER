@@ -40,14 +40,15 @@ public class LoginServiceImpl implements LoginService {
         }
 
         // JWT 토큰 생성
-        String accessToken = jwtTokenProvider.createAccessToken(member.getEmail());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail());
+        String role = member.getRole().name();
+        String newAccessToken = jwtTokenProvider.createAccessToken(member.getEmail(), role);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(member.getEmail(), role);
 
         // Refresh Token 저장
-        member.updateRefreshToken(refreshToken);
+        member.updateRefreshToken(newRefreshToken);
         memberRepository.save(member);
 
-        return new LoginResponse(accessToken, refreshToken);
+        return new LoginResponse(newAccessToken, newRefreshToken);
     }
 
     @Override
