@@ -56,14 +56,16 @@ public class RefreshApiController {
         }
 
         // 새 토큰 발급
-        String newAccessToken = jwtTokenProvider.createAccessToken(email);
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(email);
+        String role = member.getRole().name();
+        String newAccessToken = jwtTokenProvider.createAccessToken(email, role);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(email, role);
 
-        // DB에 새로운 Refresh Token 저장
         member.updateRefreshToken(newRefreshToken);
         memberRepository.save(member);
 
-        return ApiResponse.success(ResponseCode.TOKEN_REFRESH_SUCCESS,
-                new LoginResponse(newAccessToken, newRefreshToken));
+        return ApiResponse.success(
+                ResponseCode.TOKEN_REFRESH_SUCCESS,
+                new LoginResponse(newAccessToken, newRefreshToken)
+        );
     }
 }

@@ -3,6 +3,7 @@ package com.onmarket.member.service.impl;
 import com.onmarket.common.response.ResponseCode;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.domain.enums.MemberStatus;
+import com.onmarket.member.domain.enums.Role;
 import com.onmarket.member.dto.SignupRequest;
 import com.onmarket.member.exception.SignupException;
 import com.onmarket.member.repository.MemberRepository;
@@ -49,6 +50,7 @@ public class SignupServiceImpl implements SignupService {
                 .gender(request.getGender())
                 .mainBusinessId(request.getMainBusinessId())
                 .status(MemberStatus.ACTIVE)
+                .role(Role.USER)
                 .build();
 
         memberRepository.save(member);
