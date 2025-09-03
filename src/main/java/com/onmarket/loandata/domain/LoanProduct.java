@@ -199,6 +199,18 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "rlt_site")
     private String relatedSite; // 관련 사이트 URL
 
+
+    @Column(name = "keywords", length = 512)
+    private String keywords;
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
+    }
+
+    public void setRelatedSite(String relatedSite) {
+        this.relatedSite = relatedSite;
+    }
+
     @Builder
     public LoanProduct(String sequence, String productName, String usage, String target,
                        String targetFilter, String institutionCategory, String offeringInstitution,
@@ -210,7 +222,7 @@ public class LoanProduct extends BaseTimeEntity {
                        String income, String incomeCondition, String incomeConditionYes, String incomeConditionNo,
                        String creditScore, String specialTargetConditions, String otherReference,
                        String repaymentFee, String loanInsuranceCost, String productCategory,
-                       String productOperationPeriod, String isKinfaProduct, String kinfaProductEtc, String relatedSite) {
+                       String productOperationPeriod, String isKinfaProduct, String kinfaProductEtc, String relatedSite, String keywords) {
         this.sequence = sequence;
         this.productName = productName;
         this.usage = usage;
@@ -251,11 +263,10 @@ public class LoanProduct extends BaseTimeEntity {
 //        this.isKinfaProduct = isKinfaProduct;
 //        this.kinfaProductEtc = kinfaProductEtc;
         this.relatedSite = relatedSite;
+        this.keywords = keywords;
     }
 
-    public void setRelatedSite(String relatedSite) {
-        this.relatedSite = relatedSite;
-    }
+
     // 비즈니스 로직 - XML 데이터로부터 상품 정보 업데이트
     public void updateFromXmlData(String sequence, String productName, String loanLimit,
                                   String limitOver1000, String limitOver2000, String limitOver3000,
