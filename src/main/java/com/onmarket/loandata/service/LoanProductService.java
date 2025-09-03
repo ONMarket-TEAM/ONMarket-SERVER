@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,20 @@ public class LoanProductService {
 
     @Value("${gov.api.loan.base-url}")
     private String baseUrl;
+
+    private static final List<String> REGIONAL_KEYWORDS = List.of(
+            "서울시", "서울", "부산시", "부산", "대구시", "대구", "인천시", "인천", "광주시", "광주",
+            "대전시", "대전", "울산시", "울산", "세종시", "세종", "경기도", "경기", "강원특별자치도",
+            "강원자치도", "강원도", "강원", "충청북도", "충북", "충청남도", "충남", "전라북도", "전북",
+            "전라남도", "전남", "경상북도", "경북", "경상남도", "경남", "제주특별자치도", "제주도", "제주",
+            "울주군", "북구", "남구", "동구", "중구", "수성구", "달성군", "광산구", "서구", "원주시",
+            "청주시", "충주시", "제천시", "옥천군", "영동군", "단양군", "보은군", "증평군", "정읍시",
+            "익산시", "순창군", "진안군", "김제시", "고창군", "완주군", "군산시", "전주시", "부안군",
+            "진주시", "함양군", "고양시", "구리시", "김포시", "남양주시", "동두천시", "연천군",
+            "양주시", "양평군", "의정부시", "파주시", "포천시", "성남시", "수원시", "안성시", "용인시",
+            "의왕시", "안산시", "시흥시", "하남시", "이천시", "평택시", "광명시", "화성시", "남양주시",
+            "구리시", "여주시"
+    );
 
     // 모든 대출 상품 데이터 수집
     @Transactional
@@ -115,10 +132,16 @@ public class LoanProductService {
                         // 기존 상품 업데이트
                         product = existingProduct.get();
                         updateExistingProduct(item, product);
+                        // 새로운 키워드 컬럼 업데이트
+                        String keywords = extractKeywordsFromItem(item);
+                        product.setKeywords(keywords);
                         log.debug("기존 상품 업데이트: {}", item.getSeq());
                     } else {
                         // 새 상품 생성 - @Builder 사용
                         product = createNewProduct(item);
+                        // 새로운 키워드 컬럼 생성
+                        String keywords = extractKeywordsFromItem(item);
+                        product.setKeywords(keywords);
                         log.debug("새 상품 생성: {}", item.getSeq());
                     }
 
@@ -142,6 +165,7 @@ public class LoanProductService {
     // 새 상품 생성 - @Builder 패턴 사용
     private LoanProduct createNewProduct(XmlLoanApiResponse.XmlLoanItem item) {
         String applicationUrl = generateApplicationUrl(item.getOfrInstNm());
+        String keywords = extractKeywordsFromItem(item); // 키워드 추출
 
         return LoanProduct.builder()
                 .sequence(item.getSeq())
@@ -168,6 +192,7 @@ public class LoanProductService {
                 .income(item.getIncm())
                 .handlingInstitution(item.getHdlInst())
                 .relatedSite(applicationUrl)
+                .keywords(keywords) // 빌더에 키워드 추가
                 .build();
     }
 
@@ -177,6 +202,10 @@ public class LoanProductService {
             String applicationUrl = generateApplicationUrl(item.getOfrInstNm());
             product.setRelatedSite(applicationUrl);
         }
+
+        // 업데이트 메서드에 키워드 필드 추가
+        String keywords = extractKeywordsFromItem(item);
+        product.setKeywords(keywords);
 
         product.updateFromXmlData(
                 item.getSeq(),
@@ -203,6 +232,41 @@ public class LoanProductService {
                 item.getIncm(),
                 item.getHdlInst()
         );
+    }
+    // 키워드 추출 로직 추가
+    private String extractKeywordsFromItem(XmlLoanApiResponse.XmlLoanItem item) {
+        StringBuilder extractedKeywords = new StringBuilder();
+
+        // ofr_inst_nm, supr_tgt_dtl_cond, fin_prd_nm 세 컬럼에서 지역 키워드 추출
+        String textToAnalyze = (item.getOfrInstNm() != null ? item.getOfrInstNm() : "") + " " +
+                (item.getSuprTgtDtlCond() != null ? item.getSuprTgtDtlCond() : "") + " " +
+                (item.getFinPrdNm() != null ? item.getFinPrdNm() : "");
+
+        List<String> foundRegions = REGIONAL_KEYWORDS.stream()
+                .filter(region -> Pattern.compile("\\b" + Pattern.quote(region) + "\\b").matcher(textToAnalyze).find())
+                .collect(Collectors.toList());
+
+        if (!foundRegions.isEmpty()) {
+            // 중복 제거 및 쉼표로 연결
+            extractedKeywords.append(String.join(",", foundRegions.stream().distinct().collect(Collectors.toList())));
+        }
+
+        // 추가적인 공통 키워드
+        List<String> commonKeywords = new ArrayList<>();
+        if (textToAnalyze.contains("소상공인")) commonKeywords.add("소상공인");
+        if (textToAnalyze.contains("기업")) commonKeywords.add("기업");
+        if (textToAnalyze.contains("사업자")) commonKeywords.add("사업자");
+        if (textToAnalyze.contains("창업")) commonKeywords.add("창업");
+        if (textToAnalyze.contains("청년")) commonKeywords.add("청년");
+
+        if (!commonKeywords.isEmpty()) {
+            if (extractedKeywords.length() > 0) {
+                extractedKeywords.append(",");
+            }
+            extractedKeywords.append(String.join(",", commonKeywords.stream().distinct().collect(Collectors.toList())));
+        }
+
+        return extractedKeywords.length() > 0 ? extractedKeywords.toString() : null;
     }
 
     private String truncateString(String str, int maxLength) {

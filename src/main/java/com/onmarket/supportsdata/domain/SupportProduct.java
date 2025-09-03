@@ -52,12 +52,49 @@ public class SupportProduct {
     @Column(name = "keywords", length = 1024)
     private String keywords;                 // 검색 키워드
 
+    @Column(name = "start_day")
+    private String startDay;    // 신청 시작일 (YYYYMMDD 형식, 상시모집이면 null)
+
+    @Column(name = "end_day")
+    private String endDay;      // 신청 마감일 (YYYYMMDD 형식, 상시모집이면 null)
+
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
     @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition; // 연관된 지원 조건
 
     public void setSupportCondition(SupportCondition supportCondition) {
         this.supportCondition = supportCondition;
+    }
+
+    public void setStartDay(String startDay) {
+        this.startDay = startDay;
+    }
+
+    public void setEndDay(String endDay) {
+        this.endDay = endDay;
+    }
+
+    /**
+     * 표시용 마감일 반환
+     * end_day가 null이면 applicationDeadline 반환
+     */
+    public String getDisplayDeadline() {
+        if (endDay != null) {
+            return formatDate(endDay);
+        }
+        return applicationDeadline != null ? applicationDeadline : "상시모집";
+    }
+
+    /**
+     * YYYYMMDD 형식을 YYYY.MM.DD 형식으로 변환
+     */
+    private String formatDate(String yyyymmdd) {
+        if (yyyymmdd == null || yyyymmdd.length() != 8) {
+            return yyyymmdd;
+        }
+        return yyyymmdd.substring(0, 4) + "." +
+                yyyymmdd.substring(4, 6) + "." +
+                yyyymmdd.substring(6, 8);
     }
 
     @Builder
