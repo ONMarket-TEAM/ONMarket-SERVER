@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
+import java.time.Instant;
 
 @Entity
 @Table(name = "loan_product")
@@ -94,6 +95,14 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "age_39_blw")
     private String ageBelow39; // 39세 이하 가능 여부
 
+    @Column(name = "cardnews_s3_key", length = 256)
+    private String cardnewsS3Key;
+
+    @Column(name = "cardnews_url", length = 512)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
 //    @Column(name = "age_40_abnml")
 //    private String ageAbove40; // 40세 이상 가능 여부
 //
@@ -290,5 +299,11 @@ public class LoanProduct extends BaseTimeEntity {
 //        this.handlingInstitution = handlingInstitution;
 
 
+    }
+
+    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
+        this.cardnewsS3Key = s3Key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
     }
 }

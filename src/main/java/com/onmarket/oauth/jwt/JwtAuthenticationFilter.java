@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -15,44 +16,58 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    // ✅ 이 경로들은 인증필터를 아예 적용하지 않음
+    private static final String[] EXCLUDE_PATHS = {
+            "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**",
+            "/swagger-resources/**", "/webjars/**",
+            "/api/signup", "/api/auth/**", "/api/validation/**",
+            "/api/members/find-id", "/api/sms/**", "/api/s3/**",
+            "/api/support-products/**", "/api/loan-products/**", "/api/credit-loans/**",
+            "/api/cardnews/**"   // ⬅️ 카드뉴스 공개
+    };
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
+
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    /** 공개 경로는 필터 스킵 */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        for (String p : EXCLUDE_PATHS) {
+            if (PATH_MATCHER.match(p, uri)) return true;
+        }
+        return false;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
 
-        // Swagger, API docs, Webjars 요청은 필터 제외
-        if (path.startsWith("/swagger-ui")
-                || path.startsWith("/api-docs")
-                || path.startsWith("/v3/api-docs")
-                || path.startsWith("/swagger-resources")
-                || path.startsWith("/webjars")) {
+        String authHeader = request.getHeader("Authorization");
+
+        // ⭐ 토큰이 없으면 그냥 통과 (permitAll 경로 + 인증 불필요 경로 지원)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // JWT 인증 처리
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
 
-            // 토큰 유효성 검사
-            if (!jwtTokenProvider.validateToken(token)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
-                return;
-            }
-
-            // 토큰이 유효하다면 SecurityContext에 인증 정보 저장
-            String email = jwtTokenProvider.getEmail(token);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, null);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 토큰 유효성 검사
+        if (!jwtTokenProvider.validateToken(token)) {
+            // 보호된 엔드포인트에서만 401이 의미 있음. 여기서 바로 끊어도 됨.
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+            return;
         }
+
+        // 토큰이 유효하면 SecurityContext에 인증정보 저장
+        String email = jwtTokenProvider.getEmail(token);
+        var authentication = new UsernamePasswordAuthenticationToken(email, null, null);
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }

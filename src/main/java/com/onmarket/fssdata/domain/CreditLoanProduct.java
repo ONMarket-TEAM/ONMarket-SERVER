@@ -2,74 +2,81 @@ package com.onmarket.fssdata.domain;
 
 import com.onmarket.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
+import lombok.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 신용대출 상품 정보
- * 금융감독원 API에서 제공하는 개인신용대출 상품의 기본 정보를 관리
- */
 @Entity
-@Table(name = "credit_loan_product")
+@Table(
+        name = "credit_loan_product",
+        uniqueConstraints = {
+                // fin_prdt_cd가 외래키 참조 대상이 되므로 UNIQUE 필수
+                @UniqueConstraint(
+                        name = "uk_credit_loan_product_fin_prdt_cd",
+                        columnNames = "fin_prdt_cd"
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditLoanProduct extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 상품 고유 ID
+    private Long id;
 
     @Column(name = "dcls_month")
-    private String dclsMonth; // 공시 월 (YYYYMM)
+    private String dclsMonth;
 
     @Column(name = "fin_co_no")
-    private String finCoNo; // 금융회사 코드
+    private String finCoNo;
 
     @Column(name = "kor_co_nm")
-    private String korCoNm; // 금융회사명 (한국어)
+    private String korCoNm;
 
-    @Column(name = "fin_prdt_cd")
-    private String finPrdtCd; // 금융상품 코드 (상품 식별자)
+    // ✅ 외래키 참조 대상 컬럼(유니크)
+    @Column(name = "fin_prdt_cd", nullable = false, length = 100)
+    private String finPrdtCd;
 
     @Column(name = "fin_prdt_nm")
-    private String finPrdtNm; // 금융상품명
+    private String finPrdtNm;
 
     @Column(name = "join_way", columnDefinition = "TEXT")
-    private String joinWay; // 가입 방법 (온라인, 영업점 등)
+    private String joinWay;
 
     @Column(name = "crdt_prdt_type")
-    private String crdtPrdtType; // 신용대출 상품 유형 코드
+    private String crdtPrdtType;
 
     @Column(name = "crdt_prdt_type_nm")
-    private String crdtPrdtTypeNm; // 신용대출 상품 유형명
+    private String crdtPrdtTypeNm;
 
     @Column(name = "cb_name")
-    private String cbName; // 신용평가회사명
+    private String cbName;
 
     @Column(name = "dcls_strt_day")
-    private String dclsStrtDay; // 공시 시작일 (YYYYMMDD)
+    private String dclsStrtDay;
 
     @Column(name = "dcls_end_day")
-    private String dclsEndDay; // 공시 종료일 (YYYYMMDD)
+    private String dclsEndDay;
 
     @Column(name = "fin_co_subm_day")
-    private String finCoSubmDay; // 금융회사 제출일 (YYYYMMDD)
+    private String finCoSubmDay;
 
     @Column(name = "rlt_site")
-    private String rltSite; // 금융회사 홈페이지 URL
+    private String rltSite;
 
-    // 해당 상품의 금리 옵션들 (양방향 연관관계)
+    @Column(name = "cardnews_s3_key", length = 256)
+    private String cardnewsS3Key;
+
+    @Column(name = "cardnews_url", length = 512)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
+
     @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY)
-    @ToString.Exclude  // toString 무한루프 방지
-    @EqualsAndHashCode.Exclude  // equals/hashCode 무한루프 방지
-    private List<CreditLoanOption> options = new ArrayList<>(); // 상품별 금리 옵션 목록
+    private List<CreditLoanOption> options = new ArrayList<>();
 
     @Builder
     public CreditLoanProduct(String dclsMonth, String finCoNo, String korCoNm, String finPrdtCd,
@@ -88,15 +95,12 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
         this.rltSite = rltSite;
-
     }
 
-    /**
-     * 상품 정보 업데이트 (공시 정보 변경 시 사용)
-     */
     public void updateProductInfo(String dclsMonth, String korCoNm, String finPrdtNm,
                                   String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
-                                  String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay, String rltSite) {
+                                  String cbName, String dclsStrtDay, String dclsEndDay,
+                                  String finCoSubmDay, String rltSite) {
         this.dclsMonth = dclsMonth;
         this.korCoNm = korCoNm;
         this.finPrdtNm = finPrdtNm;
@@ -108,15 +112,16 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
         this.rltSite = rltSite;
-
     }
 
-    /**
-     * 연관관계 편의 메서드 - 옵션 추가
-     * 양방향 연관관계를 안전하게 설정
-     */
     public void addOption(CreditLoanOption option) {
         this.options.add(option);
         option.updateCreditLoanProduct(this);
+    }
+
+    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
+        this.cardnewsS3Key = s3Key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
     }
 }

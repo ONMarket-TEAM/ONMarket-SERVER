@@ -6,7 +6,7 @@ import com.onmarket.supportsdata.dto.ApiResponseDTO;
 import com.onmarket.supportsdata.dto.ServiceDetailDTO;
 import com.onmarket.supportsdata.dto.ServiceInfoDTO;
 import com.onmarket.supportsdata.dto.SupportConditionDTO;
-import com.onmarket.supportsdata.repository.SupportServiceRepository;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 public class PublicDataServiceImpl implements PublicDataService {
 
     private final WebClient.Builder webClientBuilder;
-    private final SupportServiceRepository supportServiceRepository;
+    private final SupportProductRepository supportProductRepository;
 
     @Value("${gov.api.support.base-url}")
     private String baseUrl;
@@ -131,7 +131,7 @@ public class PublicDataServiceImpl implements PublicDataService {
         String serviceId = infoDTO.getServiceId();
 
         // DB 저장 전 ID 중복 확인
-        if (supportServiceRepository.existsById(serviceId)) {
+        if (supportProductRepository.existsById(serviceId)) {
             log.info("Service ID {} already exists in the database. Skipping.", serviceId);
             return; // 이미 존재하면 저장을 건너뛰고 메소드를 종료합니다.
         }
@@ -182,7 +182,7 @@ public class PublicDataServiceImpl implements PublicDataService {
                 .build();
 
         conditionEntity.setSupportProduct(serviceEntity);
-        supportServiceRepository.save(serviceEntity);
+        supportProductRepository.save(serviceEntity);
     }
 
     // 키워드 추출

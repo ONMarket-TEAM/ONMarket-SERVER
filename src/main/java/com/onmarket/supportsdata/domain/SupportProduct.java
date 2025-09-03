@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.Instant;
 
 /**
  * 지원 서비스 정보 (지원사업)
@@ -58,6 +59,22 @@ public class SupportProduct {
 
     public void setSupportCondition(SupportCondition supportCondition) {
         this.supportCondition = supportCondition;
+    }
+
+    @Column(name = "cardnews_s3_key", length = 256)
+    private String cardnewsS3Key;
+
+    @Column(name = "cardnews_url", length = 512)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
+
+    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
+        this.cardnewsS3Key = s3Key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
+
     }
 
     @Builder

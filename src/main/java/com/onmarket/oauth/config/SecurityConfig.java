@@ -53,7 +53,9 @@ public class SecurityConfig {
                                 "/api/auth/email/**",
                                 "/api/support-products/*",
                                 "/api/loan-products/*",
-                                "/api/credit-loans/*"
+                                "/api/credit-loans/*",
+                                "/api/cardnews",
+                                "/api/cardnews/**"
                         ).permitAll()
                         .requestMatchers("/api/members/me/**").authenticated()
                         .anyRequest().authenticated()

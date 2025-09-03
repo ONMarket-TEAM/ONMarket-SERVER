@@ -1,6 +1,5 @@
-package com.onmarket.oauth.config;
+package com.onmarket.common.config;
 
-import com.onmarket.oauth.config.CloudAwsProps;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
