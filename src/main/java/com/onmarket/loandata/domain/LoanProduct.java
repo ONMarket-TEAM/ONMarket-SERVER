@@ -30,9 +30,9 @@ public class LoanProduct extends BaseTimeEntity {
 
     @Column(name = "trgt")
     private String target; // 대출 대상 (예: 근로자)
-
-    @Column(name = "tgt_fltr")
-    private String targetFilter; // 대상 필터
+//
+//    @Column(name = "tgt_fltr")
+//    private String targetFilter; // 대상 필터
 
     @Column(name = "inst_ctg")
     private String institutionCategory; // 금융기관 분류
@@ -40,8 +40,8 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "ofr_inst_nm")
     private String offeringInstitution; // 상품 제공 기관명
 
-    @Column(name = "grn_inst")
-    private String guaranteeInstitution; // 보증 기관
+//    @Column(name = "grn_inst")
+//    private String guaranteeInstitution; // 보증 기관
 
 //    @Column(name = "hdl_inst")
 //    private String handlingInstitution; // 취급 기관
@@ -175,11 +175,11 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "supr_tgt_dtl_cond", columnDefinition = "TEXT")
     private String specialTargetConditions; // 특별 대상 조건
 
-    @Column(name = "etc_ref_sbjc", columnDefinition = "TEXT")
-    private String otherReference; // 기타 참고사항
+//    @Column(name = "etc_ref_sbjc", columnDefinition = "TEXT")
+//    private String otherReference; // 기타 참고사항
 
-    @Column(name = "rpymd_cfe")
-    private String repaymentFee; // 상환 수수료
+//    @Column(name = "rpymd_cfe")
+//    private String repaymentFee; // 상환 수수료
 
 //    @Column(name = "ln_icdcst")
 //    private String loanInsuranceCost; // 보증료율
@@ -227,10 +227,10 @@ public class LoanProduct extends BaseTimeEntity {
         this.productName = productName;
         this.usage = usage;
         this.target = target;
-        this.targetFilter = targetFilter;
+//        this.targetFilter = targetFilter;
         this.institutionCategory = institutionCategory;
         this.offeringInstitution = offeringInstitution;
-        this.guaranteeInstitution = guaranteeInstitution;
+//        this.guaranteeInstitution = guaranteeInstitution;
 //        this.handlingInstitution = handlingInstitution;
 //        this.handlingInstitutionDetailView = handlingInstitutionDetailView;
         this.repaymentMethod = repaymentMethod;
@@ -255,8 +255,8 @@ public class LoanProduct extends BaseTimeEntity {
 //        this.incomeConditionNo = incomeConditionNo;
 //        this.creditScore = creditScore;
         this.specialTargetConditions = specialTargetConditions;
-        this.otherReference = otherReference;
-        this.repaymentFee = repaymentFee;
+//        this.otherReference = otherReference;
+//        this.repaymentFee = repaymentFee;
 //        this.loanInsuranceCost = loanInsuranceCost;
 //        this.productCategory = productCategory;
 //        this.productOperationPeriod = productOperationPeriod;

@@ -22,16 +22,23 @@ public class SupportProduct {
     // --- serviceList 에서 가져오는 정보 ---
     private String supportType;              // 지원 유형 (예: 현금, 융자, 상담 등)
     @Column(nullable = false)
+
     private String serviceName;              // 서비스명
     @Column(length = 1000)
+
     private String servicePurposeSummary;    // 서비스 목적 요약
     @Column(length = 2000)
+
     private String supportTarget;            // 지원 대상
+
     private String selectionCriteria;        // 선정 기준
     @Column(length = 2000)
+
     private String supportContent;           // 지원 내용
+
     private String applicationMethod;        // 신청 방법
     @Column(length = 500)
+
     private String detailUrl;                // 상세 페이지 URL
     private String departmentName;           // 담당 부서
     private String userCategory;             // 사용자 구분 (소상공인, 법인 등)
@@ -52,6 +59,12 @@ public class SupportProduct {
     @Column(name = "keywords", length = 1024)
     private String keywords;                 // 검색 키워드
 
+    @Column(name = "start_day")
+    private String startDay;    // 신청 시작일 (YYYYMMDD 형식, 상시모집이면 null)
+
+    @Column(name = "end_day")
+    private String endDay;      // 신청 마감일 (YYYYMMDD 형식, 상시모집이면 null)
+
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
     @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition; // 연관된 지원 조건
@@ -60,6 +73,13 @@ public class SupportProduct {
         this.supportCondition = supportCondition;
     }
 
+    public void setStartDay(String startDay) {
+        this.startDay = startDay;
+    }
+
+    public void setEndDay(String endDay) {
+        this.endDay = endDay;
+    }
     @Builder
     public SupportProduct(String serviceId, String supportType, String serviceName, String servicePurposeSummary,
                           String supportTarget, String selectionCriteria, String supportContent,

@@ -34,6 +34,7 @@ public class PublicDataServiceImpl implements PublicDataService {
 
     private final WebClient.Builder webClientBuilder;
     private final SupportServiceRepository supportServiceRepository;
+    private final SimpleDateParser simpleDateParser;
 
     @Value("${gov.api.support.base-url}")
     private String baseUrl;
@@ -130,17 +131,15 @@ public class PublicDataServiceImpl implements PublicDataService {
     private void createAndSaveEntities(ServiceInfoDTO infoDTO, ServiceDetailDTO detailDTO, SupportConditionDTO conditionDTO) {
         String serviceId = infoDTO.getServiceId();
 
-        // DB 저장 전 ID 중복 확인
         if (supportServiceRepository.existsById(serviceId)) {
             log.info("Service ID {} already exists in the database. Skipping.", serviceId);
-            return; // 이미 존재하면 저장을 건너뛰고 메소드를 종료합니다.
+            return;
         }
 
-        // 존재하지 않을 시 실행
         String generatedKeywords = generateKeywords(infoDTO, detailDTO, conditionDTO);
 
         SupportProduct serviceEntity = SupportProduct.builder()
-                .serviceId(serviceId) // serviceId 변수 사용
+                .serviceId(serviceId)
                 .supportType(infoDTO.getSupportType())
                 .serviceName(infoDTO.getServiceName())
                 .servicePurposeSummary(infoDTO.getServicePurposeSummary())
@@ -152,7 +151,7 @@ public class PublicDataServiceImpl implements PublicDataService {
                 .departmentName(infoDTO.getDepartmentName())
                 .userCategory(infoDTO.getUserCategory())
                 .servicePurpose(detailDTO.getServicePurpose())
-                .applicationDeadline(detailDTO.getApplicationDeadline())
+                .applicationDeadline(detailDTO.getApplicationDeadline()) // 원본 보존
                 .requiredDocuments(detailDTO.getRequiredDocuments())
                 .receptionAgencyName(detailDTO.getReceptionAgencyName())
                 .contact(detailDTO.getContact())
@@ -161,6 +160,14 @@ public class PublicDataServiceImpl implements PublicDataService {
                 .keywords(generatedKeywords)
                 .build();
 
+        // 신청 기한 파싱 및 설정
+        SimpleDateParser.DatePair datePair = simpleDateParser.parseApplicationDeadline(
+                detailDTO.getApplicationDeadline()
+        );
+        serviceEntity.setStartDay(datePair.startDay);
+        serviceEntity.setEndDay(datePair.endDay);
+
+        // SupportCondition 설정
         SupportCondition conditionEntity = SupportCondition.builder()
                 .genderMale(conditionDTO.getGenderMale())
                 .genderFemale(conditionDTO.getGenderFemale())
@@ -183,8 +190,10 @@ public class PublicDataServiceImpl implements PublicDataService {
 
         conditionEntity.setSupportProduct(serviceEntity);
         supportServiceRepository.save(serviceEntity);
-    }
 
+        log.debug("Saved service: {} with dates: {} ~ {}",
+                serviceEntity.getServiceName(), datePair.startDay, datePair.endDay);
+    }
     // 키워드 추출
     private String generateKeywords(ServiceInfoDTO info, ServiceDetailDTO detail, SupportConditionDTO condition) {
         Set<String> keywords = new HashSet<>();
