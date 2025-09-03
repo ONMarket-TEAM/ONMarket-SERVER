@@ -22,23 +22,16 @@ public class SupportProduct {
     // --- serviceList 에서 가져오는 정보 ---
     private String supportType;              // 지원 유형 (예: 현금, 융자, 상담 등)
     @Column(nullable = false)
-
     private String serviceName;              // 서비스명
     @Column(length = 1000)
-
     private String servicePurposeSummary;    // 서비스 목적 요약
     @Column(length = 2000)
-
     private String supportTarget;            // 지원 대상
-
     private String selectionCriteria;        // 선정 기준
     @Column(length = 2000)
-
     private String supportContent;           // 지원 내용
-
     private String applicationMethod;        // 신청 방법
     @Column(length = 500)
-
     private String detailUrl;                // 상세 페이지 URL
     private String departmentName;           // 담당 부서
     private String userCategory;             // 사용자 구분 (소상공인, 법인 등)
@@ -80,6 +73,30 @@ public class SupportProduct {
     public void setEndDay(String endDay) {
         this.endDay = endDay;
     }
+
+    /**
+     * 표시용 마감일 반환
+     * end_day가 null이면 applicationDeadline 반환
+     */
+    public String getDisplayDeadline() {
+        if (endDay != null) {
+            return formatDate(endDay);
+        }
+        return applicationDeadline != null ? applicationDeadline : "상시모집";
+    }
+
+    /**
+     * YYYYMMDD 형식을 YYYY.MM.DD 형식으로 변환
+     */
+    private String formatDate(String yyyymmdd) {
+        if (yyyymmdd == null || yyyymmdd.length() != 8) {
+            return yyyymmdd;
+        }
+        return yyyymmdd.substring(0, 4) + "." +
+                yyyymmdd.substring(4, 6) + "." +
+                yyyymmdd.substring(6, 8);
+    }
+
     @Builder
     public SupportProduct(String serviceId, String supportType, String serviceName, String servicePurposeSummary,
                           String supportTarget, String selectionCriteria, String supportContent,
