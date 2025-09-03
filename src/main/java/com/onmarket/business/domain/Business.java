@@ -56,6 +56,9 @@ public class Business extends BaseTimeEntity {
         if (this.status == null) this.status = BusinessStatus.ACTIVE;
     }
 
+    /** 사업장명 변경 */
+    public void changeBusinessName(String businessName) { this.businessName = businessName;}
+
     /** 업종 변경 */
     public void changeIndustry(Industry industry) {
         this.industry = industry;
