@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.Instant;
 
 /**
  * 지원 서비스 정보 (지원사업)
@@ -16,11 +17,6 @@ import lombok.NoArgsConstructor;
 public class SupportProduct {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
-
-
     @Column(name = "service_id")
     private String serviceId;                // 서비스 ID
 
@@ -57,12 +53,6 @@ public class SupportProduct {
     @Column(name = "keywords", length = 1024)
     private String keywords;                 // 검색 키워드
 
-    @Column(name = "start_day")
-    private String startDay;    // 신청 시작일 (YYYYMMDD 형식, 상시모집이면 null)
-
-    @Column(name = "end_day")
-    private String endDay;      // 신청 마감일 (YYYYMMDD 형식, 상시모집이면 null)
-
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
     @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition; // 연관된 지원 조건
@@ -71,35 +61,20 @@ public class SupportProduct {
         this.supportCondition = supportCondition;
     }
 
-    public void setStartDay(String startDay) {
-        this.startDay = startDay;
-    }
+    @Column(name = "cardnews_s3_key", length = 256)
+    private String cardnewsS3Key;
 
-    public void setEndDay(String endDay) {
-        this.endDay = endDay;
-    }
+    @Column(name = "cardnews_url", length = 512)
+    private String cardnewsUrl;
 
-    /**
-     * 표시용 마감일 반환
-     * end_day가 null이면 applicationDeadline 반환
-     */
-    public String getDisplayDeadline() {
-        if (endDay != null) {
-            return formatDate(endDay);
-        }
-        return applicationDeadline != null ? applicationDeadline : "상시모집";
-    }
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
 
-    /**
-     * YYYYMMDD 형식을 YYYY.MM.DD 형식으로 변환
-     */
-    private String formatDate(String yyyymmdd) {
-        if (yyyymmdd == null || yyyymmdd.length() != 8) {
-            return yyyymmdd;
-        }
-        return yyyymmdd.substring(0, 4) + "." +
-                yyyymmdd.substring(4, 6) + "." +
-                yyyymmdd.substring(6, 8);
+    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
+        this.cardnewsS3Key = s3Key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
+
     }
 
     @Builder
