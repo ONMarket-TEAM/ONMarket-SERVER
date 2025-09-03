@@ -37,4 +37,7 @@ public class SignupRequest {
 
     @Schema(description = "주 사업장 ID", example = "1")
     private Long mainBusinessId;
+
+    @Schema(description = "역할", example = "admin")
+    private Long role;
 }
