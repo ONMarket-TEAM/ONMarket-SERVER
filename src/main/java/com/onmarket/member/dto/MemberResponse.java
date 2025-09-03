@@ -34,6 +34,12 @@ public class MemberResponse {
     @Schema(description = "회원 프로필사진", example = "https://example.com/profile.jpg")
     private final String profileImage;
 
+    @Schema(description = "Instagram 계정명 (@ 포함)", example = "@onmarket_official")
+    private final String instagramUsername;
+
+    @Schema(description = "Instagram 연결 여부", example = "false")
+    private final Boolean instagramConnected;
+
     public static MemberResponse from(Member m) {
         return MemberResponse.builder()
                 .memberId(m.getMemberId())
@@ -43,6 +49,8 @@ public class MemberResponse {
                 .phone(m.getPhone())
                 .birthDate(m.getBirthDate())
                 .profileImage(m.getProfileImage())
+                .instagramUsername(m.getDisplayInstagramUsername())
+                .instagramConnected(m.hasInstagramConnected())
                 .build();
     }
 }
