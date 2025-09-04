@@ -1,4 +1,4 @@
-package com.onmarket.oauth.config;
+package com.onmarket.common.config;
 
 import lombok.Getter;
 import lombok.Setter;

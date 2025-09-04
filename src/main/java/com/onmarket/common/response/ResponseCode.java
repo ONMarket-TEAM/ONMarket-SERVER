@@ -202,7 +202,14 @@ public enum ResponseCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
     PRODUCT_FETCH_SUCCESS(HttpStatus.OK, "상품 데이터 수집에 성공했습니다."),
-    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다.");
+    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다."),
+
+    /**
+     * Caption response
+     */
+    CAPTION_GENERATE_SUCCESS(HttpStatus.OK, "캡션 생성에 성공했습니다."),
+    CAPTION_FROM_S3_SUCCESS(HttpStatus.OK, "S3 키로 캡션 생성에 성공했습니다."),
+    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
