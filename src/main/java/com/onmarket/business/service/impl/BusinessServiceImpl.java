@@ -34,11 +34,7 @@ public class BusinessServiceImpl implements BusinessService {
         Member member = memberService.findByEmail(email);
 
         // 이미 같은 사업장이 등록된 경우 체크
-        if (businessRepository.existsByMemberAndIndustryAndBusinessTypeAndRegionCodeId(
-                member,
-                request.getIndustry(),
-                request.getBusinessType(),
-                request.getRegionCodeId())) {
+        if (businessRepository.existsByMemberAndBusinessName(member, request.getBusinessName())) {
             throw new BusinessException(ResponseCode.BUSINESS_ALREADY_EXISTS);
         }
 
@@ -116,24 +112,15 @@ public class BusinessServiceImpl implements BusinessService {
         Member member = findMember(email);
         Business business = findOwnedBusiness(member, businessId);
 
-        // (1) 변경 예정 값 계산
-        Industry newIndustry   = req.getIndustry()      != null ? req.getIndustry()      : business.getIndustry();
-        BusinessType newType       = req.getBusinessType()  != null ? req.getBusinessType()  : business.getBusinessType();
-        String        newRegion     = req.getRegionCodeId()  != null ? req.getRegionCodeId()  : business.getRegionCodeId();
-        AnnualRevenue newRevenue    = req.getAnnualRevenue() != null ? req.getAnnualRevenue() : business.getAnnualRevenue();
-
-        // (2) 업종/형태/지역 조합이 변경되는 경우, 같은 회원의 중복 사업장 방지
-        boolean keyChanged =
-                newIndustry != business.getIndustry()
-                        || newType     != business.getBusinessType()
-                        || !newRegion.equals(business.getRegionCodeId());
-
-        if (keyChanged &&
-                businessRepository.existsByMemberAndIndustryAndBusinessTypeAndRegionCodeId(member, newIndustry, newType, newRegion)) {
+        // 사업장명 변경 시 중복 체크
+        if (req.getBusinessName() != null &&
+                !req.getBusinessName().equals(business.getBusinessName()) &&
+                businessRepository.existsByMemberAndBusinessName(member, req.getBusinessName())) {
             throw new BusinessException(ResponseCode.BUSINESS_DUPLICATED);
         }
 
-        // (3) 부분 업데이트 적용
+        // 부분 업데이트 적용
+        if (req.getBusinessName() != null) business.changeBusinessName(req.getBusinessName());
         if (req.getIndustry()      != null) business.changeIndustry(req.getIndustry());
         if (req.getBusinessType()  != null) business.changeBusinessType(req.getBusinessType());
         if (req.getRegionCodeId()  != null) business.changeRegion(req.getRegionCodeId());

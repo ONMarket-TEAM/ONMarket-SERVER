@@ -64,6 +64,15 @@ public class Member extends BaseTimeEntity {
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
+    @Column(name = "instagram_access_token", length = 500)
+    private String instagramAccessToken;
+
+    @Column(name = "instagram_user_id", length = 100)
+    private String instagramUserId;
+
+    @Column(name = "instagram_username", length = 100)
+    private String instagramUsername;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20, nullable = false)
     private Role role;
@@ -102,10 +111,23 @@ public class Member extends BaseTimeEntity {
         this.status = status;
     }
 
+    /** Instagram 연결 여부 확인 */
+    public boolean hasInstagramConnected() {
+        return this.instagramAccessToken != null && !this.instagramAccessToken.trim().isEmpty();
+    }
+
+    /** 표시용 Instagram 계정명 반환 (@ 포함) */
+    public String getDisplayInstagramUsername() {
+        if (this.instagramUsername == null || this.instagramUsername.trim().isEmpty()) {
+            return null;
+        }
+        // @ 가 없으면 추가, 있으면 그대로
+        return this.instagramUsername.startsWith("@") ?
+                this.instagramUsername : "@" + this.instagramUsername;
+    }
     /** 역할 변경 */
     public void changeRole(Role role) {
         this.role = role;
         this.refreshToken = null;
     }
-
 }

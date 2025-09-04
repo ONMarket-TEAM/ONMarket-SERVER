@@ -9,6 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BusinessUpdateRequest {
+    private String businessName;            // 사업장명
     private Industry industry;              // 업종
     private BusinessType businessType;      // 개인/법인
     private String regionCodeId;            // 지역 코드 (예: SEOUL-GWANGJIN)
