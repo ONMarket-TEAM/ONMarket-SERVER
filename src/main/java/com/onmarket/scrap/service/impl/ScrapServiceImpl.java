@@ -1,9 +1,12 @@
 package com.onmarket.scrap.service.impl;
 
 import com.onmarket.member.domain.Member;
+import com.onmarket.member.exception.MemberNotFountException;
 import com.onmarket.member.repository.MemberRepository;
+import com.onmarket.member.service.MemberService;
 import com.onmarket.post.domain.Post;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.scrap.domain.Scrap;
 import com.onmarket.scrap.dto.ScrapToggleResponse;
@@ -30,6 +33,7 @@ public class ScrapServiceImpl implements ScrapService {
     private final ScrapRepository scrapRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final MemberService memberService;
 
     @Override
     @Transactional
@@ -69,9 +73,10 @@ public class ScrapServiceImpl implements ScrapService {
     }
 
     @Override
-    public boolean isScrapedByMe(Long memberId, Long postId) {
+    public boolean isScrapedByMe(String email, Long postId) {
         // 성능 최적화: Entity 조회 없이 ID만으로 확인
-        return scrapRepository.existsByMemberMemberIdAndPostPostId(memberId, postId);
+        Member member = memberService.findByEmail(email);
+        return scrapRepository.existsByMemberMemberIdAndPostPostId(member.getMemberId(), postId);
     }
 
     @Override
@@ -84,12 +89,12 @@ public class ScrapServiceImpl implements ScrapService {
 
     private Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다. Email: " + email));
+                .orElseThrow(() -> new MemberNotFountException());
     }
 
     private Post findPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다. ID: " + postId));
+                .orElseThrow(() -> new PostNotFoundException());
     }
 
     private PostListResponse convertToPostListResponse(Scrap scrap) {

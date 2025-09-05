@@ -138,8 +138,10 @@ public enum ResponseCode {
      */
     POST_LIST_SUCCESS(HttpStatus.OK,"타입별 전체 리스트 조회 성공"),
     POST_DETAIL_SUCCESS(HttpStatus.OK,"게시글 상세 조회 성공"),
-
+    POST_CREDIT_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "금융 감독원 신용 대출 상품 게시물 동기화 완료"),
+    POST_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "서민금융진흥원 대출 상품 게시물 동기화 완료"),
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
+
     /**
      * scrap response
      */

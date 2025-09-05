@@ -23,5 +23,5 @@ public interface PostService {
     void createPostsFromLoanProducts();
 
     // 스크랩 관련 추가 메서드
-    PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, Long memberId);
+    PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email);
 }

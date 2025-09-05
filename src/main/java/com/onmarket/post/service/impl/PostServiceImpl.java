@@ -1,5 +1,6 @@
 package com.onmarket.post.service.impl;
 
+import com.onmarket.common.response.ResponseCode;
 import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.fssdata.repository.CreditLoanProductRepository;
 import com.onmarket.loandata.domain.LoanProduct;
@@ -9,6 +10,7 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
 import com.onmarket.scrap.service.ScrapService;
@@ -57,7 +59,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDetailResponse getPostDetail(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시물을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new PostNotFoundException());
 
         return convertToDetailResponse(post);
     }
@@ -195,14 +197,14 @@ public class PostServiceImpl implements PostService {
 
     // === 새로 추가된 스크랩 관련 메서드 ===
     @Override
-    public PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, Long memberId) {
+    public PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email) {
         // 기본 게시물 정보 조회
         PostDetailResponse postDetail = getPostDetail(postId);
 
         // 스크랩 정보 조회
         boolean isScraped = false;
-        if (memberId != null) {
-            isScraped = scrapService.isScrapedByMe(memberId, postId);
+        if (email != null) {
+            isScraped = scrapService.isScrapedByMe(email, postId);
         }
         Long scrapCount = scrapService.getScrapCount(postId);
 
@@ -210,6 +212,7 @@ public class PostServiceImpl implements PostService {
     }
     private Post findPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new PostNotFoundException());
     }
+
 }

@@ -4,7 +4,7 @@ import com.onmarket.common.exception.BaseException;
 import com.onmarket.common.response.ResponseCode;
 
 public class PostNotFoundException extends BaseException {
-    public PostNotFoundException(ResponseCode responseCode) {
-        super(responseCode);
+    public PostNotFoundException() {
+        super(ResponseCode.POST_NOT_FOUND);
     }
 }
