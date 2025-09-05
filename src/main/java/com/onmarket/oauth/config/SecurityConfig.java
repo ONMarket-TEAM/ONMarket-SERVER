@@ -53,9 +53,14 @@ public class SecurityConfig {
                                 "/api/auth/email/**",
                                 "/api/support-products/*",
                                 "/api/loan-products/*",
-                                "/api/credit-loans/*"
+                                "/api/credit-loans/*",
+                                "/api/posts/**",
+                                "/api/posts/type/**",
+                                "/api/posts/generate"
                         ).permitAll()
-                        .requestMatchers("/api/members/me/**").authenticated()
+                        .requestMatchers(
+                                "/api/members/me/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),

@@ -66,7 +66,7 @@ public class CreditLoanProduct extends BaseTimeEntity {
     private String rltSite; // 금융회사 홈페이지 URL
 
     // 해당 상품의 금리 옵션들 (양방향 연관관계)
-    @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude  // toString 무한루프 방지
     @EqualsAndHashCode.Exclude  // equals/hashCode 무한루프 방지
     private List<CreditLoanOption> options = new ArrayList<>(); // 상품별 금리 옵션 목록
@@ -88,7 +88,7 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
         this.rltSite = rltSite;
-
+        this.options = new ArrayList<>(); // 이 라인 추가
     }
 
     /**
