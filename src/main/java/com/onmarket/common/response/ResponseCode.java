@@ -86,7 +86,11 @@ public enum ResponseCode {
     /**
      * OAuth2 / Social Login 관련 응답
      */
-
+    INSTAGRAM_STATUS_SUCCESS(HttpStatus.OK, "Instagram 연결 상태 조회 성공했습니다."),
+    INSTAGRAM_LOGIN_SUCCESS(HttpStatus.OK, "Instagram 로그인 성공"),
+    INSTAGRAM_LOGOUT_SUCCESS(HttpStatus.OK, "Instagram 로그아웃 성공"),
+    INSTAGRAM_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "Instagram 계정이 연결되어 있지 않습니다."),
+    INSTAGRAM_ALREADY_CONNECTED(HttpStatus.CONFLICT, "이미 Instagram 계정이 연결되어 있습니다."),
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "소셜 로그인에 실패했습니다."),
     OAUTH2_EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "소셜 계정에서 이메일 정보를 가져올 수 없습니다."),
     OAUTH2_DIFFERENT_SOCIAL_TYPE(HttpStatus.CONFLICT, "다른 소셜 계정으로 이미 가입된 이메일입니다."),
