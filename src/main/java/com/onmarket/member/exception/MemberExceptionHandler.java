@@ -41,6 +41,13 @@ public class MemberExceptionHandler {
         return buildErrorResponse(exception.getResponseCode(), request);
     }
 
+    @ExceptionHandler(MemberNotFountException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleMemberNotFountException(
+            MemberNotFountException exception,
+            HttpServletRequest request) {
+        return buildErrorResponse(exception.getResponseCode(), request);
+    }
+
     /**
      * 공통 에러 응답 빌더
      */
