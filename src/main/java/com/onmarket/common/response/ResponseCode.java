@@ -86,7 +86,11 @@ public enum ResponseCode {
     /**
      * OAuth2 / Social Login 관련 응답
      */
-
+    INSTAGRAM_STATUS_SUCCESS(HttpStatus.OK, "Instagram 연결 상태 조회 성공했습니다."),
+    INSTAGRAM_LOGIN_SUCCESS(HttpStatus.OK, "Instagram 로그인 성공"),
+    INSTAGRAM_LOGOUT_SUCCESS(HttpStatus.OK, "Instagram 로그아웃 성공"),
+    INSTAGRAM_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "Instagram 계정이 연결되어 있지 않습니다."),
+    INSTAGRAM_ALREADY_CONNECTED(HttpStatus.CONFLICT, "이미 Instagram 계정이 연결되어 있습니다."),
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "소셜 로그인에 실패했습니다."),
     OAUTH2_EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "소셜 계정에서 이메일 정보를 가져올 수 없습니다."),
     OAUTH2_DIFFERENT_SOCIAL_TYPE(HttpStatus.CONFLICT, "다른 소셜 계정으로 이미 가입된 이메일입니다."),
@@ -210,7 +214,14 @@ public enum ResponseCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_READ_SUCCESS(HttpStatus.OK, "상품 목록 조회에 성공했습니다."),
     PRODUCT_FETCH_SUCCESS(HttpStatus.OK, "상품 데이터 수집에 성공했습니다."),
-    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다.");
+    PRODUCT_FETCH_FAILURE(HttpStatus.BAD_REQUEST, "상품 데이터 수집에 실패했습니다."),
+
+    /**
+     * Caption response
+     */
+    CAPTION_GENERATE_SUCCESS(HttpStatus.OK, "캡션 생성에 성공했습니다."),
+    CAPTION_FROM_S3_SUCCESS(HttpStatus.OK, "S3 키로 캡션 생성에 성공했습니다."),
+    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

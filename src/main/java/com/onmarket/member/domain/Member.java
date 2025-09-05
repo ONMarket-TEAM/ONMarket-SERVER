@@ -64,9 +64,17 @@ public class Member extends BaseTimeEntity {
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
+    @Column(name = "instagram_username", length = 100)
+    private String instagramUsername;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 20, nullable = false)
+    private Role role;
+
     @PrePersist
     protected void onCreate() {
         if (this.status == null) this.status = MemberStatus.ACTIVE;
+        if (this.role == null) this.role = Role.USER;  // 기본값 USER
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -95,5 +103,31 @@ public class Member extends BaseTimeEntity {
     /** 회원 상태 변경  */
     public void changeStatus(MemberStatus status) {
         this.status = status;
+    }
+
+    /** Instagram 계정명 변경/삭제 */
+    public void changeInstagramUsername(String username) {
+        this.instagramUsername = username;
+    }
+
+    /** Instagram 연결 여부 확인 */
+    public boolean hasInstagramConnected() {
+        return this.instagramUsername != null && !this.instagramUsername.trim().isEmpty();
+    }
+
+
+    /** 표시용 Instagram 계정명 반환 (@ 포함) */
+    public String getDisplayInstagramUsername() {
+        if (this.instagramUsername == null || this.instagramUsername.trim().isEmpty()) {
+            return null;
+        }
+        // @ 가 없으면 추가, 있으면 그대로
+        return this.instagramUsername.startsWith("@") ?
+                this.instagramUsername : "@" + this.instagramUsername;
+    }
+    /** 역할 변경 */
+    public void changeRole(Role role) {
+        this.role = role;
+        this.refreshToken = null;
     }
 }

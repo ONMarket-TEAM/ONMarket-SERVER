@@ -12,10 +12,6 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     List<Business> findByMember(Member member);
 
-    boolean existsByMemberAndIndustryAndBusinessTypeAndRegionCodeId(
-            Member member,
-            Industry industry,
-            BusinessType businessType,
-            String regionCodeId
-    );
+    /** 사업장명으로 중복 확인 */
+    boolean existsByMemberAndBusinessName(Member member, String businessName);
 }
