@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.List;
 
 @Tag(name = "Caption API", description = "임시 S3 업로드 → OpenAI 캡션 생성 → S3 즉시 삭제")
 @RestController
@@ -118,6 +120,81 @@ public class CaptionController {
             }
 
             return captionService.generateFromS3AndDelete(s3Key, prompt);
+        } catch (ResponseStatusException e) {
+            // 이미 처리된 예외는 다시 던지기
+            throw e;
+        } catch (Exception e) {
+            System.out.println("예외 발생: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "처리 실패: " + e.getMessage());
+        }
+    }
+
+    /** 방식 C) 다중 s3Keys + 프롬프트 → AI → 즉시 삭제 (json) - 새로 추가 */
+    @PostMapping(
+            path = "/generate-from-multiple-s3",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(
+            summary = "다중 S3 키로 캡션 생성",
+            description = "프런트가 여러 이미지를 S3에 PUT 완료 후 s3Keys 배열과 prompt를 전달하면 첫 3장을 분석하여 OpenAI 호출 후 원본들을 즉시 삭제"
+    )
+    @ApiResponse(responseCode = "200", description = "생성 성공",
+            content = @Content(schema = @Schema(implementation = CaptionGenerateResponse.class)))
+    public CaptionGenerateResponse generateFromMultipleS3(HttpServletRequest request) {
+        try {
+            // 요청 바디를 직접 읽기
+            StringBuilder sb = new StringBuilder();
+            String line;
+            try (BufferedReader reader = request.getReader()) {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+
+            String rawJson = sb.toString();
+            System.out.println("읽은 원본 JSON (다중): " + rawJson);
+
+            if (rawJson == null || rawJson.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "요청 바디가 비어있습니다");
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(rawJson);
+
+            // JSON 필드 존재 여부 확인
+            if (!jsonNode.has("s3Keys") || !jsonNode.has("prompt")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Keys와 prompt 필드가 필요합니다");
+            }
+
+            JsonNode s3KeysNode = jsonNode.get("s3Keys");
+            String prompt = jsonNode.get("prompt").asText();
+
+            // s3Keys 배열 검증
+            if (!s3KeysNode.isArray() || s3KeysNode.size() == 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Keys는 비어있지 않은 배열이어야 합니다");
+            }
+
+            // s3Keys를 List<String>으로 변환
+            List<String> s3Keys = new ArrayList<>();
+            for (JsonNode keyNode : s3KeysNode) {
+                String key = keyNode.asText();
+                if (key != null && !key.trim().isEmpty()) {
+                    s3Keys.add(key);
+                }
+            }
+
+            if (s3Keys.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효한 s3Key가 없습니다");
+            }
+
+            if (prompt == null || prompt.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "prompt가 비어있습니다");
+            }
+
+            System.out.println("파싱 성공 - s3Keys: " + s3Keys + ", prompt: " + prompt);
+
+            return captionService.generateFromMultipleS3AndDelete(s3Keys, prompt);
         } catch (ResponseStatusException e) {
             // 이미 처리된 예외는 다시 던지기
             throw e;
