@@ -28,14 +28,6 @@ public class PostApiController {
 
     private final PostService postService;
     private final JwtTokenProvider jwtTokenProvider;
-//    /**
-//     * 전체 게시물 목록 조회
-//     */
-//    @GetMapping
-//    public ApiResponse<List<PostListResponse>> getAllPosts() {
-//        List<PostListResponse> posts = postService.getAllPosts();
-//        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, posts);
-//    }
 
     /**
      * 타입별 게시물 목록 조회

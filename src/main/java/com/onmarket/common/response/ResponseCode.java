@@ -161,6 +161,22 @@ public enum ResponseCode {
     SCRAP_CHECK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 여부 확인에 실패했습니다"),
 
     /**
+     * commnet response
+     */
+    // ResponseCode.java에 추가해야 할 상수들
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "댓글에 대한 권한이 없습니다."),
+    PARENT_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "부모 댓글을 찾을 수 없습니다."),
+    COMMENT_CREATE_SUCCESS(HttpStatus.CREATED, "댓글이 작성되었습니다."),
+    COMMENT_UPDATE_SUCCESS(HttpStatus.OK, "댓글이 수정되었습니다."),
+    COMMENT_DELETE_SUCCESS(HttpStatus.OK, "댓글이 삭제되었습니다."),
+    COMMENT_LIST_SUCCESS(HttpStatus.OK, "댓글 목록 조회에 성공했습니다."),
+    COMMENT_DETAIL_SUCCESS(HttpStatus.OK, "댓글 조회에 성공했습니다."),
+    COMMENT_INVALID_RATING(HttpStatus.BAD_REQUEST, "별점은 1~5점 사이여야 합니다."),
+    COMMENT_REPLY_RATING_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "대댓글에는 별점을 줄 수 없습니다."),
+    COMMENT_REPLY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "대댓글의 대댓글은 작성할 수 없습니다."),
+
+    /**
      *  database operation response
      */
     DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 오류가 발생했습니다"),
