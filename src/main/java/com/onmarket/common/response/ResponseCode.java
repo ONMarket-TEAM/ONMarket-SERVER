@@ -86,7 +86,11 @@ public enum ResponseCode {
     /**
      * OAuth2 / Social Login 관련 응답
      */
-
+    INSTAGRAM_STATUS_SUCCESS(HttpStatus.OK, "Instagram 연결 상태 조회 성공했습니다."),
+    INSTAGRAM_LOGIN_SUCCESS(HttpStatus.OK, "Instagram 로그인 성공"),
+    INSTAGRAM_LOGOUT_SUCCESS(HttpStatus.OK, "Instagram 로그아웃 성공"),
+    INSTAGRAM_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "Instagram 계정이 연결되어 있지 않습니다."),
+    INSTAGRAM_ALREADY_CONNECTED(HttpStatus.CONFLICT, "이미 Instagram 계정이 연결되어 있습니다."),
     OAUTH2_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "소셜 로그인에 실패했습니다."),
     OAUTH2_EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "소셜 계정에서 이메일 정보를 가져올 수 없습니다."),
     OAUTH2_DIFFERENT_SOCIAL_TYPE(HttpStatus.CONFLICT, "다른 소셜 계정으로 이미 가입된 이메일입니다."),
@@ -133,6 +137,14 @@ public enum ResponseCode {
     BUSINESS_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 사업장에 접근할 권한이 없습니다."),
     BUSINESS_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "사업장 처리 중 오류가 발생했습니다."),
 
+    /**
+     * post response
+     */
+    POST_LIST_SUCCESS(HttpStatus.OK,"타입별 전체 리스트 조회 성공"),
+    POST_DETAIL_SUCCESS(HttpStatus.OK,"게시글 상세 조회 성공"),
+    POST_CREDIT_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "금융 감독원 신용 대출 상품 게시물 동기화 완료"),
+    POST_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "서민금융진흥원 대출 상품 게시물 동기화 완료"),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
 
     /**
      * scrap response
@@ -147,6 +159,22 @@ public enum ResponseCode {
 
     SCRAP_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 목록 조회에 실패했습니다"),
     SCRAP_CHECK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 여부 확인에 실패했습니다"),
+
+    /**
+     * commnet response
+     */
+    // ResponseCode.java에 추가해야 할 상수들
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "댓글에 대한 권한이 없습니다."),
+    PARENT_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "부모 댓글을 찾을 수 없습니다."),
+    COMMENT_CREATE_SUCCESS(HttpStatus.CREATED, "댓글이 작성되었습니다."),
+    COMMENT_UPDATE_SUCCESS(HttpStatus.OK, "댓글이 수정되었습니다."),
+    COMMENT_DELETE_SUCCESS(HttpStatus.OK, "댓글이 삭제되었습니다."),
+    COMMENT_LIST_SUCCESS(HttpStatus.OK, "댓글 목록 조회에 성공했습니다."),
+    COMMENT_DETAIL_SUCCESS(HttpStatus.OK, "댓글 조회에 성공했습니다."),
+    COMMENT_INVALID_RATING(HttpStatus.BAD_REQUEST, "별점은 1~5점 사이여야 합니다."),
+    COMMENT_REPLY_RATING_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "대댓글에는 별점을 줄 수 없습니다."),
+    COMMENT_REPLY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "대댓글의 대댓글은 작성할 수 없습니다."),
 
     /**
      *  database operation response

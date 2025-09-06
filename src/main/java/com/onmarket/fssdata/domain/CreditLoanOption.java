@@ -63,7 +63,8 @@ public class CreditLoanOption extends BaseTimeEntity {
 
     // 상품과의 연관관계 (fin_prdt_cd로 연결)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fin_prdt_cd", referencedColumnName = "fin_prdt_cd", insertable = false, updatable = false)
+//  @JoinColumn(name = "fin_prdt_cd", referencedColumnName = "fin_prdt_cd", insertable = false, updatable = false)
+    @JoinColumn(name = "credit_loan_product_id")  // FK를 별도 컬럼으로 설정
     private CreditLoanProduct creditLoanProduct; // 연관된 신용대출 상품
 
     @Builder

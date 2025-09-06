@@ -57,8 +57,12 @@ public class SecurityConfig {
                                 "/api/support-products/*",
                                 "/api/loan-products/*",
                                 "/api/credit-loans/*",
-                                "/api/captions/**"
+                                "/api/posts/**",
+                                "/api/posts/type/**",
+                                "/api/posts/generate"
                         ).permitAll()
+                        .requestMatchers("/api/members/me/**").authenticated()
+                        .requestMatchers("/api/captions/**").permitAll()  // <- 이렇게 추가
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
