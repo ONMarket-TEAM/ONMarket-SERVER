@@ -1,6 +1,7 @@
 package com.onmarket.comment.domain;
 
 import com.onmarket.common.domain.BaseTimeEntity;
+import com.onmarket.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +20,12 @@ public class Comment extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
-    @Column(nullable = false)
-    private Long postId;
+    // Post 엔티티 참조 - CASCADE 옵션 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false,
+            foreignKey = @ForeignKey(name = "FK_COMMENT_POST",
+                    foreignKeyDefinition = "FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE"))
+    private Post post;
 
     @Column(nullable = false)
     private String userEmail;
@@ -35,7 +40,9 @@ public class Comment extends BaseTimeEntity {
     private Integer rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_comment_id")
+    @JoinColumn(name = "parent_comment_id",
+            foreignKey = @ForeignKey(name = "FK_COMMENT_PARENT",
+                    foreignKeyDefinition = "FOREIGN KEY (parent_comment_id) REFERENCES comment(comment_id) ON DELETE CASCADE"))
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,5 +73,9 @@ public class Comment extends BaseTimeEntity {
 
     public boolean isParentComment() {
         return parentComment == null;
+    }
+
+    public Long getPostId() {
+        return post != null ? post.getPostId() : null;
     }
 }

@@ -66,6 +66,15 @@ public class PostApiController {
         return ApiResponse.success(ResponseCode.POST_LOAN_CREATE_SUCCESS);
     }
 
+    /**
+     * SupportProduct 데이터 동기화 (관리자용) - 새로 추가
+     */
+    @PostMapping("/sync/support-products")
+    public ApiResponse<String> syncSupportPosts() {
+        postService.createPostsFromSupportProducts();
+        return ApiResponse.success(ResponseCode.POST_SUPPORT_CREATE_SUCCESS);
+    }
+
     private String extractEmailFromToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
