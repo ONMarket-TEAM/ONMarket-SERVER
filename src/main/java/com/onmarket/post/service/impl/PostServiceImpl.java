@@ -1,6 +1,5 @@
 package com.onmarket.post.service.impl;
 
-import com.onmarket.common.response.ResponseCode;
 import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.fssdata.repository.CreditLoanProductRepository;
 import com.onmarket.loandata.domain.LoanProduct;
