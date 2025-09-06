@@ -130,7 +130,7 @@ public class PublicDataServiceImpl implements PublicDataService {
     private void createAndSaveEntities(ServiceInfoDTO infoDTO, ServiceDetailDTO detailDTO, SupportConditionDTO conditionDTO) {
         String serviceId = infoDTO.getServiceId();
 
-        if (supportServiceRepository.existsById(serviceId)) {
+        if (supportServiceRepository.existsByServiceId(serviceId)) {
             log.info("Service ID {} already exists in the database. Skipping.", serviceId);
             return;
         }

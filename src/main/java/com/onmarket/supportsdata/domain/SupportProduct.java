@@ -16,6 +16,11 @@ import lombok.NoArgsConstructor;
 public class SupportProduct {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+
     @Column(name = "service_id")
     private String serviceId;                // 서비스 ID
 
