@@ -67,22 +67,10 @@ public class S3TempStorageService {
     }
 
     public boolean delete(String key) {
-        // null 체크 추가 - key가 null이거나 비어있으면 삭제 건너뜀
-        if (key == null || key.trim().isEmpty()) {
-            System.out.println("S3 삭제 건너뜀 - key가 null이거나 비어있음");
-            return false;
-        }
-
         try {
-            System.out.println("S3 파일 삭제 시도: " + key);
-            s3.deleteObject(DeleteObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .build());
-            System.out.println("S3 파일 삭제 성공: " + key);
+            s3.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(key).build());
             return true;
         } catch (S3Exception e) {
-            System.out.println("S3 파일 삭제 실패: " + e.getMessage());
             return false; // 로그로만 남기고 흐름 계속
         }
     }
@@ -91,7 +79,6 @@ public class S3TempStorageService {
         LocalDate d = LocalDate.now();
         return String.format("%04d/%02d/%02d", d.getYear(), d.getMonthValue(), d.getDayOfMonth());
     }
-
     private static String ext(String filename) {
         if (filename == null) return "jpg";
         int i = filename.lastIndexOf('.');

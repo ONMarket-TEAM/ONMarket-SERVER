@@ -1,14 +1,16 @@
 package com.onmarket.caption.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onmarket.caption.dto.*;
 import com.onmarket.caption.service.CaptionService;
 import com.onmarket.caption.service.S3TempStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.BufferedReader;
 
 @Tag(name = "Caption API", description = "임시 S3 업로드 → OpenAI 캡션 생성 → S3 즉시 삭제")
 @RestController
@@ -74,14 +78,52 @@ public class CaptionController {
     )
     @ApiResponse(responseCode = "200", description = "생성 성공",
             content = @Content(schema = @Schema(implementation = CaptionGenerateResponse.class)))
-    public CaptionGenerateResponse generateFromS3(@Valid @RequestBody GenerateFromS3Request req) {
-        System.out.println("파싱된 s3Key: '" + req.getS3Key() + "'");
-        System.out.println("파싱된 prompt: '" + req.getPrompt() + "'");
+    public CaptionGenerateResponse generateFromS3(HttpServletRequest request) {
+        try {
+            // 요청 바디를 직접 읽기
+            StringBuilder sb = new StringBuilder();
+            String line;
+            try (BufferedReader reader = request.getReader()) {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
 
-        if (req.getS3Key() == null || req.getS3Key().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Key가 비어있습니다");
+            String rawJson = sb.toString();
+            System.out.println("읽은 원본 JSON: " + rawJson);
+
+            if (rawJson == null || rawJson.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "요청 바디가 비어있습니다");
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(rawJson);
+
+            // JSON 필드 존재 여부 확인
+            if (!jsonNode.has("s3Key") || !jsonNode.has("prompt")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Key와 prompt 필드가 필요합니다");
+            }
+
+            String s3Key = jsonNode.get("s3Key").asText();
+            String prompt = jsonNode.get("prompt").asText();
+
+            System.out.println("파싱 성공 - s3Key: " + s3Key + ", prompt: " + prompt);
+
+            // 값 검증
+            if (s3Key == null || s3Key.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Key가 비어있습니다");
+            }
+            if (prompt == null || prompt.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "prompt가 비어있습니다");
+            }
+
+            return captionService.generateFromS3AndDelete(s3Key, prompt);
+        } catch (ResponseStatusException e) {
+            // 이미 처리된 예외는 다시 던지기
+            throw e;
+        } catch (Exception e) {
+            System.out.println("예외 발생: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "처리 실패: " + e.getMessage());
         }
-
-        return captionService.generateFromS3AndDelete(req.getS3Key(), req.getPrompt());
     }
 }

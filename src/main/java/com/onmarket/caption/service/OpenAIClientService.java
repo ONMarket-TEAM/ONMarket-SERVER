@@ -34,16 +34,9 @@ public class OpenAIClientService {
      */
     public Generated callCaptionWithImageUrl(String imageUrl, String userPrompt) {
         if (!props.isEnabled()) {
-            System.out.println("OpenAI가 비활성화되어 있어 더미 데이터 반환");
             return new Generated("(로컬) " + userPrompt + " — 샘플 캡션", null, null, null);
         }
         try {
-            System.out.println("=== OpenAI 호출 시작 ===");
-            System.out.println("Image URL: " + imageUrl);
-            System.out.println("User Prompt: " + userPrompt);
-            System.out.println("API Key 설정됨: " + (props.getApiKey() != null && !props.getApiKey().isEmpty()));
-            System.out.println("Chat Model: " + props.getChatModel());
-
             // Chat Completions (vision): messages.content 배열에 image_url + text
             var payload = Map.of(
                     "model", props.getChatModel(),               // application.yml의 openai.chatModel 사용 (예: gpt-4.1 / gpt-4o)
@@ -88,9 +81,6 @@ Rules:
                             )
                     }
             );
-
-            System.out.println("OpenAI 요청 전송 중...");
-
             String res = client().post().uri("/chat/completions")
                     .body(BodyInserters.fromValue(payload))
                     .retrieve()
@@ -98,20 +88,11 @@ Rules:
                     .timeout(Duration.ofSeconds(60))
                     .block();
 
-            System.out.println("OpenAI 응답 받음: " + (res != null ? "성공" : "null"));
-            System.out.println("응답 길이: " + (res != null ? res.length() : 0));
-
             JsonNode root = om.readTree(res);
             String content = root.path("choices").path(0).path("message").path("content").asText("");
-
-            System.out.println("추출된 content: " + content);
-
             // 모델이 "```json ...```" 형태로 줄 수도 있어서 정리
             content = content.replaceAll("(?s)```json|```", "").trim();
             JsonNode json = om.readTree(content);
-
-            System.out.println("JSON 파싱 성공");
-
             return new Generated(
                     json.path("caption").asText(""),
                     json.has("hashtags") && json.get("hashtags").isArray() ? json.get("hashtags") : null,
@@ -119,9 +100,6 @@ Rules:
                     json.path("impactNote").asText(null)
             );
         } catch (Exception e) {
-            System.err.println("OpenAI 호출 상세 오류: " + e.getMessage());
-            System.err.println("오류 클래스: " + e.getClass().getSimpleName());
-            e.printStackTrace();
             log.error("OpenAI 호출 실패", e);
             throw new RuntimeException("OpenAI 호출 실패", e);
         }
