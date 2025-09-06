@@ -5,4 +5,6 @@ import com.onmarket.supportsdata.domain.SupportProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SupportServiceRepository extends JpaRepository<SupportProduct, String>{
+    boolean existsByServiceId(String serviceId);
+
 }

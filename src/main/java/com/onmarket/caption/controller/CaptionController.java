@@ -11,9 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Caption API", description = "임시 S3 업로드 → OpenAI 캡션 생성 → S3 즉시 삭제")
 @RestController
@@ -72,7 +74,14 @@ public class CaptionController {
     )
     @ApiResponse(responseCode = "200", description = "생성 성공",
             content = @Content(schema = @Schema(implementation = CaptionGenerateResponse.class)))
-    public CaptionGenerateResponse generateFromS3(@Valid @RequestBody GenerateFromS3Request body) {
-        return captionService.generateFromS3AndDelete(body.getS3Key(), body.getPrompt());
+    public CaptionGenerateResponse generateFromS3(@Valid @RequestBody GenerateFromS3Request req) {
+        System.out.println("파싱된 s3Key: '" + req.getS3Key() + "'");
+        System.out.println("파싱된 prompt: '" + req.getPrompt() + "'");
+
+        if (req.getS3Key() == null || req.getS3Key().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "s3Key가 비어있습니다");
+        }
+
+        return captionService.generateFromS3AndDelete(req.getS3Key(), req.getPrompt());
     }
 }
