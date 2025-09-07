@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import java.time.Instant;
 /**
  * 지원 서비스 정보 (지원사업)
  */
@@ -18,11 +18,11 @@ public class SupportProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;
+    private Long id;  // Auto-increment PK
 
-
-    @Column(name = "service_id")
-    private String serviceId;                // 서비스 ID
+    // 변경
+    @Column(name = "service_id", unique = true)
+    private String serviceId;                // 서비스 ID (자연키, 유니크)                // 서비스 ID
 
     // --- serviceList 에서 가져오는 정보 ---
     private String supportType;              // 지원 유형 (예: 현금, 융자, 상담 등)
@@ -40,6 +40,14 @@ public class SupportProduct {
     private String detailUrl;                // 상세 페이지 URL
     private String departmentName;           // 담당 부서
     private String userCategory;             // 사용자 구분 (소상공인, 법인 등)
+    @Column(name = "cardnews_key", length = 255)
+    private String cardnewsKey;
+
+    @Column(name = "cardnews_url", length = 1000)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
 
     // --- serviceDetail 에서 추가로 가져오는 정보 ---
     @Lob
@@ -127,5 +135,11 @@ public class SupportProduct {
         this.onlineApplicationUrl = onlineApplicationUrl;
         this.laws = laws;
         this.keywords = keywords;
+    }
+
+    public void updateCardnews(String key, String url, Instant updatedAt) {
+        this.cardnewsKey = key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
     }
 }

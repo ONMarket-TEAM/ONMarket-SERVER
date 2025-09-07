@@ -69,10 +69,9 @@ public class SecurityConfig {
                                 "/api/oauth/**",
                                 "/api/posts/**",
                                 "/api/posts/type/**",
-                                "/api/posts/generate"
+                                "/api/posts/generate",
+                                "/api/cardnews/**"
                         ).permitAll()
-                        .requestMatchers("/api/members/me/**").authenticated()
-                        .requestMatchers("/api/captions/**").permitAll()  // <- 이렇게 추가
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth

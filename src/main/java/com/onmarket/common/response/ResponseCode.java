@@ -239,7 +239,14 @@ public enum ResponseCode {
      */
     CAPTION_GENERATE_SUCCESS(HttpStatus.OK, "캡션 생성에 성공했습니다."),
     CAPTION_FROM_S3_SUCCESS(HttpStatus.OK, "S3 키로 캡션 생성에 성공했습니다."),
-    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다.");
+    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다."),
+
+    /**
+     * CardNews response
+     */
+    CARDNEWS_BUILD_SUCCESS(HttpStatus.OK, "카드뉴스 생성에 성공했습니다."),
+    CARDNEWS_BUILD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "카드뉴스 생성에 실패했습니다."),
+    CARDNEWS_INVALID_PARAMS(HttpStatus.BAD_REQUEST, "type 또는 id 파라미터가 올바르지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

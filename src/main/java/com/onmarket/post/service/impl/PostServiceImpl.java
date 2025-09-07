@@ -9,12 +9,13 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
 import com.onmarket.scrap.service.ScrapService;
 import com.onmarket.supportsdata.domain.SupportProduct;
-import com.onmarket.supportsdata.repository.SupportServiceRepository;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,7 +40,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CreditLoanProductRepository creditLoanProductRepository;
     private final LoanProductRepository loanProductRepository;
-    private final SupportServiceRepository supportServiceRepository; // 새로 추가
+    private final SupportProductRepository supportProductRepository; // 새로 추가
     private final ScrapService scrapService;
 
     @Override
@@ -132,7 +133,7 @@ public class PostServiceImpl implements PostService {
 
         do {
             Pageable pageable = PageRequest.of(page, pageSize);
-            productPage = supportServiceRepository.findAll(pageable); // 기본 메서드 사용
+            productPage = supportProductRepository.findAll(pageable); // 기본 메서드 사용
 
             for (SupportProduct supportProduct : productPage.getContent()) {
                 try {
@@ -165,9 +166,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostListResponse getPostById(Long postId) {
+    public PostSingleResponse getPostById(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
-        return convertToListResponse(post);
+        return convertToSingleResponse(post);
     }
 
     private PostListResponse convertToListResponse(Post post) {
@@ -178,6 +179,17 @@ public class PostServiceImpl implements PostService {
                 .deadline(calculateDDay(post.getDeadline()))
                 .productName(post.getProductName())
                 .summary(post.getSummary())
+                .build();
+    }
+    private PostSingleResponse convertToSingleResponse(Post post) {
+        return PostSingleResponse.builder()
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .companyName(post.getCompanyName())
+                .deadline(calculateDDay(post.getDeadline()))
+                .productName(post.getProductName())
+                .summary(post.getSummary())
+                .imageUrl(post.getImageUrl())
                 .build();
     }
 
