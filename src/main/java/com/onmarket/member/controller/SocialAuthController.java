@@ -17,7 +17,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import com.onmarket.member.domain.Member;
 
-
+@io.swagger.v3.oas.annotations.tags.Tag(
+        name = "소셜 로그인 API",
+        description = "카카오/구글 등 OAuth2 기반 소셜 로그인 및 회원가입 관련 API"
+)
 @RestController
 @RequestMapping("/api/oauth")
 @RequiredArgsConstructor
@@ -28,6 +31,23 @@ public class SocialAuthController {
     private final MemberRepository memberRepository;
 
     @GetMapping("/kakao/success")
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "카카오 로그인 성공 처리",
+            description = "카카오 인증 성공 후 사용자 정보를 바탕으로 로그인 또는 추가 정보 요청을 처리합니다."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "로그인 성공 또는 추가 정보 필요",
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "OAuth2 인증 실패"
+            )
+    })
     public ApiResponse<SocialLoginResponse> kakaoLoginSuccess(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User)) {
             return ApiResponse.fail(ResponseCode.OAUTH2_LOGIN_FAILED);
@@ -72,8 +92,25 @@ public class SocialAuthController {
 //        }
 //    }
 
+
     @PostMapping("/complete-signup")
-    public ApiResponse<CompleteSocialSignupResponse> completeSocialSignup(
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "소셜 회원가입 완료",
+            description = "추가 정보를 입력해 소셜 회원가입을 최종 완료합니다."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "회원가입 성공",
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 데이터"
+            )
+    })    public ApiResponse<CompleteSocialSignupResponse> completeSocialSignup(
             @RequestParam Long memberId,
             @RequestBody CompleteSocialSignupRequest request) {
         try {
@@ -86,7 +123,23 @@ public class SocialAuthController {
     }
 
     @GetMapping("/pending-member/{memberId}")
-    public ApiResponse<CompleteSocialSignupResponse> getPendingMember(@PathVariable Long memberId) {
+    @io.swagger.v3.oas.annotations.Operation(
+            summary = "대기 중 회원 정보 조회",
+            description = "추가 회원가입 정보가 필요한(PENDING 상태) 사용자의 기본 정보를 조회합니다."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "회원 정보 조회 성공",
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "해당 회원을 찾을 수 없음"
+            )
+    })    public ApiResponse<CompleteSocialSignupResponse> getPendingMember(@PathVariable Long memberId) {
         try {
             Member member = memberService.findById(memberId);
 
