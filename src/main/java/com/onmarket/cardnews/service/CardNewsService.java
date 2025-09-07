@@ -236,7 +236,6 @@ public class CardNewsService {
         Palette p = opt.get();
         try {
             if (cfg.getTheme() == null) {
-                // Theme 기본 생성자가 있다면 사용
                 cfg.setTheme(new PosterConfig.Theme());
             }
             if (cfg.getTheme() != null) {
