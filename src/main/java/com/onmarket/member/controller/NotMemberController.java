@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
-public class FindApiController {
+public class NotMemberController {
 
     private final MemberService memberService;
 

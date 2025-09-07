@@ -3,6 +3,7 @@ package com.onmarket.member.domain;
 import com.onmarket.business.domain.Business;
 import com.onmarket.common.domain.BaseTimeEntity;
 import com.onmarket.member.domain.enums.*;
+import com.onmarket.member.dto.SocialUserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -134,5 +135,36 @@ public class Member extends BaseTimeEntity {
     public void changeRole(Role role) {
         this.role = role;
         this.refreshToken = null;
+    }
+
+    /** 소셜 로그인용 PENDING 상태로 Member 생성 */
+    public static Member createSocialPendingMember(SocialUserInfo socialInfo) {
+        return Member.builder()
+                .socialProvider(socialInfo.getSocialProvider())
+                .socialId(socialInfo.getSocialId())
+                .email(socialInfo.getEmail())
+                .nickname(socialInfo.getNickname())
+                .username(socialInfo.getEmail())
+                .password("SOCIAL_LOGIN")
+                .birthDate(socialInfo.getBirthDate())
+                .phone(socialInfo.getPhoneNumber())
+                .gender(socialInfo.getGender())
+                .status(MemberStatus.PENDING)
+                .role(Role.USER)
+                .build();
+    }
+    public void completeSignup(String nickname) {
+        this.nickname = nickname;
+        this.status = MemberStatus.ACTIVE;
+    }
+
+    /** PENDING 상태인지 확인 */
+    public boolean isPending() {
+        return this.status == MemberStatus.PENDING;
+    }
+
+    /** ACTIVE 상태인지 확인 */
+    public boolean isActive() {
+        return this.status == MemberStatus.ACTIVE;
     }
 }

@@ -1,7 +1,12 @@
 package com.onmarket.oauth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onmarket.common.response.ApiResponse;
+import com.onmarket.member.dto.SocialUserInfo;
+import com.onmarket.oauth.handler.CustomOAuth2SuccessHandler;
 import com.onmarket.oauth.jwt.JwtAuthenticationFilter;
 import com.onmarket.oauth.jwt.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +17,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -27,7 +33,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2SuccessHandler successHandler) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -58,9 +64,26 @@ public class SecurityConfig {
                                 "/api/loan-products/*",
                                 "/api/credit-loans/*",
                                 "/api/captions/**",
+                                "/login/oauth2/code/**",
+                                "/oauth2/authorization/**",
+                                "/api/oauth/**",
+                                "/api/posts/**",
+                                "/api/posts/type/**",
+                                "/api/posts/generate",
                                 "/api/cardnews/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth -> oauth
+                        .successHandler(successHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"code\":\"OAUTH2_LOGIN_FAILED\",\"message\":\""
+                                            + exception.getMessage() + "\"}"
+                            );
+                        })
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)
