@@ -203,4 +203,28 @@ public class CaptionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "처리 실패: " + e.getMessage());
         }
     }
+
+    // 이미지 보기용(다운로드) presigned URL 발급
+    @GetMapping(path = "/presign-view", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "S3 키로 미리보기 URL 발급", description = "버킷이 private일 때도 유효시간 내에 이미지를 <img src>로 표시 가능")
+    @ApiResponse(responseCode = "200", description = "발급 성공",
+            content = @Content(schema = @Schema(implementation = PresignResponse.class)))
+    public PresignResponse presignView(
+            @RequestParam("key") String key,
+            @RequestParam(name = "ttl", defaultValue = "180") int ttlSec
+    ) {
+        // GET presigned URL 생성
+        String viewUrl = s3.presignGetUrl(key, ttlSec);
+        // PresignResponse 재활용: publicUrl은 private 버킷이면 null
+        return new PresignResponse(viewUrl, key, null);
+    }
+
+    // S3에 있는 파일을 직접 삭제하는 API
+    @DeleteMapping("/delete")
+    @Operation(summary = "S3 파일 삭제", description = "주어진 S3 키에 해당하는 파일을 즉시 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    public void deleteFile(@RequestParam("key") String key) {
+        s3.delete(key);
+    }
+
 }
