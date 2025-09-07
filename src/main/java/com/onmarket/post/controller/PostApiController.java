@@ -48,6 +48,12 @@ public class PostApiController {
         return ApiResponse.success(ResponseCode.POST_DETAIL_SUCCESS, response);
     }
 
+    @GetMapping("/recommendation/{postId}")
+    public ApiResponse<PostListResponse> getPostById(@PathVariable Long postId) {
+        PostListResponse response = postService.getPostById(postId);
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, response);
+    }
+
     /**
      * CreditLoanProduct 데이터 동기화 (관리자용)
      */
