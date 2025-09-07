@@ -1,8 +1,11 @@
 package com.onmarket.member.service;
 
 import com.onmarket.member.domain.Member;
+import com.onmarket.member.domain.enums.Gender;
 import com.onmarket.member.dto.*;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+
+import java.time.LocalDate;
 
 public interface MemberService {
 
@@ -51,5 +54,13 @@ public interface MemberService {
     /**
      * 소셜 회원가입 완료 (추가 정보 입력 후 ACTIVE 상태로 변경)
      */
-    public CompleteSocialSignupResponse completeSocialSignup(Long memberId, String nickname, String profileImageKey );
+    public CompleteSocialSignupResponse completeSocialSignup(
+            Long memberId,
+            String nickname,
+            String profileImageKey,
+            String username,
+            String phone,
+            LocalDate birthDate,
+            Gender gender
+    );
 }

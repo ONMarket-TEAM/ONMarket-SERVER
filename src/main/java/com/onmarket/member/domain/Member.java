@@ -81,6 +81,18 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Business> businesses = new ArrayList<>();
 
+    /** 사용자명 변경 */
+    public void updateUsername(String username) {this.username = username;}
+
+    /** 휴대폰 번호 변경 */
+    public void updatePhone(String phone) {this.phone = phone;}
+
+    /** 생년월일 변경 */
+    public void updateBirthDate(LocalDate birthDate) {this.birthDate = birthDate;}
+
+    /** 성별 변경 */
+    public void updateGender(Gender gender) {this.gender = gender;}
+
     /** 닉네임 변경 */
     public void changeNickname(String nickname) {
         this.nickname = nickname;
