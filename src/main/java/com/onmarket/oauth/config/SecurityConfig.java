@@ -67,7 +67,12 @@ public class SecurityConfig {
                                 "/login/oauth2/code/**",
                                 "/oauth2/authorization/**",
                                 "/api/oauth/**"
+                                "/api/posts/**",
+                                "/api/posts/type/**",
+                                "/api/posts/generate"
                         ).permitAll()
+                        .requestMatchers("/api/members/me/**").authenticated()
+                        .requestMatchers("/api/captions/**").permitAll()  // <- 이렇게 추가
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
