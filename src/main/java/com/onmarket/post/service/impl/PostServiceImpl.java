@@ -9,6 +9,7 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
@@ -165,9 +166,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostListResponse getPostById(Long postId) {
+    public PostSingleResponse getPostById(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
-        return convertToListResponse(post);
+        return convertToSingleResponse(post);
     }
 
     private PostListResponse convertToListResponse(Post post) {
@@ -178,6 +179,17 @@ public class PostServiceImpl implements PostService {
                 .deadline(calculateDDay(post.getDeadline()))
                 .productName(post.getProductName())
                 .summary(post.getSummary())
+                .build();
+    }
+    private PostSingleResponse convertToSingleResponse(Post post) {
+        return PostSingleResponse.builder()
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .companyName(post.getCompanyName())
+                .deadline(calculateDDay(post.getDeadline()))
+                .productName(post.getProductName())
+                .summary(post.getSummary())
+                .imageUrl(post.getImageUrl())
                 .build();
     }
 

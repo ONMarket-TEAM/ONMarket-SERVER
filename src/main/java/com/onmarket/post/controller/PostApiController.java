@@ -7,6 +7,7 @@ import com.onmarket.oauth.jwt.JwtTokenProvider;
 import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -49,8 +50,8 @@ public class PostApiController {
     }
 
     @GetMapping("/recommendation/{postId}")
-    public ApiResponse<PostListResponse> getPostById(@PathVariable Long postId) {
-        PostListResponse response = postService.getPostById(postId);
+    public ApiResponse<PostSingleResponse> getPostById(@PathVariable Long postId) {
+        PostSingleResponse response = postService.getPostById(postId);
         return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, response);
     }
 
