@@ -66,7 +66,7 @@ public class SecurityConfig {
                                 "/api/captions/**",
                                 "/login/oauth2/code/**",
                                 "/oauth2/authorization/**",
-                                "/api/oauth/**"
+                                "/api/oauth/**",
                                 "/api/posts/**",
                                 "/api/posts/type/**",
                                 "/api/posts/generate"
