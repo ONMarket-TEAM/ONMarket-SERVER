@@ -70,27 +70,28 @@ public class SocialAuthController {
         }
     }
 
-//    @GetMapping("/google/success")
-//    public ApiResponse<SocialLoginResponse> googleLoginSuccess(Authentication authentication) {
-//        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User)) {
-//            return ApiResponse.fail(ResponseCode.OAUTH2_LOGIN_FAILED);
-//        }
-//
-//        try {
-//            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-//            SocialUserInfo info = SocialUserInfo.fromGoogle(oAuth2User);
-//            SocialLoginResponse response = memberService.handleSocialLogin(info);
-//
-//            ResponseCode responseCode = response.getStatus() == MemberStatus.PENDING
-//                    ? ResponseCode.OAUTH2_ADDITIONAL_INFO_REQUIRED
-//                    : ResponseCode.LOGIN_SUCCESS;
-//
-//            return ApiResponse.success(responseCode, response);
-//        } catch (BusinessException e) {
-//            log.error("Google login failed", e);
-//            return ApiResponse.fail(e.getResponseCode());
-//        }
-//    }
+    @GetMapping("/google/success")
+    public ApiResponse<SocialLoginResponse> googleLoginSuccess(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User)) {
+            return ApiResponse.fail(ResponseCode.OAUTH2_LOGIN_FAILED);
+        }
+
+        try {
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+            SocialUserInfo info = SocialUserInfo.fromGoogle(oAuth2User);
+            SocialLoginResponse response = memberService.handleSocialLogin(info);
+
+            ResponseCode responseCode = response.getStatus() == MemberStatus.PENDING
+                    ? ResponseCode.OAUTH2_ADDITIONAL_INFO_REQUIRED
+                    : ResponseCode.LOGIN_SUCCESS;
+
+            return ApiResponse.success(responseCode, response);
+        } catch (BusinessException e) {
+            log.error("Google login failed", e);
+            return ApiResponse.fail(e.getResponseCode());
+        }
+    }
+
 
 
     @PostMapping("/complete-signup")
@@ -115,7 +116,7 @@ public class SocialAuthController {
             @RequestBody CompleteSocialSignupRequest request) {
         try {
             CompleteSocialSignupResponse response = memberService.completeSocialSignup(
-                    memberId, request.getNickname(), request.getProfileImageKey());
+                    memberId, request.getNickname(), request.getProfileImageKey(), request.getUsername(), request.getPhone(), request.getBirthDate(), request.getGender()                                                                                                                                                                          );
             return ApiResponse.success(ResponseCode.SIGNUP_SUCCESS, response);
         } catch (BusinessException e) {
             return ApiResponse.fail(e.getResponseCode());
@@ -154,6 +155,7 @@ public class SocialAuthController {
                     .profileImage(member.getProfileImage())
                     .instagramUsername(member.getInstagramUsername())
                     .status(member.getStatus())
+                    .socialProvider(member.getSocialProvider())
                     .build();
 
             return ApiResponse.success(ResponseCode.MEMBER_INFO_SUCCESS, response);

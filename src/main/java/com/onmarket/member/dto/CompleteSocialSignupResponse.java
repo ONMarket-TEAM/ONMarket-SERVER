@@ -2,6 +2,7 @@ package com.onmarket.member.dto;
 
 import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.domain.enums.Gender;
+import com.onmarket.member.domain.enums.SocialProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -44,6 +45,9 @@ public class CompleteSocialSignupResponse {
 
     @Schema(description = "회원 상태", example = "ACTIVE")
     private MemberStatus status;
+
+    @Schema(description = "소셜 로그인 타입", example = "KAKAO")
+    private SocialProvider socialProvider;
 
     @Schema(description = "Access Token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     private String accessToken;

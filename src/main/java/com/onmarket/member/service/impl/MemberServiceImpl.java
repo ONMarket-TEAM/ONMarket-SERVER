@@ -1,6 +1,7 @@
 package com.onmarket.member.service.impl;
 
 import com.onmarket.member.domain.Member;
+import com.onmarket.member.domain.enums.Gender;
 import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.dto.*;
 import com.onmarket.member.exception.LoginException;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.onmarket.member.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -199,13 +201,41 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public CompleteSocialSignupResponse completeSocialSignup(Long memberId, String nickname, String profileImageKey) {
+    public CompleteSocialSignupResponse completeSocialSignup(
+            Long memberId,
+            String nickname,
+            String profileImageKey,
+            String username,
+            String phone,
+            LocalDate birthDate,
+            Gender gender
+    ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
 
         // 닉네임 중복 체크
         if (memberRepository.existsByNicknameAndMemberIdNot(nickname.trim(), member.getMemberId())) {
             throw new BusinessException(ResponseCode.DUPLICATED_NICKNAME);
+        }
+
+        // 이름 업데이트
+        if (username != null && !username.isBlank()) {
+            member.updateUsername(username.trim());
+        }
+
+        // 전화번호 업데이트
+        if (phone != null && !phone.isBlank()) {
+            member.updatePhone(phone.trim());
+        }
+
+        // 생년월일 업데이트
+        if (birthDate != null) {
+            member.updateBirthDate(birthDate);
+        }
+
+        // 성별 업데이트
+        if (gender != null) {
+            member.updateGender(gender);
         }
 
         // 닉네임 설정 + ACTIVE 상태로 변경
@@ -238,7 +268,6 @@ public class MemberServiceImpl implements MemberService {
                 .refreshToken(refreshToken)
                 .build();
     }
-
     private void validatePasswordStrength(String password) {
         if (password == null || password.trim().isEmpty()) {
             throw new BusinessException(ResponseCode.PASSWORD_REQUIRED);

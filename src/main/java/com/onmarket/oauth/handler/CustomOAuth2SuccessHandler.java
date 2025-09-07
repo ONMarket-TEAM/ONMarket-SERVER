@@ -26,14 +26,27 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                                         Authentication authentication) throws IOException {
         try {
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-            SocialUserInfo info = SocialUserInfo.fromKakao(oAuth2User);
+
+            // 어떤 소셜 로그인인지 확인
+            String registrationId = ((org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken) authentication)
+                    .getAuthorizedClientRegistrationId();
+
+            // provider 별로 user info 파싱
+            SocialUserInfo info;
+            if ("kakao".equals(registrationId)) {
+                info = SocialUserInfo.fromKakao(oAuth2User);
+            } else if ("google".equals(registrationId)) {
+                info = SocialUserInfo.fromGoogle(oAuth2User);
+            } else {
+                throw new IllegalArgumentException("Unsupported provider: " + registrationId);
+            }
+
+            // 회원 처리
             SocialLoginResponse result = memberService.handleSocialLogin(info);
 
             if (result.getStatus() == MemberStatus.PENDING) {
-                // 회원가입 페이지로 이동 (약관 동의부터 시작)
                 response.sendRedirect("http://localhost:5173/login/signup?memberId=" + result.getMemberId());
             } else {
-                // 로그인 완료 - 메인 페이지로 토큰과 함께 이동
                 response.sendRedirect("http://localhost:5173?accessToken=" + result.getAccessToken() +
                         "&refreshToken=" + result.getRefreshToken());
             }
@@ -41,4 +54,5 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             response.sendRedirect("http://localhost:5173/login?error=oauth_failed");
         }
     }
+
 }
