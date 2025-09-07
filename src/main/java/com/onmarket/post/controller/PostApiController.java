@@ -48,6 +48,12 @@ public class PostApiController {
         return ApiResponse.success(ResponseCode.POST_DETAIL_SUCCESS, response);
     }
 
+    @GetMapping("/recommendation/{postId}")
+    public ApiResponse<PostListResponse> getPostById(@PathVariable Long postId) {
+        PostListResponse response = postService.getPostById(postId);
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, response);
+    }
+
     /**
      * CreditLoanProduct 데이터 동기화 (관리자용)
      */
@@ -64,6 +70,15 @@ public class PostApiController {
     public ApiResponse<String> syncGeneralLoanPosts() {
         postService.createPostsFromLoanProducts();
         return ApiResponse.success(ResponseCode.POST_LOAN_CREATE_SUCCESS);
+    }
+
+    /**
+     * SupportProduct 데이터 동기화 (관리자용) - 새로 추가
+     */
+    @PostMapping("/sync/support-products")
+    public ApiResponse<String> syncSupportPosts() {
+        postService.createPostsFromSupportProducts();
+        return ApiResponse.success(ResponseCode.POST_SUPPORT_CREATE_SUCCESS);
     }
 
     private String extractEmailFromToken(HttpServletRequest request) {

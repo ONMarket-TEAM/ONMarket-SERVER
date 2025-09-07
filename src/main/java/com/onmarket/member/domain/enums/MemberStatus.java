@@ -1,5 +1,5 @@
 package com.onmarket.member.domain.enums;
 
 public enum MemberStatus {
-    ACTIVE, INACTIVE, DELETED
+    ACTIVE, INACTIVE, DELETED, PENDING
 }

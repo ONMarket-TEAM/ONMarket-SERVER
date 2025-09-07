@@ -30,6 +30,7 @@ spring:
       max-request-size: 50MB   # 요청 본문 총합
 
 
+
 springdoc:
   packages-to-scan: com.onmarket
   default-consumes-media-type: application/json

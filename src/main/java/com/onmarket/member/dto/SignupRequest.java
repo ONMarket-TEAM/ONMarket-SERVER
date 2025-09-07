@@ -26,7 +26,7 @@ public class SignupRequest {
     @Schema(description = "전화번호 ('-' 포함 가능)", example = "010-1234-5678")
     private String phone;
 
-    @Schema(description = "프로필 이미지 URL", example = "https://example.com/profile.jpg")
+    @Schema(description = "프로필 이미지 S3 key", example = "uploads/uuid-test.png")
     private String profileImage;
 
     @Schema(description = "생년월일 (yyyy-MM-dd 형식)", example = "1995-08-27", type = "string")

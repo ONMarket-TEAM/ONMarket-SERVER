@@ -7,9 +7,6 @@ import com.onmarket.post.dto.PostListResponse;
 import java.util.List;
 
 public interface PostService {
-    // 전체 게시물 목록 조회
-    List<PostListResponse> getAllPosts();
-
     // 타입별 게시물 목록 조회
     List<PostListResponse> getPostsByType(PostType postType);
 
@@ -24,4 +21,9 @@ public interface PostService {
 
     // 스크랩 관련 추가 메서드
     PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email);
+
+    // SupportProduct에서 Post 생성 (새로 추가)
+    void createPostsFromSupportProducts();
+
+    PostListResponse getPostById(Long postId);
 }

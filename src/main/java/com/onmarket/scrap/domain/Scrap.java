@@ -26,9 +26,11 @@ public class Scrap extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // Post와 연결 (FK)
+    // Post와 연결 (FK) - CASCADE 옵션 추가
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false,
+            foreignKey = @ForeignKey(name = "FK_SCRAP_POST",
+                    foreignKeyDefinition = "FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE"))
     private Post post;
 
     // 스크랩 생성 메서드

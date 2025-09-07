@@ -74,7 +74,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = Comment.builder()
-                .postId(post.getPostId())
+                .post(post)
                 .userEmail(userEmail)
                 .author(author)
                 .content(request.getContent())
