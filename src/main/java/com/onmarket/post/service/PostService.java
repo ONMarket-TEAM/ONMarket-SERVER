@@ -24,4 +24,6 @@ public interface PostService {
 
     // SupportProduct에서 Post 생성 (새로 추가)
     void createPostsFromSupportProducts();
+
+    PostListResponse getPostById(Long postId);
 }
