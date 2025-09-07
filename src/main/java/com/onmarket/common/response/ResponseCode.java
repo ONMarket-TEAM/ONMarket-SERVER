@@ -245,7 +245,16 @@ public enum ResponseCode {
      */
     CARDNEWS_BUILD_SUCCESS(HttpStatus.OK, "카드뉴스 생성에 성공했습니다."),
     CARDNEWS_BUILD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "카드뉴스 생성에 실패했습니다."),
-    CARDNEWS_INVALID_PARAMS(HttpStatus.BAD_REQUEST, "type 또는 id 파라미터가 올바르지 않습니다.");
+    CARDNEWS_INVALID_PARAMS(HttpStatus.BAD_REQUEST, "type 또는 id 파라미터가 올바르지 않습니다."),
+
+    /**
+     * Summary response
+     */
+    SUMMARY_INVALID_PARAMS(HttpStatus.BAD_REQUEST, "요약 생성에 필요한 파라미터가 누락되었습니다."),
+    SUMMARY_GENERATE_SUCCESS(HttpStatus.OK, "요약 생성에 성공했습니다."),
+    SUMMARY_GENERATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "요약 생성에 실패했습니다."),
+    SUMMARY_BACKFILL_SUCCESS(HttpStatus.OK, "요약 백필에 성공했습니다."),
+    SUMMARY_BACKFILL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "요약 백필에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
