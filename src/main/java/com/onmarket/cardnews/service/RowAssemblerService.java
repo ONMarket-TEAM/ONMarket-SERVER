@@ -1,75 +1,114 @@
 package com.onmarket.cardnews.service;
-import com.onmarket.cardnews.dto.CardNewsRequest;
-import com.onmarket.cardnews.dto.CreditLoanProductDto;
-import com.onmarket.cardnews.dto.LoanProductDto;
-import com.onmarket.cardnews.dto.SupportServiceDto;
-import com.onmarket.cardnews.util.RateCalculator;
-import io.micrometer.common.util.StringUtils;
+
+import com.onmarket.cardnews.dto.TargetType;
+import com.onmarket.fssdata.domain.CreditLoanOption;
+import com.onmarket.fssdata.domain.CreditLoanProduct;
+import com.onmarket.fssdata.repository.CreditLoanProductRepository;
+import com.onmarket.loandata.domain.LoanProduct;
+import com.onmarket.loandata.repository.LoanProductRepository;
+import com.onmarket.supportsdata.domain.SupportCondition;
+import com.onmarket.supportsdata.domain.SupportProduct;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RowAssemblerService {
-    public String toRowText(CardNewsRequest req) {
-        if (StringUtils.isNotBlank(req.getRowText())) return req.getRowText();
 
-        StringBuilder sb = new StringBuilder();
+    private final LoanProductRepository loanRepo;
+    private final CreditLoanProductRepository creditRepo;
+    private final SupportProductRepository supportRepo;
 
-        if (req.getLoanProduct() != null) {
-            LoanProductDto p = req.getLoanProduct();
-            sb.append("상품명: ").append(n(p.getProductName())).append("\n");
-            sb.append("대출 대상: ").append(n(p.getTarget())).append(" (필터: ").append(n(p.getTargetFilter())).append(")\n");
-            sb.append("대출 용도: ").append(n(p.getUsage())).append("\n");
-            sb.append("금리 구분/금리: ").append(n(p.getInterestCategory())).append(" / ").append(n(p.getInterestRate())).append("%\n");
-            sb.append("한도: ").append(n(p.getLoanLimit())).append("만원\n");
-            sb.append("상환 방식: ").append(n(p.getRepaymentMethod())).append(" / 총 ")
-                    .append(n(p.getMaxTotalTerm())).append("개월, 거치 ")
-                    .append(n(p.getMaxDeferredTerm())).append("개월\n");
-            sb.append("공급처: ").append(n(p.getOfferingInstitution())).append(" (분류: ")
-                    .append(n(p.getInstitutionCategory())).append(")\n");
-            if (StringUtils.isNotBlank(p.getIncome())) sb.append("소득 조건: ").append(p.getIncome()).append("\n");
-            if (StringUtils.isNotBlank(p.getSpecialTargetConditions())) sb.append("특별 대상: ").append(p.getSpecialTargetConditions()).append("\n");
-            if (StringUtils.isNotBlank(p.getOtherReference())) sb.append("기타: ").append(p.getOtherReference()).append("\n");
-        }
-
-        if (req.getCreditLoanProduct() != null) {
-            CreditLoanProductDto p = req.getCreditLoanProduct();
-            sb.append("신용대출 상품명: ").append(n(p.getFinPrdtNm())).append(" (회사: ").append(n(p.getKorCoNm())).append(")\n");
-            sb.append("상품코드: ").append(n(p.getFinPrdtCd())).append(", 가입: ").append(n(p.getJoinWay())).append("\n");
-
-            Map<String, Double> rates = RateCalculator.computeFinalRates(req.getCreditLoanOptions());
-            if (!rates.isEmpty()) {
-                sb.append("[예상 최종금리] 등급별: ");
-                rates.forEach((g, v) -> sb.append(g).append("등급 ").append(v).append("% "));
-                sb.append("\n");
-            }
-        }
-
-        if (req.getSupportService() != null) {
-            SupportServiceDto s = req.getSupportService();
-            sb.append("서비스명: ").append(n(s.getServiceName())).append(" / 유형: ").append(n(s.getSupportType())).append("\n");
-            sb.append("목적: ").append(n(s.getServicePurposeSummary())).append("\n");
-            sb.append("지원대상: ").append(n(s.getSupportTarget())).append(" (사용자: ").append(n(s.getUserCategory())).append(")\n");
-            sb.append("지원내용: ").append(n(s.getSupportContent())).append("\n");
-            sb.append("신청방법: ").append(n(s.getApplicationMethod())).append(", 마감: ").append(n(s.getApplicationDeadline())).append("\n");
-            sb.append("문의: ").append(n(s.getContact())).append(" / URL: ").append(n(s.getOnlineApplicationUrl())).append("\n");
-            if (req.getSupportConditions() != null && !req.getSupportConditions().isEmpty()) {
-                sb.append("조건: ");
-                req.getSupportConditions().stream().limit(1).forEach(c -> {
-                    sb.append("연령").append("(").append(c.getAgeStart()).append("~").append(c.getAgeEnd()).append(") ");
-                    if ("Y".equalsIgnoreCase(c.getBusinessOperating())) sb.append("운영기업 ");
-                    if ("Y".equalsIgnoreCase(c.getBusinessProspective())) sb.append("창업기업 ");
-                    if ("Y".equalsIgnoreCase(c.getHouseholdNoHome())) sb.append("무주택 ");
-                });
-                sb.append("\n");
-            }
-        }
-
-        String out = sb.toString().trim();
-        if (out.isEmpty()) out = "대출/지원 상품 안내 텍스트가 비어있습니다.";
-        return out;
+    public String assemble(TargetType type, String idRaw) {
+        return switch (type) {
+            case LOAN_PRODUCT        -> assembleLoanProduct(Long.parseLong(idRaw));
+            case CREDIT_LOAN_PRODUCT -> assembleCreditLoanProduct(Long.parseLong(idRaw));
+            case SUPPORT_PRODUCT     -> assembleSupportProduct(Long.parseLong(idRaw)); // ← String → Long
+        };
     }
 
-    private String n(Object o) { return o == null ? "-" : String.valueOf(o); }
+    private String assembleLoanProduct(Long id) {
+        LoanProduct p = loanRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("LoanProduct not found: " + id));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("배지: 대출상품\n"); // ← 프롬프트 일관성(팔레트 선택) 위해 명시
+        sb.append("상품명: ").append(n(p.getProductName())).append("\n");
+        sb.append("용도: ").append(n(p.getUsage())).append("\n");
+        sb.append("대상: ").append(n(p.getTarget())).append("\n");
+        sb.append("제공기관: ").append(n(p.getOfferingInstitution())).append("\n");
+        if (p.getInterestCategory()!=null || p.getInterestRate()!=null) {
+            sb.append("금리: ").append(n(p.getInterestCategory())).append(" / ").append(n(p.getInterestRate())).append("\n");
+        }
+        if (p.getLoanLimit()!=null) sb.append("한도: ").append(n(p.getLoanLimit())).append("\n");
+        if (p.getMaxTotalTerm()!=null) sb.append("기간: ").append(n(p.getMaxTotalTerm())).append("개월\n");
+        if (p.getRepaymentMethod()!=null) sb.append("상환방식: ").append(n(p.getRepaymentMethod())).append("\n");
+        if (p.getAge()!=null) sb.append("연령조건: ").append(p.getAge()).append("\n");
+        if (p.getSpecialTargetConditions()!=null) sb.append("특별대상: ").append(p.getSpecialTargetConditions()).append("\n");
+        if (p.getRelatedSite()!=null) sb.append("관련사이트: ").append(p.getRelatedSite()).append("\n");
+        return sb.toString();
+    }
+
+    private String assembleCreditLoanProduct(Long id) {
+        CreditLoanProduct cp = creditRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("CreditLoanProduct not found: " + id));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("배지: 대출상품\n"); // ← 일관성
+        sb.append("상품명: ").append(n(cp.getFinPrdtNm())).append("\n");
+        sb.append("기관명: ").append(n(cp.getKorCoNm())).append("\n");
+        if (cp.getCrdtPrdtTypeNm()!=null) sb.append("상품종류: ").append(cp.getCrdtPrdtTypeNm()).append("\n");
+        if (cp.getJoinWay()!=null) sb.append("가입방법: ").append(cp.getJoinWay()).append("\n");
+        if (cp.getCbName()!=null) sb.append("신용평가기관: ").append(cp.getCbName()).append("\n");
+
+        Optional<CreditLoanOption> avgOpt = cp.getOptions().stream()
+                .filter(o -> o.getCrdtGradAvg()!=null)
+                .findFirst();
+        avgOpt.ifPresent(o -> sb.append("평균 금리: ").append(trimZero(o.getCrdtGradAvg())).append("%\n"));
+
+        if (cp.getRltSite()!=null) sb.append("관련사이트: ").append(cp.getRltSite()).append("\n");
+        return sb.toString();
+    }
+
+    private String assembleSupportProduct(Long id) { // ← String → Long
+        SupportProduct sp = supportRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("SupportProduct not found: " + id));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("배지: 정부지원금\n"); // ← 일관성
+        sb.append("정책명: ").append(n(sp.getServiceName())).append("\n");
+        sb.append("유형: ").append(n(sp.getSupportType())).append("\n");
+        if (sp.getServicePurposeSummary()!=null) sb.append("목적: ").append(sp.getServicePurposeSummary()).append("\n");
+        if (sp.getSupportTarget()!=null) sb.append("지원대상: ").append(sp.getSupportTarget()).append("\n");
+        if (sp.getSupportContent()!=null) sb.append("지원내용: ").append(sp.getSupportContent()).append("\n");
+        if (sp.getApplicationMethod()!=null) sb.append("신청방법: ").append(sp.getApplicationMethod()).append("\n");
+        sb.append("마감일: ").append(sp.getDisplayDeadline()).append("\n");
+        if (sp.getContact()!=null) sb.append("문의처: ").append(sp.getContact()).append("\n");
+        if (sp.getDetailUrl()!=null) sb.append("상세URL: ").append(sp.getDetailUrl()).append("\n");
+
+        SupportCondition c = sp.getSupportCondition();
+        if (c!=null) {
+            if (c.getAgeStart()!=null || c.getAgeEnd()!=null) {
+                sb.append("연령조건: ")
+                        .append(c.getAgeStart()!=null?c.getAgeStart():"?")
+                        .append("~")
+                        .append(c.getAgeEnd()!=null?c.getAgeEnd():"?")
+                        .append("세\n");
+            }
+            if ("Y".equals(c.getJobEmployee())) sb.append("재직자 가능\n");
+            if ("Y".equals(c.getJobSeeker())) sb.append("구직자 가능\n");
+            if ("Y".equals(c.getBusinessProspective())) sb.append("창업기업 대상\n");
+            if ("Y".equals(c.getBusinessOperating())) sb.append("운영기업 대상\n");
+        }
+        return sb.toString();
+    }
+
+    private String n(String v){ return v==null ? "" : v.trim(); }
+    private String trimZero(Double d){
+        String s = String.valueOf(d);
+        return s.endsWith(".0") ? s.substring(0,s.length()-2) : s;
+    }
 }

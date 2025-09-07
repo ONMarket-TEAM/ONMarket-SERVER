@@ -4,5 +4,5 @@ package com.onmarket.cardnews.dto;
 public enum TargetType {
     LOAN_PRODUCT,
     CREDIT_LOAN_PRODUCT,
-    SUPPORT_SERVICE
+    SUPPORT_PRODUCT
 }

@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.Instant;
-
 /**
  * 지원 서비스 정보 (지원사업)
  */
@@ -17,8 +16,13 @@ import java.time.Instant;
 public class SupportProduct {
 
     @Id
-    @Column(name = "service_id")
-    private String serviceId;                // 서비스 ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;  // Auto-increment PK
+
+    // 변경
+    @Column(name = "service_id", unique = true)
+    private String serviceId;                // 서비스 ID (자연키, 유니크)                // 서비스 ID
 
     // --- serviceList 에서 가져오는 정보 ---
     private String supportType;              // 지원 유형 (예: 현금, 융자, 상담 등)
@@ -36,6 +40,14 @@ public class SupportProduct {
     private String detailUrl;                // 상세 페이지 URL
     private String departmentName;           // 담당 부서
     private String userCategory;             // 사용자 구분 (소상공인, 법인 등)
+    @Column(name = "cardnews_key", length = 255)
+    private String cardnewsKey;
+
+    @Column(name = "cardnews_url", length = 1000)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
 
     // --- serviceDetail 에서 추가로 가져오는 정보 ---
     @Lob
@@ -53,6 +65,12 @@ public class SupportProduct {
     @Column(name = "keywords", length = 1024)
     private String keywords;                 // 검색 키워드
 
+    @Column(name = "start_day")
+    private String startDay;    // 신청 시작일 (YYYYMMDD 형식, 상시모집이면 null)
+
+    @Column(name = "end_day")
+    private String endDay;      // 신청 마감일 (YYYYMMDD 형식, 상시모집이면 null)
+
     // --- SupportCondition 엔티티와 1:1 관계 설정 ---
     @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition; // 연관된 지원 조건
@@ -61,20 +79,35 @@ public class SupportProduct {
         this.supportCondition = supportCondition;
     }
 
-    @Column(name = "cardnews_s3_key", length = 256)
-    private String cardnewsS3Key;
+    public void setStartDay(String startDay) {
+        this.startDay = startDay;
+    }
 
-    @Column(name = "cardnews_url", length = 512)
-    private String cardnewsUrl;
+    public void setEndDay(String endDay) {
+        this.endDay = endDay;
+    }
 
-    @Column(name = "cardnews_updated_at")
-    private Instant cardnewsUpdatedAt;
+    /**
+     * 표시용 마감일 반환
+     * end_day가 null이면 applicationDeadline 반환
+     */
+    public String getDisplayDeadline() {
+        if (endDay != null) {
+            return formatDate(endDay);
+        }
+        return applicationDeadline != null ? applicationDeadline : "상시모집";
+    }
 
-    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
-        this.cardnewsS3Key = s3Key;
-        this.cardnewsUrl = url;
-        this.cardnewsUpdatedAt = updatedAt;
-
+    /**
+     * YYYYMMDD 형식을 YYYY.MM.DD 형식으로 변환
+     */
+    private String formatDate(String yyyymmdd) {
+        if (yyyymmdd == null || yyyymmdd.length() != 8) {
+            return yyyymmdd;
+        }
+        return yyyymmdd.substring(0, 4) + "." +
+                yyyymmdd.substring(4, 6) + "." +
+                yyyymmdd.substring(6, 8);
     }
 
     @Builder
@@ -102,5 +135,11 @@ public class SupportProduct {
         this.onlineApplicationUrl = onlineApplicationUrl;
         this.laws = laws;
         this.keywords = keywords;
+    }
+
+    public void updateCardnews(String key, String url, Instant updatedAt) {
+        this.cardnewsKey = key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
     }
 }
