@@ -21,8 +21,15 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public void validateNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
+    public void validateNickname(String nickname, Long memberId) {
+        boolean exists;
+        if (memberId != null) {
+            exists = memberRepository.existsByNicknameAndMemberIdNot(nickname, memberId);
+        } else {
+            exists = memberRepository.existsByNickname(nickname);
+        }
+
+        if (exists) {
             throw new ValidationException(ResponseCode.DUPLICATED_NICKNAME);
         }
     }

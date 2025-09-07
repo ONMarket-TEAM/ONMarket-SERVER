@@ -100,6 +100,7 @@ public enum ResponseCode {
     INVALID_ASSET_RANGE(HttpStatus.BAD_REQUEST, "유효하지 않은 자산 범위입니다"),
     INVALID_WMTI_CODE_FORMAT(HttpStatus.BAD_REQUEST, "WMTI 코드 형식이 올바르지 않습니다"),
     INVALID_CATEGORY_OR_SUBCATEGORY(HttpStatus.BAD_REQUEST, "카테고리 및 소분류는 필수입니다."),
+    OAUTH2_ADDITIONAL_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "추가 정보 입력이 필요합니다."),
 
     /**
      * SMS response
