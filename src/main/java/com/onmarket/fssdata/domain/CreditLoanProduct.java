@@ -2,13 +2,14 @@ package com.onmarket.fssdata.domain;
 
 import com.onmarket.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,16 @@ public class CreditLoanProduct extends BaseTimeEntity {
     @Column(name = "rlt_site")
     private String rltSite; // 금융회사 홈페이지 URL
 
+    /* ==== 카드뉴스 저장 정보 (S3) ==== */
+    @Column(name = "cardnews_s3_key", length = 255)
+    private String cardnewsS3Key;
+
+    @Column(name = "cardnews_url", length = 1000)
+    private String cardnewsUrl;
+
+    @Column(name = "cardnews_updated_at")
+    private Instant cardnewsUpdatedAt;
+
     // 해당 상품의 금리 옵션들 (양방향 연관관계)
     @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude  // toString 무한루프 방지
@@ -74,7 +85,8 @@ public class CreditLoanProduct extends BaseTimeEntity {
     @Builder
     public CreditLoanProduct(String dclsMonth, String finCoNo, String korCoNm, String finPrdtCd,
                              String finPrdtNm, String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
-                             String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay, String rltSite) {
+                             String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay,
+                             String rltSite) {
         this.dclsMonth = dclsMonth;
         this.finCoNo = finCoNo;
         this.korCoNm = korCoNm;
@@ -88,7 +100,7 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
         this.rltSite = rltSite;
-        this.options = new ArrayList<>(); // 이 라인 추가
+        this.options = new ArrayList<>();
     }
 
     /**
@@ -96,7 +108,8 @@ public class CreditLoanProduct extends BaseTimeEntity {
      */
     public void updateProductInfo(String dclsMonth, String korCoNm, String finPrdtNm,
                                   String joinWay, String crdtPrdtType, String crdtPrdtTypeNm,
-                                  String cbName, String dclsStrtDay, String dclsEndDay, String finCoSubmDay, String rltSite) {
+                                  String cbName, String dclsStrtDay, String dclsEndDay,
+                                  String finCoSubmDay, String rltSite) {
         this.dclsMonth = dclsMonth;
         this.korCoNm = korCoNm;
         this.finPrdtNm = finPrdtNm;
@@ -108,7 +121,6 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.dclsEndDay = dclsEndDay;
         this.finCoSubmDay = finCoSubmDay;
         this.rltSite = rltSite;
-
     }
 
     /**
@@ -118,5 +130,19 @@ public class CreditLoanProduct extends BaseTimeEntity {
     public void addOption(CreditLoanOption option) {
         this.options.add(option);
         option.updateCreditLoanProduct(this);
+    }
+
+    /* ==== 카드뉴스 갱신 ==== */
+    public void updateCardnews(String s3Key, String url, Instant updatedAt) {
+        this.cardnewsS3Key = s3Key;
+        this.cardnewsUrl = url;
+        this.cardnewsUpdatedAt = updatedAt;
+    }
+
+    /** 필요 시 삭제/초기화 용 */
+    public void clearCardnews() {
+        this.cardnewsS3Key = null;
+        this.cardnewsUrl = null;
+        this.cardnewsUpdatedAt = null;
     }
 }
