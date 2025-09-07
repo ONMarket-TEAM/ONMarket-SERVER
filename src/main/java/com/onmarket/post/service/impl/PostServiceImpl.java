@@ -14,7 +14,7 @@ import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
 import com.onmarket.scrap.service.ScrapService;
 import com.onmarket.supportsdata.domain.SupportProduct;
-import com.onmarket.supportsdata.repository.SupportServiceRepository;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,7 +39,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CreditLoanProductRepository creditLoanProductRepository;
     private final LoanProductRepository loanProductRepository;
-    private final SupportServiceRepository supportServiceRepository; // 새로 추가
+    private final SupportProductRepository supportProductRepository; // 새로 추가
     private final ScrapService scrapService;
 
     @Override
@@ -132,7 +132,7 @@ public class PostServiceImpl implements PostService {
 
         do {
             Pageable pageable = PageRequest.of(page, pageSize);
-            productPage = supportServiceRepository.findAll(pageable); // 기본 메서드 사용
+            productPage = supportProductRepository.findAll(pageable); // 기본 메서드 사용
 
             for (SupportProduct supportProduct : productPage.getContent()) {
                 try {
