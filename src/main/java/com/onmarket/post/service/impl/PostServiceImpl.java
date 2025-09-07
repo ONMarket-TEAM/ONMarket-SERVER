@@ -164,10 +164,17 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
+    public PostListResponse getPostById(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+        return convertToListResponse(post);
+    }
+
     private PostListResponse convertToListResponse(Post post) {
         return PostListResponse.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
+                .companyName(post.getCompanyName())
                 .deadline(calculateDDay(post.getDeadline()))
                 .productName(post.getProductName())
                 .summary(post.getSummary())
