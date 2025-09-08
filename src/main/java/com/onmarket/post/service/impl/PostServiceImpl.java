@@ -1,6 +1,5 @@
 package com.onmarket.post.service.impl;
 
-import com.onmarket.common.response.ResponseCode;
 import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.fssdata.repository.CreditLoanProductRepository;
 import com.onmarket.loandata.domain.LoanProduct;
@@ -10,10 +9,13 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
 import com.onmarket.scrap.service.ScrapService;
+import com.onmarket.supportsdata.domain.SupportProduct;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,15 +40,8 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CreditLoanProductRepository creditLoanProductRepository;
     private final LoanProductRepository loanProductRepository;
+    private final SupportProductRepository supportProductRepository; // 새로 추가
     private final ScrapService scrapService;
-
-    @Override
-    public List<PostListResponse> getAllPosts() {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
-        return posts.stream()
-                .map(this::convertToListResponse)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public List<PostListResponse> getPostsByType(PostType postType) {
@@ -124,13 +119,77 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    // SupportProduct 처리 메서드
+    @Override
+    @Transactional
+    public void createPostsFromSupportProducts() {
+        // 페이징으로 처리하여 메모리 사용량 줄이기
+        int pageSize = 50;
+        int page = 0;
+
+        Page<SupportProduct> productPage;
+        int totalProcessed = 0;
+        int successCount = 0;
+
+        do {
+            Pageable pageable = PageRequest.of(page, pageSize);
+            productPage = supportProductRepository.findAll(pageable); // 기본 메서드 사용
+
+            for (SupportProduct supportProduct : productPage.getContent()) {
+                try {
+                    processIndividualSupportProduct(supportProduct);
+                    successCount++;
+                } catch (Exception e) {
+                    log.error("SupportProduct({}) 처리 실패: {}", supportProduct.getServiceId(), e.getMessage());
+                }
+                totalProcessed++;
+            }
+
+            page++;
+            log.info("처리 진행률: {}/{}", totalProcessed, productPage.getTotalElements());
+
+        } while (productPage.hasNext());
+
+        log.info("공공지원금 상품 Post 생성 완료 - 전체: {}, 성공: {}", totalProcessed, successCount);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void processIndividualSupportProduct(SupportProduct supportProduct) {
+        // 기존 패턴과 동일 (Long ID 사용)
+        Long count = postRepository.countBySourceTableAndSourceId("SupportProduct", supportProduct.getId());
+
+        if (count == 0) {
+            Post post = createPostFromSupportProduct(supportProduct);
+            postRepository.save(post);
+            log.debug("SupportProduct({})에서 Post 생성 완료", supportProduct.getId());
+        }
+    }
+
+    @Override
+    public PostSingleResponse getPostById(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+        return convertToSingleResponse(post);
+    }
+
     private PostListResponse convertToListResponse(Post post) {
         return PostListResponse.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
+                .companyName(post.getCompanyName())
                 .deadline(calculateDDay(post.getDeadline()))
                 .productName(post.getProductName())
                 .summary(post.getSummary())
+                .build();
+    }
+    private PostSingleResponse convertToSingleResponse(Post post) {
+        return PostSingleResponse.builder()
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .companyName(post.getCompanyName())
+                .deadline(calculateDDay(post.getDeadline()))
+                .productName(post.getProductName())
+                .summary(post.getSummary())
+                .imageUrl(post.getImageUrl())
                 .build();
     }
 
@@ -170,6 +229,22 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
+    private Post createPostFromSupportProduct(SupportProduct supportProduct) {
+        return Post.builder()
+                .postType(PostType.SUPPORT)
+                .productName(supportProduct.getServiceName())
+                .summary(supportProduct.getServicePurposeSummary() != null ?
+                        supportProduct.getServicePurposeSummary() : "작성 예정")
+                .deadline(supportProduct.getEndDay()) // YYYYMMDD 형식
+                .companyName(supportProduct.getDepartmentName())
+                .joinLink(supportProduct.getOnlineApplicationUrl() != null ?
+                        supportProduct.getOnlineApplicationUrl() :
+                        supportProduct.getDetailUrl())
+                .sourceTable("SupportProduct")
+                .sourceId(supportProduct.getId()) // Long ID 사용!
+                .build();
+    }
+
     private String calculateDDay(String deadlineStr) {
         if (deadlineStr == null || deadlineStr.trim().isEmpty()) {
             return "상시 모집";
@@ -195,7 +270,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    // === 새로 추가된 스크랩 관련 메서드 ===
+
     @Override
     public PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email) {
         // 기본 게시물 정보 조회
@@ -210,9 +285,4 @@ public class PostServiceImpl implements PostService {
 
         return PostDetailWithScrapResponse.from(postDetail, isScraped, scrapCount);
     }
-    private Post findPostById(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException());
-    }
-
 }

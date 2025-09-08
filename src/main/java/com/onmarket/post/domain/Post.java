@@ -1,8 +1,13 @@
 package com.onmarket.post.domain;
 
+import com.onmarket.comment.domain.Comment;
 import com.onmarket.common.domain.BaseTimeEntity;
+import com.onmarket.scrap.domain.Scrap;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "post")
@@ -18,7 +23,7 @@ public class Post extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PostType postType; // LOAN, POLICY
+    private PostType postType; // LOAN, SUPPORT
 
     // === 게시물 목록에서 보여질 기본 정보 ===
     @Column(nullable = false)
@@ -42,8 +47,14 @@ public class Post extends BaseTimeEntity {
 
     // === 원본 데이터 추적용 ===
     @Column(nullable = false)
-    private String sourceTable; // "CreditLoanProduct" 또는 "LoanProduct"
+    private String sourceTable; // "CreditLoanProduct", "LoanProduct", "SupportProduct"
 
     @Column(nullable = false)
     private Long sourceId; // 원본 테이블의 ID
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Scrap> scraps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Comment> comments = new ArrayList<>();
 }

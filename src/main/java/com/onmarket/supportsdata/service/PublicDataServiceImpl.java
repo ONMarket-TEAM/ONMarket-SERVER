@@ -6,7 +6,7 @@ import com.onmarket.supportsdata.dto.ApiResponseDTO;
 import com.onmarket.supportsdata.dto.ServiceDetailDTO;
 import com.onmarket.supportsdata.dto.ServiceInfoDTO;
 import com.onmarket.supportsdata.dto.SupportConditionDTO;
-import com.onmarket.supportsdata.repository.SupportServiceRepository;
+import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public class PublicDataServiceImpl implements PublicDataService {
 
     private final WebClient.Builder webClientBuilder;
-    private final SupportServiceRepository supportServiceRepository;
+    private final SupportProductRepository supportServiceRepository;
     private final SimpleDateParser simpleDateParser;
 
     @Value("${gov.api.support.base-url}")
@@ -130,7 +130,7 @@ public class PublicDataServiceImpl implements PublicDataService {
     private void createAndSaveEntities(ServiceInfoDTO infoDTO, ServiceDetailDTO detailDTO, SupportConditionDTO conditionDTO) {
         String serviceId = infoDTO.getServiceId();
 
-        if (supportServiceRepository.existsById(serviceId)) {
+        if (supportServiceRepository.existsByServiceId(serviceId)) {
             log.info("Service ID {} already exists in the database. Skipping.", serviceId);
             return;
         }

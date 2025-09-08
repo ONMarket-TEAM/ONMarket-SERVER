@@ -3,6 +3,7 @@ package com.onmarket.member.domain;
 import com.onmarket.business.domain.Business;
 import com.onmarket.common.domain.BaseTimeEntity;
 import com.onmarket.member.domain.enums.*;
+import com.onmarket.member.dto.SocialUserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -64,6 +65,12 @@ public class Member extends BaseTimeEntity {
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
+    @Column(name = "instagram_access_token", length = 500)
+    private String instagramAccessToken;
+
+    @Column(name = "instagram_user_id", length = 100)
+    private String instagramUserId;
+
     @Column(name = "instagram_username", length = 100)
     private String instagramUsername;
 
@@ -77,8 +84,25 @@ public class Member extends BaseTimeEntity {
         if (this.role == null) this.role = Role.USER;  // 기본값 USER
     }
 
+    /** Instagram 계정명 변경/삭제 */
+    public void changeInstagramUsername(String username) {
+        this.instagramUsername = username;
+    }
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Business> businesses = new ArrayList<>();
+
+    /** 사용자명 변경 */
+    public void updateUsername(String username) {this.username = username;}
+
+    /** 휴대폰 번호 변경 */
+    public void updatePhone(String phone) {this.phone = phone;}
+
+    /** 생년월일 변경 */
+    public void updateBirthDate(LocalDate birthDate) {this.birthDate = birthDate;}
+
+    /** 성별 변경 */
+    public void updateGender(Gender gender) {this.gender = gender;}
 
     /** 닉네임 변경 */
     public void changeNickname(String nickname) {
@@ -105,16 +129,10 @@ public class Member extends BaseTimeEntity {
         this.status = status;
     }
 
-    /** Instagram 계정명 변경/삭제 */
-    public void changeInstagramUsername(String username) {
-        this.instagramUsername = username;
-    }
-
     /** Instagram 연결 여부 확인 */
     public boolean hasInstagramConnected() {
-        return this.instagramUsername != null && !this.instagramUsername.trim().isEmpty();
+        return this.instagramAccessToken != null && !this.instagramAccessToken.trim().isEmpty();
     }
-
 
     /** 표시용 Instagram 계정명 반환 (@ 포함) */
     public String getDisplayInstagramUsername() {
@@ -129,5 +147,36 @@ public class Member extends BaseTimeEntity {
     public void changeRole(Role role) {
         this.role = role;
         this.refreshToken = null;
+    }
+
+    /** 소셜 로그인용 PENDING 상태로 Member 생성 */
+    public static Member createSocialPendingMember(SocialUserInfo socialInfo) {
+        return Member.builder()
+                .socialProvider(socialInfo.getSocialProvider())
+                .socialId(socialInfo.getSocialId())
+                .email(socialInfo.getEmail())
+                .nickname(socialInfo.getNickname())
+                .username(socialInfo.getEmail())
+                .password("SOCIAL_LOGIN")
+                .birthDate(socialInfo.getBirthDate())
+                .phone(socialInfo.getPhoneNumber())
+                .gender(socialInfo.getGender())
+                .status(MemberStatus.PENDING)
+                .role(Role.USER)
+                .build();
+    }
+    public void completeSignup(String nickname) {
+        this.nickname = nickname;
+        this.status = MemberStatus.ACTIVE;
+    }
+
+    /** PENDING 상태인지 확인 */
+    public boolean isPending() {
+        return this.status == MemberStatus.PENDING;
+    }
+
+    /** ACTIVE 상태인지 확인 */
+    public boolean isActive() {
+        return this.status == MemberStatus.ACTIVE;
     }
 }

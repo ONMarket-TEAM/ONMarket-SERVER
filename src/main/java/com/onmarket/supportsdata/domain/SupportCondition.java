@@ -20,8 +20,13 @@ public class SupportCondition {
     private Long id; // 조건 ID
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id", unique = true)
-    private SupportProduct supportProduct; // 연관된 지원 서비스
+    @JoinColumn(
+            name = "support_product_id",
+            nullable = false,
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_support_condition_product")
+    )
+    private SupportProduct supportProduct; // 연관된 지원 서비스 (FK: support_product.id)
 
     // --- JA 코드 필드들 ---
     private String genderMale;          // 남성 지원 여부 (Y/N)

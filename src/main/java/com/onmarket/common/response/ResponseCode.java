@@ -101,6 +101,7 @@ public enum ResponseCode {
     INVALID_ASSET_RANGE(HttpStatus.BAD_REQUEST, "유효하지 않은 자산 범위입니다"),
     INVALID_WMTI_CODE_FORMAT(HttpStatus.BAD_REQUEST, "WMTI 코드 형식이 올바르지 않습니다"),
     INVALID_CATEGORY_OR_SUBCATEGORY(HttpStatus.BAD_REQUEST, "카테고리 및 소분류는 필수입니다."),
+    OAUTH2_ADDITIONAL_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "추가 정보 입력이 필요합니다."),
 
     /**
      * SMS response
@@ -145,6 +146,7 @@ public enum ResponseCode {
     POST_DETAIL_SUCCESS(HttpStatus.OK,"게시글 상세 조회 성공"),
     POST_CREDIT_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "금융 감독원 신용 대출 상품 게시물 동기화 완료"),
     POST_LOAN_CREATE_SUCCESS(HttpStatus.CREATED, "서민금융진흥원 대출 상품 게시물 동기화 완료"),
+    POST_SUPPORT_CREATE_SUCCESS(HttpStatus.OK,"공공지원금 게시물 생성이 완료되었습니다."),
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
 
     /**
@@ -160,6 +162,22 @@ public enum ResponseCode {
 
     SCRAP_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 목록 조회에 실패했습니다"),
     SCRAP_CHECK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "관심상품 여부 확인에 실패했습니다"),
+
+    /**
+     * commnet response
+     */
+    // ResponseCode.java에 추가해야 할 상수들
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "댓글에 대한 권한이 없습니다."),
+    PARENT_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "부모 댓글을 찾을 수 없습니다."),
+    COMMENT_CREATE_SUCCESS(HttpStatus.CREATED, "댓글이 작성되었습니다."),
+    COMMENT_UPDATE_SUCCESS(HttpStatus.OK, "댓글이 수정되었습니다."),
+    COMMENT_DELETE_SUCCESS(HttpStatus.OK, "댓글이 삭제되었습니다."),
+    COMMENT_LIST_SUCCESS(HttpStatus.OK, "댓글 목록 조회에 성공했습니다."),
+    COMMENT_DETAIL_SUCCESS(HttpStatus.OK, "댓글 조회에 성공했습니다."),
+    COMMENT_INVALID_RATING(HttpStatus.BAD_REQUEST, "별점은 1~5점 사이여야 합니다."),
+    COMMENT_REPLY_RATING_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "대댓글에는 별점을 줄 수 없습니다."),
+    COMMENT_REPLY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "대댓글의 대댓글은 작성할 수 없습니다."),
 
     /**
      *  database operation response
@@ -237,7 +255,14 @@ public enum ResponseCode {
      */
     CAPTION_GENERATE_SUCCESS(HttpStatus.OK, "캡션 생성에 성공했습니다."),
     CAPTION_FROM_S3_SUCCESS(HttpStatus.OK, "S3 키로 캡션 생성에 성공했습니다."),
-    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다.");
+    CAPTION_PRESIGN_ISSUED(HttpStatus.OK, "캡션 업로드용 프리사인 URL 발급에 성공했습니다."),
+
+    /**
+     * CardNews response
+     */
+    CARDNEWS_BUILD_SUCCESS(HttpStatus.OK, "카드뉴스 생성에 성공했습니다."),
+    CARDNEWS_BUILD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "카드뉴스 생성에 실패했습니다."),
+    CARDNEWS_INVALID_PARAMS(HttpStatus.BAD_REQUEST, "type 또는 id 파라미터가 올바르지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

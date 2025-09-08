@@ -4,12 +4,10 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import java.util.List;
 
 public interface PostService {
-    // 전체 게시물 목록 조회
-    List<PostListResponse> getAllPosts();
-
     // 타입별 게시물 목록 조회
     List<PostListResponse> getPostsByType(PostType postType);
 
@@ -24,4 +22,9 @@ public interface PostService {
 
     // 스크랩 관련 추가 메서드
     PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email);
+
+    // SupportProduct에서 Post 생성 (새로 추가)
+    void createPostsFromSupportProducts();
+
+    PostSingleResponse getPostById(Long postId);
 }

@@ -7,6 +7,7 @@ import com.onmarket.oauth.jwt.JwtTokenProvider;
 import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,14 +29,6 @@ public class PostApiController {
 
     private final PostService postService;
     private final JwtTokenProvider jwtTokenProvider;
-//    /**
-//     * 전체 게시물 목록 조회
-//     */
-//    @GetMapping
-//    public ApiResponse<List<PostListResponse>> getAllPosts() {
-//        List<PostListResponse> posts = postService.getAllPosts();
-//        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, posts);
-//    }
 
     /**
      * 타입별 게시물 목록 조회
@@ -56,6 +49,12 @@ public class PostApiController {
         return ApiResponse.success(ResponseCode.POST_DETAIL_SUCCESS, response);
     }
 
+    @GetMapping("/recommendation/{postId}")
+    public ApiResponse<PostSingleResponse> getPostById(@PathVariable Long postId) {
+        PostSingleResponse response = postService.getPostById(postId);
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, response);
+    }
+
     /**
      * CreditLoanProduct 데이터 동기화 (관리자용)
      */
@@ -72,6 +71,15 @@ public class PostApiController {
     public ApiResponse<String> syncGeneralLoanPosts() {
         postService.createPostsFromLoanProducts();
         return ApiResponse.success(ResponseCode.POST_LOAN_CREATE_SUCCESS);
+    }
+
+    /**
+     * SupportProduct 데이터 동기화 (관리자용) - 새로 추가
+     */
+    @PostMapping("/sync/support-products")
+    public ApiResponse<String> syncSupportPosts() {
+        postService.createPostsFromSupportProducts();
+        return ApiResponse.success(ResponseCode.POST_SUPPORT_CREATE_SUCCESS);
     }
 
     private String extractEmailFromToken(HttpServletRequest request) {
