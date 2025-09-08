@@ -72,9 +72,6 @@ public class BusinessServiceImpl implements BusinessService {
     /** 공통 비즈니스 조회 로직 */
     private List<BusinessResponse> getBusinessesByMember(Member member) {
         List<Business> businesses = businessRepository.findByMember(member);
-        if (businesses.isEmpty()) {
-            throw new BusinessException(ResponseCode.BUSINESS_NOT_FOUND);
-        }
 
         return businesses.stream()
                 .map(this::toResponse)

@@ -45,8 +45,7 @@ public class PushNotificationService {
         Map<String, Object> payload = Map.of(
                 "title", title,
                 "body",  message,
-                "icon",  "/icons/notification-icon.png",
-                "badge", "/icons/badge-icon.png",
+                "icon",  "/icons/logo.png",
                 "url",   "/"
         );
         byte[] messageBytes = objectMapper.writeValueAsBytes(payload);

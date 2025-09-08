@@ -27,4 +27,7 @@ public interface NotificationService {
 
     // 마감일 알림 생성 (기능 1 - 스케줄러에서 호출)
     void createDeadlineNotifications();
+
+    // 테스트용 알림 전송
+    void sendTestNotification();
 }

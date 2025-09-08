@@ -161,6 +161,36 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("마감일 알림 생성 작업 완료");
     }
 
+    // 테스트용 알림 -> 사용 시 스케줄러에서 sendTestNotification 실행
+    @Override
+    @Transactional(readOnly = true)
+    public void sendTestNotification() {
+
+        // 자신의 memberId에 맞게 수정하기
+        final long targetMemberId = 2L;
+        log.info("테스트 알림 전송 시작");
+
+        // 활성화
+        var opt = subscriptionRepository.findByMemberMemberId(targetMemberId);
+        var subscription = opt.get();
+
+        String title = "테스트 알림";
+        String message = "웹 푸시 알림이 정상 작동합니다!";
+
+
+        try {
+            pushService.sendPushNotification(subscription, title, message);
+            log.info("사용자 {}에게 테스트 알림 발송 성공",
+                    subscription.getMember().getEmail());
+        } catch (Exception e) {
+            log.error("사용자 {}에게 테스트 알림 발송 실패: {}",
+                    subscription.getMember().getEmail(), e.getMessage());
+        }
+
+
+        log.info("테스트 알림 전송 완료");
+    }
+
     // === Private 헬퍼 메서드들 ===
 
     private void processDeadlineNotification(Scrap scrap) {

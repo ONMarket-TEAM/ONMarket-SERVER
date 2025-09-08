@@ -29,8 +29,15 @@ public class NotificationListResponse {
     // 생성 시간
     private LocalDateTime createdAt;
 
+    // 상대 시간
+    private String relativeTime;
+
     // 상대 시간 표시 (예: "2시간 전", "1일 전")
     public String getRelativeTime() {
+        if (this.relativeTime != null) {
+            return this.relativeTime;
+        }
+
         LocalDateTime now = LocalDateTime.now();
         long minutes = java.time.Duration.between(createdAt, now).toMinutes();
 
@@ -48,5 +55,18 @@ public class NotificationListResponse {
 
         long years = months / 12;
         return years + "년 전";
+    }
+
+    // 빌더 패턴에서 relativeTime 자동 설정을 위한 커스텀 빌더
+    public static class NotificationListResponseBuilder {
+        public NotificationListResponse build() {
+            NotificationListResponse response = new NotificationListResponse(
+                    notificationId, title, message, notificationType,
+                    postId, productName, isRead, createdAt, null
+            );
+            // relativeTime을 자동으로 계산하여 설정
+            response.relativeTime = response.getRelativeTime();
+            return response;
+        }
     }
 }

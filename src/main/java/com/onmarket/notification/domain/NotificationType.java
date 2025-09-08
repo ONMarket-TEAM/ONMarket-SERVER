@@ -37,9 +37,9 @@ public enum NotificationType {
     // 알림 제목 템플릿 생성
     public String createTitle(String productName) {
         return switch (this) {
-            case DEADLINE_D3 -> "마감 3일 전 알림";
-            case DEADLINE_D1 -> "마감 1일 전 알림";
-            case DEADLINE_DDAY -> "오늘 마감 알림";
+            case DEADLINE_D3 -> "[온마켓] 마감 3일 전";
+            case DEADLINE_D1 -> "[온마켓] 마감 1일 전";
+            case DEADLINE_DDAY -> "[온마켓] 오늘 마감";
         };
     }
 }

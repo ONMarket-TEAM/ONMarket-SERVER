@@ -28,4 +28,19 @@ public class NotificationScheduler {
             log.error("마감일 알림 생성 중 오류 발생", e);
         }
     }
+
+    /**
+     * 테스트용 알림
+     */
+//    @Scheduled(cron = "0 22 1 * * *", zone = "Asia/Seoul")
+//    public void sendTestNotification() {
+//        log.info("테스트 알림 스케줄러 실행 시작");
+//
+//        try {
+//            notificationService.sendTestNotification();
+//            log.info("테스트 알림 스케줄러 실행 완료");
+//        } catch (Exception e) {
+//            log.error("테스트 알림 전송 중 오류 발생", e);
+//        }
+//    }
 }
