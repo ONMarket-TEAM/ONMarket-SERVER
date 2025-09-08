@@ -194,16 +194,11 @@ public enum ResponseCode {
     NOTIFICATION_ON_SUCCESS(HttpStatus.OK, "알림 설정을 키는 데 성공했습니다."),
     NOTIFICATION_UNREAD_COUNT_SUCCESS(HttpStatus.OK, "읽지 않은 알림 개수 조회에 성공했습니다."),
     NOTIFICATION_CREATE_DDAY_SUCCESS(HttpStatus.CREATED, "디데이 알림 배치에 성공했습니다."),
-    NOTIFICATION_UNSEND_SUCCESS(HttpStatus.OK, "미발송 알림 전송에 성공했습니다."),
 
     WEB_PUSH_SUBSCRIBE_SUCCESS(HttpStatus.OK, "웹 푸시 구독 등록에 성공했습니다."),
     WEB_PUSH_UNSUBSCRIBE_SUCCESS(HttpStatus.OK, "웹 푸시 구독 해제에 성공했습니다."),
     WEB_PUSH_STATUS_SUCCESS(HttpStatus.OK, "웹 푸시 구독 상태 조회에 성공했습니다."),
     WEB_PUSH_SEND_SUCCESS(HttpStatus.OK, "웹 푸시 알림 발송에 성공했습니다."),
-    WEB_PUSH_SUBSCRIPTION_FAILED(HttpStatus.BAD_REQUEST, "웹 푸시 구독 등록에 실패했습니다."),
-    WEB_PUSH_UNSUBSCRIBE_FAILED(HttpStatus.BAD_REQUEST, "웹 푸시 구독 해제에 실패했습니다."),
-    WEB_PUSH_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "웹 푸시 알림 발송에 실패했습니다."),
-    WEB_PUSH_INVALID_SUBSCRIPTION(HttpStatus.BAD_REQUEST, "유효하지 않은 웹 푸시 구독 정보입니다."),
 
     /**
      * S3 / 파일 스토리지 관련 응답
