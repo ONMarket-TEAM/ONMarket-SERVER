@@ -12,6 +12,8 @@ import com.onmarket.scrap.domain.Scrap;
 import com.onmarket.scrap.dto.ScrapToggleResponse;
 import com.onmarket.scrap.repository.ScrapRepository;
 import com.onmarket.scrap.service.ScrapService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +68,7 @@ public class ScrapServiceImpl implements ScrapService {
     public List<PostListResponse> getMyScraps(String email) {
         Member member = findMemberByEmail(email);
 
-        return scrapRepository.findByMemberOrderByCreatedAtDesc(member)
+        return scrapRepository.findByMemberOrderByDeadlineAndCreatedAt(member, LocalDate.now(), Pageable.unpaged())
                 .stream()
                 .map(this::convertToPostListResponse)
                 .collect(Collectors.toList());

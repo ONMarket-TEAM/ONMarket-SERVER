@@ -5,6 +5,7 @@ import com.onmarket.oauth.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,6 +46,18 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/error"
                         ).permitAll()
+
+                        // --- Web Push 테스트용 공개 엔드포인트
+                        .requestMatchers(HttpMethod.GET,  "/api/push/vapidPublicKey").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/push/subscribe").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/push/send").permitAll()   // 개발 중에만 오픈
+
+                        // --- 정적 파일(서비스워커 등)
+                        .requestMatchers("/sw.js", "/favicon.ico", "/manifest.json").permitAll()
+
+                        // --- CORS 프리플라이트
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
                                 "/api/signup",
                                 "/api/auth/login",
