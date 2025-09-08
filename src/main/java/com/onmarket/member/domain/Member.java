@@ -131,7 +131,7 @@ public class Member extends BaseTimeEntity {
 
     /** Instagram 연결 여부 확인 */
     public boolean hasInstagramConnected() {
-        return this.instagramAccessToken != null && !this.instagramAccessToken.trim().isEmpty();
+        return this.instagramUsername!= null && !this.instagramUsername.trim().isEmpty();
     }
 
     /** 표시용 Instagram 계정명 반환 (@ 포함) */
