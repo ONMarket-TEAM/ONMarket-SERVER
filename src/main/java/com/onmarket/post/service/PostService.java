@@ -4,6 +4,7 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.PostSingleResponse;
 import java.util.List;
 
 public interface PostService {
@@ -25,5 +26,5 @@ public interface PostService {
     // SupportProduct에서 Post 생성 (새로 추가)
     void createPostsFromSupportProducts();
 
-    PostListResponse getPostById(Long postId);
+    PostSingleResponse getPostById(Long postId);
 }
