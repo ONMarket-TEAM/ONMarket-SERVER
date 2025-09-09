@@ -13,6 +13,9 @@ build/
 ._*
 EOF
 
+.keys/
+*.pem
+
 
 ### STS ###
 .apt_generated
