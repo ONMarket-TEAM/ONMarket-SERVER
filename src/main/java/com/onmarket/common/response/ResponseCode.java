@@ -75,6 +75,7 @@ public enum ResponseCode {
     INVALID_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
     INVALID_IMAGE_KEY(HttpStatus.BAD_REQUEST, "유효하지 않은 이미지 키입니다."),
     PROFILE_IMAGE_DELETE_SUCCESS(HttpStatus.OK, "프로필 이미지가 성공적으로 삭제되었습니다."),
+    SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "변경할 비밀번호가 현재 비밀번호와 동일합니다."),
 
 
     /**
@@ -194,7 +195,7 @@ public enum ResponseCode {
     INVALID_MEMBER_ID(HttpStatus.BAD_REQUEST, "회원 ID는 양수여야 합니다"),
 
     /**
-     * Notification response
+     * Notification response / Web Push response
      */
     NOTIFICATION_LIST_SUCCESS(HttpStatus.OK, "알림 목록 조회에 성공했습니다."),
     NOTIFICATION_READ_SUCCESS(HttpStatus.OK, "알림 읽음 처리에 성공했습니다."),
@@ -206,6 +207,21 @@ public enum ResponseCode {
     NOTIFICATION_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "이미 읽은 알림입니다."),
     NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
+    NOTIFICATION_UPDATE_SUCCESS(HttpStatus.OK, "알림 업데이트 성공"),
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 알림에 접근할 권한이 없습니다."),
+    NOTIFICATION_ON_SUCCESS(HttpStatus.OK, "알림 설정을 키는 데 성공했습니다."),
+    NOTIFICATION_UNREAD_COUNT_SUCCESS(HttpStatus.OK, "읽지 않은 알림 개수 조회에 성공했습니다."),
+    NOTIFICATION_CREATE_DDAY_SUCCESS(HttpStatus.CREATED, "디데이 알림 배치에 성공했습니다."),
+    NOTIFICATION_UNSEND_SUCCESS(HttpStatus.OK, "미발송 알림 전송에 성공했습니다."),
+
+    WEB_PUSH_SUBSCRIBE_SUCCESS(HttpStatus.OK, "웹 푸시 구독 등록에 성공했습니다."),
+    WEB_PUSH_UNSUBSCRIBE_SUCCESS(HttpStatus.OK, "웹 푸시 구독 해제에 성공했습니다."),
+    WEB_PUSH_STATUS_SUCCESS(HttpStatus.OK, "웹 푸시 구독 상태 조회에 성공했습니다."),
+    WEB_PUSH_SEND_SUCCESS(HttpStatus.OK, "웹 푸시 알림 발송에 성공했습니다."),
+    WEB_PUSH_SUBSCRIPTION_FAILED(HttpStatus.BAD_REQUEST, "웹 푸시 구독 등록에 실패했습니다."),
+    WEB_PUSH_UNSUBSCRIBE_FAILED(HttpStatus.BAD_REQUEST, "웹 푸시 구독 해제에 실패했습니다."),
+    WEB_PUSH_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "웹 푸시 알림 발송에 실패했습니다."),
+    WEB_PUSH_INVALID_SUBSCRIPTION(HttpStatus.BAD_REQUEST, "유효하지 않은 웹 푸시 구독 정보입니다."),
 
     /**
      * S3 / 파일 스토리지 관련 응답

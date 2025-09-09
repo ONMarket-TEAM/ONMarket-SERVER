@@ -111,7 +111,11 @@ public class MemberServiceImpl implements MemberService {
                 throw new ValidationException(ResponseCode.NEW_PASSWORD_MISMATCH);
             }
 
-            // 비밀번호 복잡성 검증
+            if (passwordEncoder.matches(request.getNewPassword(), m.getPassword())) {
+                throw new ValidationException(ResponseCode.SAME_AS_CURRENT_PASSWORD);
+            }
+
+            // 비밀번호 복잡성 검증 (서버에서도 체크)
             validatePasswordStrength(request.getNewPassword());
 
             m.changePassword(passwordEncoder.encode(request.getNewPassword()));
@@ -268,6 +272,11 @@ public class MemberServiceImpl implements MemberService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+   /**
+     * 비밀번호 복잡성 검증
+     * 영문, 숫자, 특수문자를 모두 포함하여 8~20자로 입력
+     */
     private void validatePasswordStrength(String password) {
         if (password == null || password.trim().isEmpty()) {
             throw new BusinessException(ResponseCode.PASSWORD_REQUIRED);
@@ -287,13 +296,14 @@ public class MemberServiceImpl implements MemberService {
         boolean hasUppercase = password.matches(".*[A-Z].*");
         boolean hasDigit = password.matches(".*\\d.*");
         boolean hasSpecialChar = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+        boolean hasLetter = hasLowercase || hasUppercase;
 
         if (hasLowercase) complexity++;
         if (hasUppercase) complexity++;
         if (hasDigit) complexity++;
         if (hasSpecialChar) complexity++;
 
-        if (complexity < 2) {
+        if (!hasLetter || !hasDigit || !hasSpecialChar) {
             throw new BusinessException(ResponseCode.PASSWORD_COMPLEXITY_INSUFFICIENT);
         }
 
