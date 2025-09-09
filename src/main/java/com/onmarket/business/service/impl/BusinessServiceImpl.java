@@ -142,4 +142,13 @@ public class BusinessServiceImpl implements BusinessService {
         }
         return b;
     }
+
+    @Override
+    @Transactional
+    public void deleteMyBusiness(String email, Long businessId) {
+        Member member = findMember(email);
+        Business business = findOwnedBusiness(member, businessId);
+
+        businessRepository.delete(business);
+    }
 }
