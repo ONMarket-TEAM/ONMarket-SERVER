@@ -64,6 +64,7 @@ public class SecurityConfig {
                                 "/api/loan-products/*",
                                 "/api/credit-loans/*",
                                 "/api/captions/**",
+                                "/api/summary/**",
                                 "/login/oauth2/code/**",
                                 "/oauth2/authorization/**",
                                 "/api/oauth/**",
