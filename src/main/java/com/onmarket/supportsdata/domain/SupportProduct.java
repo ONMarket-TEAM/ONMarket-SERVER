@@ -75,6 +75,9 @@ public class SupportProduct {
     @OneToOne(mappedBy = "supportProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private SupportCondition supportCondition; // 연관된 지원 조건
 
+    @Column(length = 140) private String summaryShort;
+    @Lob @Column(columnDefinition = "TEXT") private String summaryLong;
+
     public void setSupportCondition(SupportCondition supportCondition) {
         this.supportCondition = supportCondition;
     }
@@ -142,4 +145,8 @@ public class SupportProduct {
         this.cardnewsUrl = url;
         this.cardnewsUpdatedAt = updatedAt;
     }
+
+    public void setSummaryShort(String summaryShort) { this.summaryShort = summaryShort; }
+    public void setSummaryLong(String summaryLong)   { this.summaryLong  = summaryLong; }
+
 }

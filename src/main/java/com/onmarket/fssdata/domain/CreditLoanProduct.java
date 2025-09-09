@@ -76,6 +76,9 @@ public class CreditLoanProduct extends BaseTimeEntity {
     @Column(name = "cardnews_updated_at")
     private Instant cardnewsUpdatedAt;
 
+    @Column(length = 140) private String summaryShort;
+    @Lob @Column(columnDefinition = "TEXT") private String summaryLong;
+
     // 해당 상품의 금리 옵션들 (양방향 연관관계)
     @OneToMany(mappedBy = "creditLoanProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude  // toString 무한루프 방지
@@ -145,4 +148,8 @@ public class CreditLoanProduct extends BaseTimeEntity {
         this.cardnewsUrl = null;
         this.cardnewsUpdatedAt = null;
     }
+
+    public void setSummaryShort(String summaryShort) { this.summaryShort = summaryShort; }
+    public void setSummaryLong(String summaryLong)   { this.summaryLong  = summaryLong; }
+
 }

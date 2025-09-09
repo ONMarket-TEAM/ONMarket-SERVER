@@ -212,6 +212,9 @@ public class LoanProduct extends BaseTimeEntity {
     @Column(name = "keywords", length = 512)
     private String keywords;
 
+    @Column(length = 140) private String summaryShort;
+    @Lob @Column(columnDefinition = "TEXT") private String summaryLong;
+
     public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
@@ -219,6 +222,7 @@ public class LoanProduct extends BaseTimeEntity {
     public void setRelatedSite(String relatedSite) {
         this.relatedSite = relatedSite;
     }
+
 
     @Builder
     public LoanProduct(String sequence, String productName, String usage, String target,
@@ -317,4 +321,8 @@ public class LoanProduct extends BaseTimeEntity {
         this.cardnewsUrl = url;
         this.cardnewsUpdatedAt = updatedAt;
     }
+
+    public void setSummaryShort(String summaryShort) { this.summaryShort = summaryShort; }
+    public void setSummaryLong(String summaryLong)   { this.summaryLong  = summaryLong; }
+
 }
