@@ -215,8 +215,10 @@ public enum ResponseCode {
     S3_MISSING_PARAMS(HttpStatus.BAD_REQUEST, "필수 파라미터(dir, filename, contentType)가 누락되었습니다."),
     S3_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "필수 파라미터(key)가 누락되었습니다."),
     S3_INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않은 Content-Type 입니다."),
+    S3_OPERATION_SUCCESS(HttpStatus.OK, "S3 작업 처리 성공하였습니다."),
     S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 작업 처리 중 오류가 발생했습니다."),
     NOTIFICATION_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 생성에 실패했습니다."),
+    S3_DELETE_SUCCESS(HttpStatus.OK, "S3 파일 삭제 성공"),
 
     /**
      * 데이터 조회 response
