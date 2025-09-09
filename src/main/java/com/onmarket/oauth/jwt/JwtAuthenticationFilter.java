@@ -32,10 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.startsWith("/api-docs")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-resources")
-                || path.startsWith("/webjars")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+                || path.startsWith("/webjars")
+                || path.startsWith("/login/oauth2/")
+                    || path.startsWith("/oauth2/authorization/")
+                    || path.startsWith("/api/oauth/")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
         // JWT 인증 처리
         String authHeader = request.getHeader("Authorization");

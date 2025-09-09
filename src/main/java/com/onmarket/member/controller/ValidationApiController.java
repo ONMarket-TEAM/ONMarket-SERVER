@@ -40,8 +40,11 @@ public class ValidationApiController {
             @io.swagger.v3.oas.annotations.responses.
                     ApiResponse(responseCode = "409", description = "이미 사용 중인 닉네임")
     })
-    public ApiResponse<?> checkNickname(@RequestParam String nickname) {
-        validationService.validateNickname(nickname);
+    public ApiResponse<?> checkNickname(
+            @RequestParam String nickname,
+            @RequestParam(required = false) Long memberId) {
+
+        validationService.validateNickname(nickname, memberId);
         return ApiResponse.success(ResponseCode.VALID_NICKNAME);
     }
 }
