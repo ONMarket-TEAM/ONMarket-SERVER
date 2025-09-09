@@ -21,17 +21,17 @@ public class OpenAIClient {
 
     private WebClient client() {
         var httpClient = reactor.netty.http.client.HttpClient.create()
-                .responseTimeout(java.time.Duration.ofSeconds(90))
+                .responseTimeout(java.time.Duration.ofSeconds(300))
                 .compress(true)
                 .doOnConnected(conn -> {
-                    conn.addHandlerLast(new io.netty.handler.timeout.ReadTimeoutHandler(90));
-                    conn.addHandlerLast(new io.netty.handler.timeout.WriteTimeoutHandler(90));
+                    conn.addHandlerLast(new io.netty.handler.timeout.ReadTimeoutHandler(300));
+                    conn.addHandlerLast(new io.netty.handler.timeout.WriteTimeoutHandler(300));
                 });
 
         var connector = new org.springframework.http.client.reactive.ReactorClientHttpConnector(httpClient);
 
         var strategies = org.springframework.web.reactive.function.client.ExchangeStrategies.builder()
-                .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(50 * 1024 * 1024)) // 50MB
+                .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(100 * 1024 * 1024)) // 100MB
                 .build();
 
         return WebClient.builder()
