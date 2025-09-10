@@ -10,7 +10,7 @@ spring:
     import: optional:application-data.yml
 
   profiles:
-    active: local
+    active: prod
     include: oauth
   cors:
     allowed-origins: http://localhost:8080,http://localhost:5173
