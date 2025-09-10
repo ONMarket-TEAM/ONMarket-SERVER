@@ -32,15 +32,15 @@ public class NotificationScheduler {
     /**
      * 테스트용 알림
      */
-//    @Scheduled(cron = "0 22 1 * * *", zone = "Asia/Seoul")
-//    public void sendTestNotification() {
-//        log.info("테스트 알림 스케줄러 실행 시작");
-//
-//        try {
-//            notificationService.sendTestNotification();
-//            log.info("테스트 알림 스케줄러 실행 완료");
-//        } catch (Exception e) {
-//            log.error("테스트 알림 전송 중 오류 발생", e);
-//        }
-//    }
+    @Scheduled(cron = "0 23 0 * * *", zone = "Asia/Seoul")
+    public void sendTestNotification() {
+        log.info("테스트 알림 스케줄러 실행 시작");
+
+        try {
+            notificationService.sendTestNotification();
+            log.info("테스트 알림 스케줄러 실행 완료");
+        } catch (Exception e) {
+            log.error("테스트 알림 전송 중 오류 발생", e);
+        }
+    }
 }

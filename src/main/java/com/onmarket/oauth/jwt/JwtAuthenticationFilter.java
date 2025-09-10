@@ -25,45 +25,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         String path = request.getRequestURI();
 
-        // Swagger, API docs, Webjars 요청은 필터 제외
-        if (path.startsWith("/swagger-ui")
+        // CORS 프리플라이트 & 공개 리소스는 바로 통과
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())
+                || path.startsWith("/swagger-ui")
                 || path.startsWith("/api-docs")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-resources")
                 || path.startsWith("/webjars")
                 || path.startsWith("/login/oauth2/")
-                    || path.startsWith("/oauth2/authorization/")
-                    || path.startsWith("/api/oauth/")) {
+                || path.startsWith("/oauth2/authorization/")
+                || path.startsWith("/api/oauth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            String token = authHeader.substring(7);
+
+            // 토큰이 유효하지 않으면 컨텍스트만 비우고 계속 진행(보호된 자원은 이후 401 처리)
+            if (!jwtTokenProvider.validateToken(token)) {
+                SecurityContextHolder.clearContext();
                 filterChain.doFilter(request, response);
                 return;
             }
 
-        // JWT 인증 처리
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-
-            // 토큰 유효성 검사
-            if (!jwtTokenProvider.validateToken(token)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
-                return;
-            }
-
-            // 토큰이 유효하다면 SecurityContext에 인증 정보 저장
+            // 유효 토큰이면 인증 저장
             String email = jwtTokenProvider.getEmail(token);
-            String role = jwtTokenProvider.getRole(token);
+            String role  = jwtTokenProvider.getRole(token); // null 가능성 가드
+            List<SimpleGrantedAuthority> authorities =
+                    (role != null && !role.isBlank())
+                            ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                            : List.of();
 
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
+                    new UsernamePasswordAuthenticationToken(email, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-           }
+        }
 
         filterChain.doFilter(request, response);
     }

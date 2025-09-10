@@ -115,6 +115,11 @@ public class ScrapServiceImpl implements ScrapService {
             return "상시 모집";
         }
 
+        String s = deadlineStr.trim();
+        if ("99991231".equals(s)) {
+            return "상시 모집";
+        }
+
         try {
             LocalDate deadline = LocalDate.parse(deadlineStr, DateTimeFormatter.ofPattern("yyyyMMdd"));
             long daysBetween = ChronoUnit.DAYS.between(LocalDate.now(), deadline);
