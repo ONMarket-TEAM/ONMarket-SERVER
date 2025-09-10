@@ -119,4 +119,22 @@ public class BusinessApiController {
         BusinessResponse updated = businessService.updateMyBusiness(email, businessId, request);
         return ApiResponse.success(ResponseCode.BUSINESS_UPDATE_SUCCESS, updated);
     }
+
+    // 사업장 삭제
+    @DeleteMapping("/{businessId}")
+    @Operation(summary = "내 사업장 삭제", description = "businessId가 내 소유인지 검증 후 삭제합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "내 소유 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사업장 없음")
+    })
+    public ApiResponse<Void> deleteMyBusiness(
+            @AuthenticationPrincipal String email,
+            @PathVariable Long businessId
+    ) {
+        businessService.deleteMyBusiness(email, businessId);
+        return ApiResponse.success(ResponseCode.BUSINESS_DELETE_SUCCESS, null);
+    }
+
 }

@@ -22,4 +22,8 @@ public interface BusinessService {
 
     /** 사업 정보 수정(이메일 기반) */
     BusinessResponse updateMyBusiness(String email, Long businessId, BusinessUpdateRequest request);
+
+    /** 사업장 삭제 */
+    void deleteMyBusiness(String email, Long businessId);
+
 }
