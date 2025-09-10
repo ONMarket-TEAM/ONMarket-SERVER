@@ -53,24 +53,10 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
             "ORDER BY s.createdAt DESC")
     List<Scrap> findAllWithMemberAndPost();
 
-    @Query("""
-    select s from Scrap s
-    join s.post p
-    where s.member = :member
-    order by
-      case
-        when p.deadline is null or p.deadline = '' then 2
-        when p.deadline is not null and p.deadline != '' 
-             and STR_TO_DATE(p.deadline, '%Y%m%d') < :today then 3
-        else 1
-      end,
-      case
-        when p.deadline is not null and p.deadline != ''
-        then STR_TO_DATE(p.deadline, '%Y%m%d')
-        else '9999-12-31'
-      end asc,
-      s.createdAt desc
-    """)
+    @Query("SELECT s FROM Scrap s " +
+            "JOIN FETCH s.post p " +
+            "WHERE s.member = :member " +
+            "ORDER BY s.createdAt DESC")
     List<Scrap> findByMemberOrderByDeadlineAndCreatedAt(
             @Param("member") Member member,
             @Param("today") LocalDate today,
