@@ -246,81 +246,62 @@ public class CardNewsService {
             // 세터/기본생성자가 없을 수 있으므로 실패해도 무시하고 배경 프롬프트에서만 강제
             log.debug("PosterConfig에 팔레트 주입 실패(무시): {}", t.getMessage());
         }
-    }
-
-    /* ===================== 배경 프롬프트 ===================== */
-
-    /** DALLE 배경 프롬프트 (중앙금지 + 팔레트 강제 + 파랑 고착 방지) */
+    }/** DALLE 배경 프롬프트 (소상공인 느낌 + 파스텔톤, 그라데이션 금지) */
     private String buildBackgroundPrompt(PosterConfig cfg) {
         String badge = safe(cfg.getBadge());
         String operatorName = (cfg.getOperator() != null ? safe(cfg.getOperator().getName()) : "");
 
-        // 1) 운영사 팔레트 우선 사용
         Optional<Palette> op = resolvePalette(operatorName);
-        boolean strict = op.map(Palette::strict).orElse(false);
+        String brand = op.map(Palette::brand)
+                .orElseGet(() -> (cfg.getTheme()!=null && cfg.getTheme().getBrand()!=null)
+                        ? cfg.getTheme().getBrand() : "#7C3AED");
+        String accent = op.map(Palette::accent)
+                .orElseGet(() -> (cfg.getTheme()!=null && cfg.getTheme().getAccent()!=null)
+                        ? cfg.getTheme().getAccent() : "#14B8A6");
 
-        // 2) brand/accent 결정: (운영사 팔레트) > (LLM이 준 theme) > (비파랑 기본)
-        String brand =
-                op.map(Palette::brand).orElseGet(() ->
-                        (cfg.getTheme()!=null && cfg.getTheme().getBrand()!=null)
-                                ? cfg.getTheme().getBrand()
-                                : "#7C3AED" // 보라(비파랑) 기본
-                );
-
-        String accent =
-                op.map(Palette::accent).orElseGet(() ->
-                        (cfg.getTheme()!=null && cfg.getTheme().getAccent()!=null)
-                                ? cfg.getTheme().getAccent()
-                                : "#14B8A6" // 틸(비파랑) 기본
-                );
-
-        String themeHint = badge != null && badge.contains("정부")
-                ? "government welfare support theme (Korea)"
-                : "consumer banking / credit loan theme (Korea)";
-
-        String dominance = strict
-                ? "- Dominant color MUST be {BRAND} (≥70% coverage). Use {ACCENT} as secondary (≤20%). Avoid other hues except neutrals.\n"
-                : "- Use {BRAND} as the primary color and {ACCENT} as highlight; keep other hues subtle.\n"
-                + "- If {BRAND} and {ACCENT} are not blue, avoid blue hues (>5%).\n";
+        String themeHint = (badge != null && badge.contains("정부"))
+                ? "Korean government support for small businesses"
+                : "Korean small business banking and credit loan";
 
         String horizRule = Math.random() < 0.5
-                ? "- Place the main illustration on the LEFT third (x ≈ 28%).\n"
-                : "- Place the main illustration on the RIGHT third (x ≈ 72%).\n";
+                ? "- Place the main illustration on the LEFT third (x≈28%).\n"
+                : "- Place the main illustration on the RIGHT third (x≈72%).\n";
 
-        String tmpl = """
-Korean poster background, 1024x1536. Finance/welfare theme. {THEME_HINT}.
-Color palette: primary {BRAND}, secondary {ACCENT}.
-{DOMINANCE}
-Smooth gradients, soft shadows.
+        return """
+Create a single poster BACKGROUND image at 1024x1536, PNG.
 
-LAYOUT BANDS:
-- TOP y 0–18%: COMPLETELY EMPTY for HTML title.
-- CONTENT y 18–44%: ONE main figurative illustration here.
-- BOTTOM y 56–100%: only faint abstract shapes; no focal objects.
+Theme: {THEME_HINT}.
+Visual style:
+- Evoke small business owners: shop fronts, market stalls, calculators, loan documents, people consulting at a desk.
+- Use pastel tones only (soft, light, gentle colors). DO NOT use saturated or neon colors.
+- Absolutely NO gradients. Use solid pastel background colors with subtle flat shading.
+- Add faint, almost invisible background motifs (like shop outlines, store shelves, simple icons) so it feels lively but subtle.
+- Make it cute and friendly, not corporate.
 
-PLACEMENT HARD RULES:
-- Do NOT use a centered composition.
-  {HORIZ_RULE}- Vertical anchor around y ≈ 28% (keep salient parts ABOVE y 48%).
-- Keep 48–100% free of focal elements.
+Layout rules (Y axis in % of height):
+- TOP 0–14%: leave completely EMPTY (reserved for HTML title).
+- HERO BANNER 18–34%: put ONE figurative subject here (people with documents, shop owner, small shop, money sign).
+  Keep inside a 980x240px panel centered at y≈26%.
+- TEXT AREA 36–100%: only subtle abstract pastel patterns, no strong objects.
 
-ABSOLUTE RULES — NO TEXT/LOGOS:
-- No readable or pseudo text in any language.
-- No logos/labels/watermarks/UI captions. Objects that normally have text must be left blank.
+Placement rules:
+{HORIZ_RULE}
+- Do NOT center the subject. Keep bias to one side (left or right).
+- No logos, no readable text.
 
-Composition: asymmetric layout; large negative space opposite the subject.
-Category hint: {BADGE}. Operator: {OPERATOR} (no real logos).
-""";
+Color palette hint:
+- Primary color {BRAND}, secondary color {ACCENT}, but all rendered in pastel tones.
+- Background should be solid pastel, not gradient.
 
-        return tmpl.replace("{THEME_HINT}", themeHint)
+Category: {BADGE}. Operator: {OPERATOR}.
+""".replace("{THEME_HINT}", themeHint)
                 .replace("{BRAND}", brand)
                 .replace("{ACCENT}", accent)
                 .replace("{BADGE}", badge == null ? "" : badge)
                 .replace("{OPERATOR}", operatorName)
-                .replace("{DOMINANCE}", dominance)
                 .replace("{HORIZ_RULE}", horizRule);
     }
 
-    /* ===================== 렌더링 ===================== */
 
     private byte[] render(PosterConfig cfg, String bgDataUrl) {
         String html = htmlTemplate.renderHtml(cfg, bgDataUrl);

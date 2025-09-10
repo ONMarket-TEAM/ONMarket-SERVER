@@ -41,7 +41,7 @@ public class ScrapServiceImpl implements ScrapService {
     @Transactional
     public ScrapToggleResponse toggleScrap(String email, Long postId) {
         Member member = findMemberByEmail(email);
-        Post post = findPostById(postId);
+        Post post = findPostById(postId); // Post 엔티티를 여기서 조회합니다.
 
         Optional<Scrap> existingScrap = scrapRepository.findByMemberAndPost(member, post);
 
@@ -49,18 +49,20 @@ public class ScrapServiceImpl implements ScrapService {
         if (existingScrap.isPresent()) {
             // 스크랩 해제
             scrapRepository.delete(existingScrap.get());
+            post.decreaseScrapCount(); // 🔥 [핵심 수정 1] Post의 스크랩 카운트 1 감소
             isScraped = false;
-            log.info("사용자 {}가 게시물 {} 스크랩 해제", email, postId);
+            log.info("사용자 {}가 게시물 {} 스크랩 해제. 현재 스크랩 수: {}", email, postId, post.getScrapCount());
         } else {
             // 스크랩 추가
             Scrap newScrap = Scrap.create(member, post);
             scrapRepository.save(newScrap);
+            post.increaseScrapCount(); // 🔥 [핵심 수정 2] Post의 스크랩 카운트 1 증가
             isScraped = true;
-            log.info("사용자 {}가 게시물 {} 스크랩 추가", email, postId);
+            log.info("사용자 {}가 게시물 {} 스크랩 추가. 현재 스크랩 수: {}", email, postId, post.getScrapCount());
         }
 
-        // 최신 스크랩 개수 조회
-        Long scrapCount = scrapRepository.countByPost(post);
+        // 🔥 [핵심 수정 3] DB를 다시 조회하는 대신, 이미 업데이트된 Post 객체의 카운트를 사용합니다.
+        long scrapCount = post.getScrapCount();
         return ScrapToggleResponse.of(isScraped, scrapCount);
     }
 
@@ -76,18 +78,16 @@ public class ScrapServiceImpl implements ScrapService {
 
     @Override
     public boolean isScrapedByMe(String email, Long postId) {
-        // 성능 최적화: Entity 조회 없이 ID만으로 확인
         Member member = memberService.findByEmail(email);
         return scrapRepository.existsByMemberMemberIdAndPostPostId(member.getMemberId(), postId);
     }
 
     @Override
     public Long getScrapCount(Long postId) {
-        // 성능 최적화: Entity 조회 없이 ID만으로 카운트
-        return scrapRepository.countByPostId(postId);
+        // 🔥 [최적화] Scrap 테이블을 전부 세는 대신, Post 엔티티의 scrapCount 값을 직접 반환합니다.
+        Post post = findPostById(postId);
+        return (long) post.getScrapCount();
     }
-
-    // === Private 헬퍼 메서드들 ===
 
     private Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email)

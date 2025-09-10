@@ -19,8 +19,11 @@ public class BusinessRequest {
     @Schema(description = "사업장 유형", example = "CORPORATE")
     private BusinessType businessType;
 
-    @Schema(description = "지역 코드 ID", example = "11011")
-    private String regionCodeId;
+    @Schema(description = "시/도명", example = "서울특별시")
+    private String sidoName;
+
+    @Schema(description = "시군구명", example = "종로구")
+    private String sigunguName;
 
     @Schema(description = "설립 연도", example = "2015")
     private Integer establishedYear;
