@@ -32,7 +32,7 @@ public class NotificationScheduler {
     /**
      * 테스트용 알림
      */
-//    @Scheduled(cron = "0 22 1 * * *", zone = "Asia/Seoul")
+//    @Scheduled(cron = "0 23 0 * * *", zone = "Asia/Seoul")
 //    public void sendTestNotification() {
 //        log.info("테스트 알림 스케줄러 실행 시작");
 //

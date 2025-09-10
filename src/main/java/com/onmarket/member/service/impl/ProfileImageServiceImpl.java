@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URL;
 
@@ -20,6 +21,8 @@ import java.net.URL;
 public class ProfileImageServiceImpl implements ProfileImageService {
     private final MemberRepository memberRepository;
     private final S3PresignService s3;
+
+    private static final String DEFAULT_PROFILE_IMAGE = "/basic_profile.png";
 
     @Override
     @Transactional(readOnly = true)
@@ -65,7 +68,14 @@ public class ProfileImageServiceImpl implements ProfileImageService {
         Member m = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ResponseCode.MEMBER_NOT_FOUND));
         String key = m.getProfileImage();
-        String url = (key == null) ? null : s3.generateGetUrl(key).toString();
+        if (!StringUtils.hasText(key)) {
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path(DEFAULT_PROFILE_IMAGE)
+                    .toUriString();
+            return new ImageUrlResponse(null, url);
+        }
+
+        String url = s3.generateGetUrl(key).toString();
         return new ImageUrlResponse(key, url);
     }
 
