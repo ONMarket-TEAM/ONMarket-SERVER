@@ -27,4 +27,7 @@ public interface PostService {
     void createPostsFromSupportProducts();
 
     PostSingleResponse getPostById(Long postId);
+
+    List<PostListResponse> getTop5PostsByScrapCount();
+
 }

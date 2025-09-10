@@ -13,6 +13,7 @@ import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
+import com.onmarket.scrap.repository.ScrapRepository;
 import com.onmarket.scrap.service.ScrapService;
 import com.onmarket.supportsdata.domain.SupportProduct;
 import com.onmarket.supportsdata.repository.SupportProductRepository;
@@ -42,6 +43,8 @@ public class PostServiceImpl implements PostService {
     private final LoanProductRepository loanProductRepository;
     private final SupportProductRepository supportProductRepository; // 새로 추가
     private final ScrapService scrapService;
+    private final ScrapRepository scrapRepository;
+
 
     @Override
     public List<PostListResponse> getPostsByType(PostType postType) {
@@ -284,5 +287,12 @@ public class PostServiceImpl implements PostService {
         Long scrapCount = scrapService.getScrapCount(postId);
 
         return PostDetailWithScrapResponse.from(postDetail, isScraped, scrapCount);
+    }
+
+    public List<PostListResponse> getTop5PostsByScrapCount() {
+        List<Post> posts = scrapRepository.findTopPostsByScrapCount(PageRequest.of(0, 5));
+        return posts.stream()
+                .map(PostListResponse::from) // 이미 있는 DTO 변환 메서드 사용
+                .toList();
     }
 }
