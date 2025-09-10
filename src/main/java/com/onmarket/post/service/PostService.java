@@ -14,6 +14,9 @@ public interface PostService {
     // Pageable을 파라미터로 받고, Page<PostListResponse>를 반환하도록 변경
     Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable);
 
+    // Top 5 게시물 조회
+    List<PostListResponse> getTopScrapedPosts();
+
     // 게시물 상세 조회
     PostDetailResponse getPostDetail(Long postId);
 
@@ -33,7 +36,4 @@ public interface PostService {
 
     //  검색 기능
     Page<PostListResponse> searchPosts(PostType postType, String keyword, String companyName, Pageable pageable);
-
-    List<PostListResponse> getTop5PostsByScrapCount();
-
 }
