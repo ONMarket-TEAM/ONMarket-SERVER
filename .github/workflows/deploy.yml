@@ -1,91 +1,177 @@
-name: Deploy to EC2
+name: Zero Downtime Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop, main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Build with Gradle
-      run: ./gradlew build -x test
-      
-    - name: Upload JAR to EC2
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "build/libs/onmarket-0.0.1-SNAPSHOT.jar"
-        target: "/home/ec2-user/onmarket-new.jar"
-        
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          # 현재 실행 중인 Java 프로세스의 포트 확인
-          CURRENT_PORT=8081
-          NEW_PORT=8080
-          if pgrep -f "server.port=8080" > /dev/null; then
-            CURRENT_PORT=8080
-            NEW_PORT=8081
-          fi
-          
-          echo "Current port: $CURRENT_PORT, New port: $NEW_PORT"
-          
-          # 새 버전을 다른 포트에서 실행
-          nohup java -Dserver.port=$NEW_PORT -jar onmarket-new.jar > app-$NEW_PORT.log 2>&1 &
-          NEW_PID=$!
-          
-          # 새 앱이 시작될 때까지 대기
-          echo "Waiting for new application to start on port $NEW_PORT..."
-          for i in {1..30}; do
-            if curl -f http://localhost:$NEW_PORT/login > /dev/null 2>&1; then
-              echo "New application is running on port $NEW_PORT"
-              break
-            fi
-            echo "Attempt $i: Application not ready yet..."
-            sleep 2
-          done
-          
-          # 헬스체크 성공 시 Nginx 설정 변경
-          if curl -f http://localhost:$NEW_PORT/login > /dev/null 2>&1; then
-            echo "Health check passed. Switching Nginx to port $NEW_PORT"
-            
-            # Nginx 설정 파일에서 포트 변경
-            sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]*/proxy_pass http:\/\/localhost:$NEW_PORT/" /etc/nginx/conf.d/onmarket.conf
-            
-            # Nginx 설정 테스트 및 리로드
-            sudo nginx -t && sudo systemctl reload nginx
-            
-            # 기존 프로세스 종료
-            OLD_PID=$(pgrep -f "server.port=$CURRENT_PORT")
-            if [ ! -z "$OLD_PID" ]; then
-              echo "Killing old process: $OLD_PID"
-              kill $OLD_PID
-            fi
-            
-            echo "Deployment completed successfully!"
-            
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Set environment and ports
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+            echo "PORT_A=8080" >> $GITHUB_ENV
+            echo "PORT_B=8082" >> $GITHUB_ENV
+            echo "NGINX_TARGET_PORT=8080" >> $GITHUB_ENV
           else
-            echo "Health check failed. Rolling back..."
-            kill $NEW_PID
-            exit 1
+            echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+            echo "PORT_A=8081" >> $GITHUB_ENV
+            echo "PORT_B=8083" >> $GITHUB_ENV
+            echo "NGINX_TARGET_PORT=8081" >> $GITHUB_ENV
           fi
+
+      - name: Upload JAR to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build/libs/onmarket-0.0.1-SNAPSHOT.jar"
+          target: "/home/ec2-user/onmarket-${{ env.DEPLOY_ENV }}-new.jar"
+
+      - name: Zero Downtime Deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            ENV=${{ env.DEPLOY_ENV }}
+            PORT_A=${{ env.PORT_A }}
+            PORT_B=${{ env.PORT_B }}
+            NGINX_TARGET=${{ env.NGINX_TARGET_PORT }}
+            
+            echo "Starting zero downtime deployment for $ENV environment"
+            
+            # 현재 어느 포트가 활성화되어 있는지 확인
+            CURRENT_PORT=""
+            NEW_PORT=""
+            
+            if pgrep -f "server.port=$PORT_A" > /dev/null; then
+              CURRENT_PORT=$PORT_A
+              NEW_PORT=$PORT_B
+              echo "Current: $PORT_A, New: $PORT_B"
+            elif pgrep -f "server.port=$PORT_B" > /dev/null; then
+              CURRENT_PORT=$PORT_B
+              NEW_PORT=$PORT_A
+              echo "Current: $PORT_B, New: $PORT_A"
+            else
+              # 둘 다 실행되지 않은 경우 PORT_A를 새 포트로 사용
+              NEW_PORT=$PORT_A
+              echo "No current process found. Starting on $PORT_A"
+            fi
+            
+            # 새 버전을 NEW_PORT에서 시작
+            echo "Starting new version on port $NEW_PORT"
+            nohup java -Dserver.port=$NEW_PORT -jar onmarket-$ENV-new.jar > app-$ENV-$NEW_PORT.log 2>&1 &
+            NEW_PID=$!
+            
+            # 헬스체크 - 새 버전이 완전히 시작될 때까지 대기
+            echo "Performing health check on port $NEW_PORT..."
+            HEALTH_CHECK_PASSED=false
+            
+            for i in {1..60}; do
+              sleep 2
+              if curl -f http://localhost:$NEW_PORT/login > /dev/null 2>&1; then
+                echo "Health check passed on attempt $i"
+                HEALTH_CHECK_PASSED=true
+                break
+              fi
+              echo "Attempt $i: Waiting for application to be ready..."
+            done
+            
+            if [ "$HEALTH_CHECK_PASSED" = false ]; then
+              echo "Health check failed. Rolling back..."
+              kill $NEW_PID 2>/dev/null || true
+              exit 1
+            fi
+            
+            # 추가 안정성 확인 (3회 연속 성공)
+            echo "Performing additional stability checks..."
+            for i in {1..3}; do
+              sleep 1
+              if ! curl -f http://localhost:$NEW_PORT/login > /dev/null 2>&1; then
+                echo "Stability check failed on attempt $i"
+                kill $NEW_PID 2>/dev/null || true
+                exit 1
+              fi
+            done
+            
+            echo "New version is stable on port $NEW_PORT"
+            
+            # 운영 환경인 경우에만 Nginx 설정 업데이트
+            if [ "$ENV" = "production" ]; then
+              echo "Updating Nginx configuration to point to port $NEW_PORT"
+            
+              # Nginx 설정 파일 백업
+              sudo cp /etc/nginx/conf.d/onmarket.conf /etc/nginx/conf.d/onmarket.conf.backup
+            
+              # Nginx 설정에서 포트 변경
+              sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]*/proxy_pass http:\/\/localhost:$NEW_PORT/" /etc/nginx/conf.d/onmarket.conf
+            
+              # Nginx 설정 테스트
+              if sudo nginx -t; then
+                echo "Nginx configuration test passed"
+                sudo systemctl reload nginx
+                echo "Nginx reloaded successfully"
+            
+                # 짧은 대기 시간 후 트래픽 전환 확인
+                sleep 2
+            
+              else
+                echo "Nginx configuration test failed. Rolling back..."
+                sudo cp /etc/nginx/conf.d/onmarket.conf.backup /etc/nginx/conf.d/onmarket.conf
+                kill $NEW_PID 2>/dev/null || true
+                exit 1
+              fi
+            fi
+            
+            # 기존 버전이 있다면 안전하게 종료
+            if [ ! -z "$CURRENT_PORT" ]; then
+              echo "Gracefully shutting down old version on port $CURRENT_PORT"
+              OLD_PID=$(pgrep -f "server.port=$CURRENT_PORT")
+            
+              if [ ! -z "$OLD_PID" ]; then
+                # Graceful shutdown 시도
+                kill -TERM $OLD_PID 2>/dev/null || true
+            
+                # 최대 10초 대기
+                for i in {1..10}; do
+                  if ! kill -0 $OLD_PID 2>/dev/null; then
+                    echo "Old process gracefully shut down"
+                    break
+                  fi
+                  sleep 1
+                done
+            
+                # 여전히 실행 중이면 강제 종료
+                if kill -0 $OLD_PID 2>/dev/null; then
+                  echo "Force killing old process"
+                  kill -9 $OLD_PID 2>/dev/null || true
+                fi
+              fi
+            fi
+            
+            echo "Zero downtime deployment completed successfully!"
+            echo "$ENV environment is now running on port $NEW_PORT"
+            
+            # 배포 정보 저장
+            echo "$(date): $ENV deployed on port $NEW_PORT (PID: $NEW_PID)" >> /home/ec2-user/deployment-history.log
