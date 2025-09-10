@@ -20,6 +20,7 @@ import com.onmarket.supportsdata.repository.SupportProductRepository;
 import com.onmarket.post.domain.PostSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.jpa.domain.Specification;
 
 @Slf4j
@@ -51,6 +54,28 @@ public class PostServiceImpl implements PostService {
     public Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable) {
         Page<Post> posts = postRepository.findByPostType(postType, pageable);
         return posts.map(this::convertToListResponse);
+    }
+
+    @Override
+    @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
+    public List<PostListResponse> getTopScrapedPosts() {
+        log.info("스크랩 수 상위 5개 게시물 조회 시작");
+
+        try {
+            Pageable pageable = PageRequest.of(0, 5);
+            List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
+
+            List<PostListResponse> result = topPosts.stream()
+                    .map(this::convertToListResponse)
+                    .collect(Collectors.toList());
+
+            log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
+            return result;
+
+        } catch (Exception e) {
+            log.error("스크랩 수 상위 게시물 조회 중 오류 발생", e);
+            throw e;
+        }
     }
 
     @Override
@@ -286,12 +311,5 @@ public class PostServiceImpl implements PostService {
             log.warn("날짜 파싱 실패: {}", deadlineStr);
             return "상시";
         }
-    }
-
-    public List<PostListResponse> getTop5PostsByScrapCount() {
-        List<Post> posts = scrapRepository.findTopPostsByScrapCount(PageRequest.of(0, 5));
-        return posts.stream()
-                .map(PostListResponse::from) // 이미 있는 DTO 변환 메서드 사용
-                .toList();
     }
 }

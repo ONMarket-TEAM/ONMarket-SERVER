@@ -62,14 +62,4 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
             @Param("today") LocalDate today,
             Pageable pageable
     );
-
-    @Query("""
-    select p
-    from Post p
-    left join p.scraps s
-    group by p
-    order by count(s) desc
-""")
-    List<Post> findTopPostsByScrapCount(Pageable pageable);
-
 }

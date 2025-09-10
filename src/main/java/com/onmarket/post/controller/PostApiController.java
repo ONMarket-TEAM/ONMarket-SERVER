@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @Tag(name = "Post API", description = "상품 게시물 관련 API")
 @RestController
@@ -39,6 +41,25 @@ public class PostApiController {
     public ApiResponse<Page<PostListResponse>> getPostsByType(@PathVariable PostType type, Pageable pageable) {
         Page<PostListResponse> postsPage = postService.getPostsByType(type, pageable);
         return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, postsPage);
+    }
+
+    /**
+     * 스크랩 수 상위 5개 게시물 조회
+     */
+    @Operation(summary = "TOP 5 게시물 조회", description = "스크랩 수가 가장 많은 상위 5개 게시물 조회")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/top-scraped")
+    public ApiResponse<List<PostListResponse>> getTopScrapedPosts() {
+        log.info("인기 상품 Top 5 조회 요청");
+
+        List<PostListResponse> topPosts = postService.getTopScrapedPosts();
+
+        log.info("인기 상품 Top 5 조회 완료 - {}개 반환", topPosts.size());
+
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, topPosts);
     }
 
     /**
@@ -142,11 +163,4 @@ public class PostApiController {
 
         return jwtTokenProvider.getEmail(token);
     }
-
-    @GetMapping("/hot-top5")
-    public ApiResponse<List<PostListResponse>> getTop5ScrapPosts() {
-        List<PostListResponse> posts = postService.getTop5PostsByScrapCount();
-        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, posts);
-    }
-
 }
