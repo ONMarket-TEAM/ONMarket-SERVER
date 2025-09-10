@@ -45,6 +45,9 @@ public class Post extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String detailContent; // 상세 내용
 
+    @Column(nullable = false)
+    private int scrapCount = 0;
+
     // === 원본 데이터 추적용 ===
     @Column(nullable = false)
     private String sourceTable; // "CreditLoanProduct", "LoanProduct", "SupportProduct"
@@ -57,4 +60,14 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
+
+    // 스크랩 수를 1 증가시키는 편의 메서드
+    public void increaseScrapCount() {
+        this.scrapCount++;
+    }
+
+    // 스크랩 수를 1 감소시키는 편의 메서드 (0 이하로 내려가지 않도록 방지)
+    public void decreaseScrapCount() {
+        this.scrapCount = Math.max(0, this.scrapCount - 1);
+    }
 }

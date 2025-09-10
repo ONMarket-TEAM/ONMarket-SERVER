@@ -18,12 +18,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-
+@Slf4j
 @Tag(name = "Post API", description = "상품 게시물 관련 API")
 @RestController
 @RequestMapping("/api/posts")
@@ -44,7 +42,7 @@ public class PostApiController {
     }
 
     /**
-     * 상품 검색 API
+     * 상품 검색 API - 개선된 버전
      */
     @Operation(summary = "상품 검색", description = "타입별 상품을 키워드로 검색합니다")
     @ApiResponses(value = {
@@ -63,19 +61,35 @@ public class PostApiController {
             @Parameter(description = "회사명 필터", example = "신한은행")
             @RequestParam(value = "company", required = false) String companyName,
 
-            Pageable pageable) {
+            Pageable pageable,
 
-        Page<PostListResponse> searchResults = postService.searchPosts(
-                type, keyword, companyName, pageable);
+            HttpServletRequest request) { // 🔥 요청 정보 로깅을 위해 추가
 
-        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, searchResults);
+        // 🔥 디버깅을 위한 로깅 추가
+        log.info("검색 요청 - URL: {}, 타입: {}, 키워드: '{}', 회사명: '{}', 페이지: {}",
+                request.getRequestURL() + "?" + request.getQueryString(),
+                type, keyword, companyName, pageable.getPageNumber());
+
+        try {
+            Page<PostListResponse> searchResults = postService.searchPosts(
+                    type, keyword, companyName, pageable);
+
+            log.info("검색 결과 - 총 {}개, 현재 페이지 {}개",
+                    searchResults.getTotalElements(), searchResults.getNumberOfElements());
+
+            return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, searchResults);
+
+        } catch (Exception e) {
+            log.error("검색 중 오류 발생: ", e);
+            throw e;
+        }
     }
 
     /**
      * 게시물 상세 조회 (스크랩 정보 포함)
      */
     @GetMapping("/{postId}")
-    public ApiResponse<PostDetailWithScrapResponse> getPostDetail(HttpServletRequest request,  @PathVariable Long postId) {
+    public ApiResponse<PostDetailWithScrapResponse> getPostDetail(HttpServletRequest request, @PathVariable Long postId) {
         String email = extractEmailFromToken(request);
         PostDetailWithScrapResponse response = postService.getPostDetailWithScrap(postId, email);
         return ApiResponse.success(ResponseCode.POST_DETAIL_SUCCESS, response);
@@ -106,7 +120,7 @@ public class PostApiController {
     }
 
     /**
-     * SupportProduct 데이터 동기화 (관리자용) - 새로 추가
+     * SupportProduct 데이터 동기화 (관리자용)
      */
     @PostMapping("/sync/support-products")
     public ApiResponse<String> syncSupportPosts() {
