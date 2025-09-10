@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
     Page<Post> findByPostType(PostType postType, Pageable pageable);
 
@@ -28,4 +30,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
                               @Param("sourceId") Long sourceId,
                               @Param("summary") String summary,
                               @Param("detailContent") String detailContent);
+
+    /**
+     * 스크랩 수 기준으로 상위 N개 게시물 조회
+     */
+    @Query("SELECT p FROM Post p ORDER BY p.scrapCount DESC, p.createdAt DESC")
+    List<Post> findTopByScrapCountOrderByScrapCountDesc(Pageable pageable);
 }
