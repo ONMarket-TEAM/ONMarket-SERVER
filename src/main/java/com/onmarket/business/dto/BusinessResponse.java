@@ -23,8 +23,12 @@ public class BusinessResponse {
     @Schema(description = "사업장 유형", example = "CORPORATE")
     private BusinessType businessType;
 
-    @Schema(description = "지역 코드 ID", example = "11011")
-    private String regionCodeId;
+    /** 🔽 지역명/구명 직접 반환 */
+    @Schema(description = "시/도명", example = "서울특별시")
+    private String sidoName;
+
+    @Schema(description = "시군구명", example = "종로구")
+    private String sigunguName;
 
     @Schema(description = "설립 연도", example = "2015")
     private Integer establishedYear;
@@ -44,7 +48,8 @@ public class BusinessResponse {
                 b.getBusinessName(),
                 b.getIndustry(),
                 b.getBusinessType(),
-                b.getRegionCodeId(),
+                b.getSidoName(),
+                b.getSigunguName(),
                 b.getEstablishedYear(),
                 b.getAnnualRevenue(),
                 b.getEmployeeCount(),

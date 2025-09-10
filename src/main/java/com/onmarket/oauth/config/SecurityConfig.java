@@ -99,7 +99,8 @@ public class SecurityConfig {
                                 "/api/posts/**",
                                 "/api/posts/type/**",
                                 "/api/posts/generate",
-                                "/api/cardnews/**"
+                                "/api/cardnews/**",
+                                "/api/regions"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

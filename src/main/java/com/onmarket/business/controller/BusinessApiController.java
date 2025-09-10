@@ -102,8 +102,11 @@ public class BusinessApiController {
 
     // 사업정보 수정
     @PatchMapping("/{businessId}")
-    @Operation(summary = "사업장 정보 부분 수정",
-            description = "업종/형태/지역/연매출/직원수/설립연도 중 전달된 값만 반영합니다.")
+    @Operation(
+            summary = "사업장 정보 부분 수정",
+            description = "업종/형태/지역(시/도명, 시군구명)/연매출/직원수/설립연도 중 전달된 값만 반영합니다."
+    )
+
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "수정 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 값"),

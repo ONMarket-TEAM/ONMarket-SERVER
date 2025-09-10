@@ -34,8 +34,11 @@ public class Business extends BaseTimeEntity {
     @Column(name = "business_type", nullable = false)
     private BusinessType businessType;
 
-    @Column(name = "region_code_id", length = 20, nullable = false)
-    private String regionCodeId;
+    @Column(name = "sido_name", length = 50, nullable = false)
+    private String sidoName;
+
+    @Column(name = "sigungu_name", length = 50, nullable = false)
+    private String sigunguName;
 
     @Column(name = "established_year")
     private Integer establishedYear;
@@ -70,8 +73,9 @@ public class Business extends BaseTimeEntity {
     }
 
     /** 지역 코드 변경 */
-    public void changeRegion(String regionCodeId) {
-        this.regionCodeId = regionCodeId;
+    public void changeRegion(String sidoName, String sigunguName) {
+        if (sidoName != null) this.sidoName = sidoName;
+        if (sigunguName != null) this.sigunguName = sigunguName;
     }
 
     /** 설립 연도 변경 */

@@ -43,7 +43,8 @@ public class BusinessServiceImpl implements BusinessService {
                 .businessName(request.getBusinessName())
                 .industry(request.getIndustry())
                 .businessType(request.getBusinessType())
-                .regionCodeId(request.getRegionCodeId())
+                .sidoName(request.getSidoName())
+                .sigunguName(request.getSigunguName())
                 .establishedYear(request.getEstablishedYear())
                 .annualRevenue(request.getAnnualRevenue())
                 .employeeCount(request.getEmployeeCount())
@@ -85,7 +86,8 @@ public class BusinessServiceImpl implements BusinessService {
                 b.getBusinessName(),
                 b.getIndustry(),
                 b.getBusinessType(),
-                b.getRegionCodeId(),
+                b.getSidoName(),
+                b.getSigunguName(),
                 b.getEstablishedYear(),
                 b.getAnnualRevenue(),
                 b.getEmployeeCount(),
@@ -120,7 +122,8 @@ public class BusinessServiceImpl implements BusinessService {
         if (req.getBusinessName() != null) business.changeBusinessName(req.getBusinessName());
         if (req.getIndustry()      != null) business.changeIndustry(req.getIndustry());
         if (req.getBusinessType()  != null) business.changeBusinessType(req.getBusinessType());
-        if (req.getRegionCodeId()  != null) business.changeRegion(req.getRegionCodeId());
+        if (req.getSidoName()      != null || req.getSigunguName() != null) {business.changeRegion(req.getSidoName(), req.getSigunguName());
+        }
         if (req.getAnnualRevenue() != null) business.changeAnnualRevenue(req.getAnnualRevenue());
         if (req.getEmployeeCount() != null) business.changeEmployeeCount(req.getEmployeeCount());
         if (req.getEstablishedYear()!= null) business.changeEstablishedYear(req.getEstablishedYear());
