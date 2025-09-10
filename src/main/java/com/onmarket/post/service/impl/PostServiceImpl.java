@@ -47,11 +47,10 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    public List<PostListResponse> getPostsByType(PostType postType) {
-        List<Post> posts = postRepository.findByPostTypeOrderByCreatedAtDesc(postType);
-        return posts.stream()
-                .map(this::convertToListResponse)
-                .collect(Collectors.toList());
+    public Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable) {
+        Page<Post> posts = postRepository.findByPostTypeOrderByCreatedAtDesc(postType, pageable);
+
+        return posts.map(this::convertToListResponse);
     }
 
     @Override
@@ -287,6 +286,23 @@ public class PostServiceImpl implements PostService {
         Long scrapCount = scrapService.getScrapCount(postId);
 
         return PostDetailWithScrapResponse.from(postDetail, isScraped, scrapCount);
+    }
+
+    @Override
+    public Page<PostListResponse> searchPosts(PostType postType, String keyword, String companyName,
+                                              Pageable pageable) {
+
+        // [수정] 서비스 계층에서 검색어 패턴을 직접 만들어 전달
+        String keywordPattern = (keyword != null && !keyword.trim().isEmpty()) ?
+                "%" + keyword.trim().toLowerCase() + "%" : null;
+
+        String companyNamePattern = (companyName != null && !companyName.trim().isEmpty()) ?
+                "%" + companyName.trim().toLowerCase() + "%" : null;
+
+        Page<Post> posts = postRepository.searchPosts(
+                postType, keywordPattern, companyNamePattern, pageable);
+
+        return posts.map(this::convertToListResponse);
     }
 
     public List<PostListResponse> getTop5PostsByScrapCount() {
