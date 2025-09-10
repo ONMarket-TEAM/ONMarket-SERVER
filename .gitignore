@@ -6,16 +6,6 @@ build/
 !**/src/test/**/build/
 
 .DB_Store
-.DS_Store
-**/.DS_Store
-.AppleDouble
-.LSOverride
-._*
-EOF
-
-.keys/
-*.pem
-
 
 ### STS ###
 .apt_generated
@@ -55,7 +45,6 @@ out/
 src/main/resources/application-oauth.yml
 src/main/resources/application-prod.yml
 src/main/resources/application-local.yml
-src/main/resources/application-data.yml
 
 # Ignore all XML files
 *.xml

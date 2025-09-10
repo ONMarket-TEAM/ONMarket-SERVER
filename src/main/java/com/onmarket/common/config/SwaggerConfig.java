@@ -1,7 +1,5 @@
 package com.onmarket.common.config;
 
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -11,12 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Arrays;
 
 @Configuration
-@SecurityScheme(
-        name = "BearerAuth",              // 스키마 이름
-        type = SecuritySchemeType.HTTP,   // HTTP 인증 방식
-        scheme = "bearer",                // Bearer 토큰
-        bearerFormat = "JWT"              // JWT 사용
-)
 public class SwaggerConfig {
 
 
