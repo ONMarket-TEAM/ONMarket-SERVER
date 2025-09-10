@@ -9,11 +9,15 @@ import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
 import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.service.PostService;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +38,37 @@ public class PostApiController {
      * 타입별 게시물 목록 조회
      */
     @GetMapping("/type/{type}")
-    public ApiResponse<List<PostListResponse>> getPostsByType(@PathVariable PostType type) {
-        List<PostListResponse> posts = postService.getPostsByType(type);
-        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, posts);
+    public ApiResponse<Page<PostListResponse>> getPostsByType(@PathVariable PostType type, Pageable pageable) {
+        Page<PostListResponse> postsPage = postService.getPostsByType(type, pageable);
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, postsPage);
+    }
+
+    /**
+     * 상품 검색 API
+     */
+    @Operation(summary = "상품 검색", description = "타입별 상품을 키워드로 검색합니다")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "검색 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/type/{type}/search")
+    public ApiResponse<Page<PostListResponse>> searchPosts(
+            @Parameter(description = "상품 타입", example = "LOAN")
+            @PathVariable PostType type,
+
+            @Parameter(description = "검색 키워드 (상품명, 회사명에서 검색)", example = "신한")
+            @RequestParam(value = "keyword", required = false) String keyword,
+
+            @Parameter(description = "회사명 필터", example = "신한은행")
+            @RequestParam(value = "company", required = false) String companyName,
+
+            Pageable pageable) {
+
+        Page<PostListResponse> searchResults = postService.searchPosts(
+                type, keyword, companyName, pageable);
+
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, searchResults);
     }
 
     /**

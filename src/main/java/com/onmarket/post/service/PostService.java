@@ -4,12 +4,15 @@ import com.onmarket.post.domain.PostType;
 import com.onmarket.post.dto.PostDetailResponse;
 import com.onmarket.post.dto.PostDetailWithScrapResponse;
 import com.onmarket.post.dto.PostListResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.onmarket.post.dto.PostSingleResponse;
 import java.util.List;
 
 public interface PostService {
-    // 타입별 게시물 목록 조회
-    List<PostListResponse> getPostsByType(PostType postType);
+    // Pageable을 파라미터로 받고, Page<PostListResponse>를 반환하도록 변경
+    Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable);
 
     // 게시물 상세 조회
     PostDetailResponse getPostDetail(Long postId);
@@ -27,4 +30,7 @@ public interface PostService {
     void createPostsFromSupportProducts();
 
     PostSingleResponse getPostById(Long postId);
+
+    //  검색 기능
+    Page<PostListResponse> searchPosts(PostType postType, String keyword, String companyName, Pageable pageable);
 }
