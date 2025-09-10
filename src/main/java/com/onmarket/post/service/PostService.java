@@ -33,4 +33,7 @@ public interface PostService {
 
     //  검색 기능
     Page<PostListResponse> searchPosts(PostType postType, String keyword, String companyName, Pageable pageable);
+
+    List<PostListResponse> getTop5PostsByScrapCount();
+
 }

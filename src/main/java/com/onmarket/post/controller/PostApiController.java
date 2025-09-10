@@ -142,4 +142,11 @@ public class PostApiController {
 
         return jwtTokenProvider.getEmail(token);
     }
+
+    @GetMapping("/hot-top5")
+    public ApiResponse<List<PostListResponse>> getTop5ScrapPosts() {
+        List<PostListResponse> posts = postService.getTop5PostsByScrapCount();
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, posts);
+    }
+
 }

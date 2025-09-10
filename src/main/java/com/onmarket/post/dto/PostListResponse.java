@@ -1,5 +1,6 @@
 package com.onmarket.post.dto;
 
+import com.onmarket.post.domain.Post;
 import com.onmarket.post.domain.PostType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,4 +18,18 @@ public class PostListResponse {
     private String deadline;        // 마감일 (D-12 형태로 변환 필요)
     private String productName;     // 상품명
     private String summary;         // 요약 정보
+    private String imageUrl;
+
+    public static PostListResponse from(Post post) {
+        return PostListResponse.builder()
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .productName(post.getProductName())
+                .companyName(post.getCompanyName())
+                .summary(post.getSummary())
+                .deadline(post.getDeadline())
+                .imageUrl(post.getImageUrl())
+                .build();
+    }
+
 }
