@@ -41,6 +41,7 @@ public class Post extends BaseTimeEntity {
     private String joinLink; // 가입하기 링크
 
     // 나중에 다른 사람이 채워줄 필드들
+    @Setter
     private String imageUrl; // 상품 이미지 URL
 
     @Column(columnDefinition = "TEXT")

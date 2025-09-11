@@ -1,5 +1,7 @@
 package com.onmarket.post.service.impl;
 
+import com.onmarket.cardnews.dto.TargetType;
+import com.onmarket.cardnews.service.CardNewsService;
 import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.fssdata.repository.CreditLoanProductRepository;
 import com.onmarket.loandata.domain.LoanProduct;
@@ -25,6 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,8 +38,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.data.jpa.domain.Specification;
 
 @Slf4j
 @Service
@@ -50,6 +51,7 @@ public class PostServiceImpl implements PostService {
     private final SupportProductRepository supportProductRepository;
     private final ScrapService scrapService;
     private final SummaryService summaryService;
+    private final CardNewsService cardNewsService;
     private final ScrapRepository scrapRepository;
 
 
@@ -63,22 +65,15 @@ public class PostServiceImpl implements PostService {
     @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
     public List<PostListResponse> getTopScrapedPosts() {
         log.info("스크랩 수 상위 5개 게시물 조회 시작");
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
 
-        try {
-            Pageable pageable = PageRequest.of(0, 5);
-            List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
+        List<PostListResponse> result = topPosts.stream()
+                .map(this::convertToListResponse)
+                .collect(Collectors.toList());
 
-            List<PostListResponse> result = topPosts.stream()
-                    .map(this::convertToListResponse)
-                    .collect(Collectors.toList());
-
-            log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
-            return result;
-
-        } catch (Exception e) {
-            log.error("스크랩 수 상위 게시물 조회 중 오류 발생", e);
-            throw e;
-        }
+        log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
+        return result;
     }
 
     @Override
@@ -98,13 +93,11 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDetailWithScrapResponse getPostDetailWithScrap(Long postId, String email) {
         PostDetailResponse postDetail = getPostDetail(postId);
-
         boolean isScraped = false;
         if (email != null) {
             isScraped = scrapService.isScrapedByMe(email, postId);
         }
         Long scrapCount = scrapService.getScrapCount(postId);
-
         return PostDetailWithScrapResponse.from(postDetail, isScraped, scrapCount);
     }
 
@@ -116,15 +109,11 @@ public class PostServiceImpl implements PostService {
         return posts.map(this::convertToListResponse);
     }
 
-    // 🔥 =================================================================
-    // 🔥 [핵심 수정] 테스트를 위해 5개만 처리하도록 변경된 메서드들
-    // 🔥 =================================================================
-
     @Override
     @Transactional
     public void createPostsFromCreditLoanProducts() {
-        log.info("신용대출 상품 데이터 동기화 시작 (테스트: 5개만 처리)...");
-        Pageable pageRequest = PageRequest.of(0, 5);
+        log.info("신용대출 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
+        Pageable pageRequest = PageRequest.of(1, 1, Sort.by("id").ascending());
         Page<CreditLoanProduct> productPage = creditLoanProductRepository.findAll(pageRequest);
         processProducts(productPage.getContent(), "신용대출 (테스트)", this::processIndividualCreditProduct);
     }
@@ -132,8 +121,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void createPostsFromLoanProducts() {
-        log.info("일반대출 상품 데이터 동기화 시작 (테스트: 5개만 처리)...");
-        Pageable pageRequest = PageRequest.of(0, 5);
+        log.info("일반대출 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
+        // 🔥 [수정] 5 -> 1로 변경하고 정렬 추가
+        Pageable pageRequest = PageRequest.of(0, 1, Sort.by("id").ascending());
         Page<LoanProduct> productPage = loanProductRepository.findAll(pageRequest);
         processProducts(productPage.getContent(), "일반대출 (테스트)", this::processIndividualLoanProduct);
     }
@@ -141,52 +131,21 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void createPostsFromSupportProducts() {
-        log.info("공공지원금 상품 데이터 동기화 시작 (테스트: 5개만 처리)...");
-        Pageable pageRequest = PageRequest.of(0, 5);
+        log.info("공공지원금 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
+        // 🔥 [수정] 5 -> 1로 변경하고 정렬 추가
+        Pageable pageRequest = PageRequest.of(0, 1, Sort.by("id").ascending());
         Page<SupportProduct> productPage = supportProductRepository.findAll(pageRequest);
         processProducts(productPage.getContent(), "공공지원금 (테스트)", this::processIndividualSupportProduct);
     }
 
-    // ------------------------------------------------------------------
-    // 아래 헬퍼 메서드들은 실제 운영 환경을 위한 코드이므로 그대로 유지합니다.
-    // ------------------------------------------------------------------
-
-    private <T> void processProductsInPages(PageableFunction<T> pagedFinder, String productType, ProductProcessor<T> processor) {
-        int page = 0;
-        final int PAGE_SIZE = 100;
-        Page<T> productPage;
-
-        do {
-            Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-            productPage = pagedFinder.apply(pageable);
-
-            log.info("[{}] 처리 진행: {}/{} 페이지 (현재 페이지 항목: {}개)",
-                    productType, page + 1, productPage.getTotalPages(), productPage.getNumberOfElements());
-
-            processProducts(productPage.getContent(), productType, processor);
-
-            page++;
-        } while (productPage.hasNext());
-
-        log.info("{} 상품 Post 생성 전체 완료 - 총 {}개 페이지 처리 완료", productType, productPage.getTotalPages());
-    }
-
     private <T> void processProducts(List<T> products, String productType, ProductProcessor<T> processor) {
-        int successCount = 0;
         for (T product : products) {
             try {
                 processor.process(product);
-                successCount++;
             } catch (Exception e) {
                 log.error("[{}] 개별 상품 처리 실패: {} - 원인: {}", productType, product.toString(), e.getMessage());
             }
         }
-        log.info("[{}] 현재 배치 처리 완료 (성공: {}/{})", productType, successCount, products.size());
-    }
-
-    @FunctionalInterface
-    private interface PageableFunction<T> {
-        Page<T> apply(Pageable pageable);
     }
 
     @FunctionalInterface
@@ -194,25 +153,23 @@ public class PostServiceImpl implements PostService {
         void process(T product) throws Exception;
     }
 
-    // ------------------------------------------------------------------
-    // 이하 개별 처리 및 변환 메서드들은 모두 그대로 유지합니다.
-    // ------------------------------------------------------------------
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processIndividualCreditProduct(CreditLoanProduct creditProduct) {
         if (!postRepository.existsBySourceTableAndSourceId("CreditLoanProduct", creditProduct.getId())) {
             Post post = createPostFromCreditLoanProduct(creditProduct);
             Post savedPost = postRepository.save(post);
-            updatePostWithAISummary(savedPost, () -> summaryService.generateForCredit(creditProduct.getId()));
+            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
+            enrichPostWithAiContent(savedPost, TargetType.CREDIT_LOAN_PRODUCT, creditProduct.getId());
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processIndividualLoanProduct(LoanProduct loanProduct) {
         if (!postRepository.existsBySourceTableAndSourceId("LoanProduct", loanProduct.getId())) {
-            Post post = createPostFromLoanProduct(loanProduct, new String[]{"작성 예정", "작성 예정"});
+            Post post = createPostFromLoanProduct(loanProduct);
             Post savedPost = postRepository.save(post);
-            updatePostWithAISummary(savedPost, () -> summaryService.generateForLoan(loanProduct.getId()));
+            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
+            enrichPostWithAiContent(savedPost, TargetType.LOAN_PRODUCT, loanProduct.getId());
         }
     }
 
@@ -221,27 +178,90 @@ public class PostServiceImpl implements PostService {
         if (!postRepository.existsBySourceTableAndSourceId("SupportProduct", supportProduct.getId())) {
             Post post = createPostFromSupportProduct(supportProduct);
             Post savedPost = postRepository.save(post);
-            updatePostWithAISummary(savedPost, () -> summaryService.generateForSupport(supportProduct.getId()));
+            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
+            enrichPostWithAiContent(savedPost, TargetType.SUPPORT_PRODUCT, supportProduct.getId());
         }
     }
 
-    private void updatePostWithAISummary(Post post, SummaryGenerator generator) {
+    private void enrichPostWithAiContent(Post post, TargetType type, Long sourceId) {
+        boolean isUpdated = false;
+
         try {
-            String[] summaryResult = generator.generate();
+            String cardNewsUrl = cardNewsService.buildFromDbAndPersist(type, sourceId.toString());
+            post.setImageUrl(cardNewsUrl);
+            isUpdated = true;
+            log.info("Post({}) 카드뉴스 생성 및 URL 설정 완료", post.getPostId());
+        } catch (Exception e) {
+            log.warn("Post({}) 카드뉴스 생성 실패: {}", post.getPostId(), e.getMessage());
+        }
+
+        try {
+            String[] summaryResult = generateSummary(type, sourceId);
             if (summaryResult != null && summaryResult.length >= 2) {
                 post.setDetailContent(summaryResult[0]);
                 post.setSummary(summaryResult[1]);
-                postRepository.save(post);
-                log.debug("Post({}) AI 요약 생성 및 업데이트 완료", post.getPostId());
+                isUpdated = true;
+                log.info("Post({}) AI 요약 생성 및 설정 완료", post.getPostId());
             }
         } catch (Exception e) {
-            log.warn("Post({}) AI 요약 생성 실패, 기본 Post는 유지: {}", post.getPostId(), e.getMessage());
+            log.warn("Post({}) AI 요약 생성 실패: {}", post.getPostId(), e.getMessage());
+        }
+
+        if (isUpdated) {
+            postRepository.save(post);
+            log.info("Post({}) AI 콘텐츠 최종 저장 완료", post.getPostId());
         }
     }
 
-    @FunctionalInterface
-    private interface SummaryGenerator {
-        String[] generate() throws Exception;
+    private String[] generateSummary(TargetType type, Long sourceId) throws Exception {
+        return switch (type) {
+            case CREDIT_LOAN_PRODUCT -> summaryService.generateForCredit(sourceId);
+            case LOAN_PRODUCT -> summaryService.generateForLoan(sourceId);
+            case SUPPORT_PRODUCT -> summaryService.generateForSupport(sourceId);
+        };
+    }
+
+    private Post createPostFromCreditLoanProduct(CreditLoanProduct creditProduct) {
+        return Post.builder()
+                .postType(PostType.LOAN)
+                .productName(creditProduct.getFinPrdtNm())
+                .summary("요약 정보 생성 중...")
+                .detailContent("상세 정보 생성 중...")
+                .deadline(creditProduct.getDclsEndDay())
+                .companyName(creditProduct.getKorCoNm())
+                .joinLink(creditProduct.getRltSite())
+                .sourceTable("CreditLoanProduct")
+                .sourceId(creditProduct.getId())
+                .build();
+    }
+
+    private Post createPostFromLoanProduct(LoanProduct loanProduct) {
+        return Post.builder()
+                .postType(PostType.LOAN)
+                .productName(loanProduct.getProductName())
+                .summary("요약 정보 생성 중...")
+                .detailContent("상세 정보 생성 중...")
+                .companyName(loanProduct.getOfferingInstitution())
+                .joinLink(loanProduct.getRelatedSite())
+                .sourceTable("LoanProduct")
+                .sourceId(loanProduct.getId())
+                .build();
+    }
+
+    private Post createPostFromSupportProduct(SupportProduct supportProduct) {
+        return Post.builder()
+                .postType(PostType.SUPPORT)
+                .productName(supportProduct.getServiceName())
+                .summary("요약 정보 생성 중...")
+                .detailContent("상세 정보 생성 중...")
+                .deadline(supportProduct.getEndDay())
+                .companyName(supportProduct.getDepartmentName())
+                .joinLink(supportProduct.getOnlineApplicationUrl() != null ?
+                        supportProduct.getOnlineApplicationUrl() :
+                        supportProduct.getDetailUrl())
+                .sourceTable("SupportProduct")
+                .sourceId(supportProduct.getId())
+                .build();
     }
 
     private PostListResponse convertToListResponse(Post post) {
@@ -278,62 +298,15 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
-    private Post createPostFromCreditLoanProduct(CreditLoanProduct creditProduct) {
-        return Post.builder()
-                .postType(PostType.LOAN)
-                .productName(creditProduct.getFinPrdtNm())
-                .summary("작성 예정")
-                .detailContent("작성 예정")
-                .deadline(creditProduct.getDclsEndDay())
-                .companyName(creditProduct.getKorCoNm())
-                .joinLink(creditProduct.getRltSite())
-                .sourceTable("CreditLoanProduct")
-                .sourceId(creditProduct.getId())
-                .build();
-    }
-
-    private Post createPostFromLoanProduct(LoanProduct loanProduct, String[] str) {
-        return Post.builder()
-                .postType(PostType.LOAN)
-                .productName(loanProduct.getProductName())
-                .summary(str[1])
-                .detailContent(str[0])
-                .companyName(loanProduct.getOfferingInstitution())
-                .joinLink(loanProduct.getRelatedSite())
-                .sourceTable("LoanProduct")
-                .sourceId(loanProduct.getId())
-                .build();
-    }
-
-    private Post createPostFromSupportProduct(SupportProduct supportProduct) {
-        return Post.builder()
-                .postType(PostType.SUPPORT)
-                .productName(supportProduct.getServiceName())
-                .summary(supportProduct.getServicePurposeSummary() != null ?
-                        supportProduct.getServicePurposeSummary() : "작성 예정")
-                .detailContent("작성 예정")
-                .deadline(supportProduct.getEndDay())
-                .companyName(supportProduct.getDepartmentName())
-                .joinLink(supportProduct.getOnlineApplicationUrl() != null ?
-                        supportProduct.getOnlineApplicationUrl() :
-                        supportProduct.getDetailUrl())
-                .sourceTable("SupportProduct")
-                .sourceId(supportProduct.getId())
-                .build();
-    }
-
     private String calculateDDay(String deadlineStr) {
         if (deadlineStr == null || deadlineStr.trim().isEmpty()) {
             return "상시 모집";
         }
-
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
             LocalDate deadline = LocalDate.parse(deadlineStr, formatter);
             LocalDate now = LocalDate.now();
-
             long daysBetween = ChronoUnit.DAYS.between(now, deadline);
-
             if (daysBetween > 0) {
                 return "D-" + daysBetween;
             } else if (daysBetween == 0) {
