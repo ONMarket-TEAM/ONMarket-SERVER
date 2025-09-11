@@ -5,15 +5,23 @@ server:
     encoding:
       charset: utf-8
       enabled: true
+  tomcat:
+    threads:
+      max: 50                       # 최대 스레드 수
+      min-spare: 5                  # 최소 스레드 수
+    connection-timeout: 10000       # 10초 연결 타임아웃
 spring:
+  cache:
+    type: simple
+    cache-names: userRecommendations
   config:
     import: optional:application-data.yml
 
   profiles:
-    active: prod
+    active: local
     include: oauth
   cors:
-    allowed-origins: http://localhost:8080,http://localhost:5173
+    allowed-origins: http://3.34.91.104:8080,https://onmarket.duckdns.org,http://localhost:5173
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true

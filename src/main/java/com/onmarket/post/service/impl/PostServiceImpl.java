@@ -14,12 +14,14 @@ import com.onmarket.post.dto.PostSingleResponse;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.post.service.PostService;
+import com.onmarket.scrap.repository.ScrapRepository;
 import com.onmarket.scrap.service.ScrapService;
 import com.onmarket.summary.service.SummaryService;
 import com.onmarket.supportsdata.domain.SupportProduct;
 import com.onmarket.supportsdata.repository.SupportProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.jpa.domain.Specification;
 
 @Slf4j
 @Service
@@ -45,11 +50,35 @@ public class PostServiceImpl implements PostService {
     private final SupportProductRepository supportProductRepository;
     private final ScrapService scrapService;
     private final SummaryService summaryService;
+    private final ScrapRepository scrapRepository;
+
 
     @Override
     public Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable) {
         Page<Post> posts = postRepository.findByPostType(postType, pageable);
         return posts.map(this::convertToListResponse);
+    }
+
+    @Override
+    @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
+    public List<PostListResponse> getTopScrapedPosts() {
+        log.info("스크랩 수 상위 5개 게시물 조회 시작");
+
+        try {
+            Pageable pageable = PageRequest.of(0, 5);
+            List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
+
+            List<PostListResponse> result = topPosts.stream()
+                    .map(this::convertToListResponse)
+                    .collect(Collectors.toList());
+
+            log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
+            return result;
+
+        } catch (Exception e) {
+            log.error("스크랩 수 상위 게시물 조회 중 오류 발생", e);
+            throw e;
+        }
     }
 
     @Override

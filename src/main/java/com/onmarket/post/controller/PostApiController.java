@@ -20,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 
 @Slf4j
 @Tag(name = "Post API", description = "상품 게시물 관련 API")
@@ -39,6 +41,25 @@ public class PostApiController {
     public ApiResponse<Page<PostListResponse>> getPostsByType(@PathVariable PostType type, Pageable pageable) {
         Page<PostListResponse> postsPage = postService.getPostsByType(type, pageable);
         return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, postsPage);
+    }
+
+    /**
+     * 스크랩 수 상위 5개 게시물 조회
+     */
+    @Operation(summary = "TOP 5 게시물 조회", description = "스크랩 수가 가장 많은 상위 5개 게시물 조회")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/top-scraped")
+    public ApiResponse<List<PostListResponse>> getTopScrapedPosts() {
+        log.info("인기 상품 Top 5 조회 요청");
+
+        List<PostListResponse> topPosts = postService.getTopScrapedPosts();
+
+        log.info("인기 상품 Top 5 조회 완료 - {}개 반환", topPosts.size());
+
+        return ApiResponse.success(ResponseCode.POST_LIST_SUCCESS, topPosts);
     }
 
     /**
@@ -62,8 +83,9 @@ public class PostApiController {
             @RequestParam(value = "company", required = false) String companyName,
 
             Pageable pageable,
-            HttpServletRequest request) {
+            HttpServletRequest request) { // 🔥 요청 정보 로깅을 위해 추가
 
+        // 🔥 디버깅을 위한 로깅 추가
         log.info("검색 요청 - URL: {}, 타입: {}, 키워드: '{}', 회사명: '{}', 페이지: {}",
                 request.getRequestURL() + "?" + request.getQueryString(),
                 type, keyword, companyName, pageable.getPageNumber());

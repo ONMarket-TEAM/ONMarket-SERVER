@@ -167,7 +167,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendTestNotification() {
 
         // 자신의 memberId에 맞게 수정하기
-        final long targetMemberId = 2L;
+        final long targetMemberId = 4L;
         log.info("테스트 알림 전송 시작");
 
         // 활성화
