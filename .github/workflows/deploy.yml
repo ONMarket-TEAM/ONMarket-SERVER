@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/libs/onmarket-0.0.1-SNAPSHOT.jar"
-          target: "/home/ec2-user/onmarket-${{ env.DEPLOY_ENV }}-new.jar"
+          target: "/home/ec2-user/"
 
       - name: Zero Downtime Deploy
         uses: appleboy/ssh-action@v1.0.0
@@ -60,6 +60,9 @@ jobs:
             NGINX_TARGET=${{ env.NGINX_TARGET_PORT }}
             
             echo "Starting zero downtime deployment for $ENV environment"
+            
+            # 업로드된 JAR 파일명을 배포용 파일명으로 변경
+            cp /home/ec2-user/build/libs/onmarket-0.0.1-SNAPSHOT.jar /home/ec2-user/onmarket-$ENV-new.jar
             
             # 현재 어느 포트가 활성화되어 있는지 확인
             CURRENT_PORT=""
@@ -81,6 +84,7 @@ jobs:
             
             # 새 버전을 NEW_PORT에서 시작
             echo "Starting new version on port $NEW_PORT"
+            cd /home/ec2-user
             nohup java -Dserver.port=$NEW_PORT -jar onmarket-$ENV-new.jar > app-$ENV-$NEW_PORT.log 2>&1 &
             NEW_PID=$!
             
