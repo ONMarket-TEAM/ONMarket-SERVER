@@ -2,6 +2,7 @@ package com.onmarket.post.repository;
 
 import com.onmarket.post.domain.Post;
 import com.onmarket.post.domain.PostType;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import org.springframework.data.domain.Page;
@@ -79,4 +80,16 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
      * Collection을 받는 sourceId 조회 메서드 (Set과 List 모두 지원)
      */
     List<Post> findBySourceTableAndSourceIdIn(String sourceTable, Collection<Long> sourceIds);
+
+    /** source_table + source_id 매칭으로 image_url 갱신 */
+    @Modifying
+    @Transactional
+    @Query("""
+    UPDATE Post p
+       SET p.imageUrl  = :url,
+           p.updatedAt = :ts
+     WHERE p.sourceTable = :sourceTable
+       AND p.sourceId    = :sourceId
+""")
+    int updateImageUrlBySource(String sourceTable, Long sourceId, String url, LocalDateTime ts);
 }

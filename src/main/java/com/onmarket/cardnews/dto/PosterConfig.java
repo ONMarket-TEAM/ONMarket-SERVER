@@ -1,6 +1,7 @@
 package com.onmarket.cardnews.dto;
 
 import lombok.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter @NoArgsConstructor
@@ -8,10 +9,13 @@ public class PosterConfig {
     private String title;       // 포스터 메인 타이틀
     private String subtitle;    // 부제(선택)
     private String date;        // YYYY.MM.DD 또는 빈 값
-    private String badge;       // "대출상품","정책지원" 등
+    private String badge;       // "대출상품","정부지원금" 등
     private Theme theme;        // 색상 힌트
     private Operator operator;  // 주관기관
     private List<Section> sections; // 3개 섹션
+
+    /** ✅ 신청 기간 카드 전용 라인들 (1번째 카드에 사용) */
+    private List<String> applyPeriodLines = new ArrayList<>();
 
     @Getter @Setter @NoArgsConstructor
     public static class Theme {

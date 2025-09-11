@@ -58,3 +58,6 @@ springdoc:
     user:
       name: test
       password: 1234
+
+app:
+  base-url: http://localhost:8080
