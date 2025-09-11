@@ -26,4 +26,6 @@ public interface BusinessService {
     /** 사업장 삭제 */
     void deleteMyBusiness(String email, Long businessId);
 
+    /** 메인 사업장 변경 */
+    void changeMainBusiness(String email, Long businessId);
 }
