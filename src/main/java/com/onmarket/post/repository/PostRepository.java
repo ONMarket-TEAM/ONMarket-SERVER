@@ -21,7 +21,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
-    // === 기존 메서드들 ===
     Page<Post> findByPostType(PostType postType, Pageable pageable);
 
     @Query("SELECT COUNT(p) FROM Post p WHERE p.sourceTable = :sourceTable AND p.sourceId = :sourceId")
@@ -63,8 +62,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
     List<Post> findTop20ByOrderByCreatedAtDesc();
 
-    // === 우선순위 추천 시스템을 위한 추가 메서드들 ===
-
     /**
      * 우선순위 추천을 위한 최신 게시물 50개 조회
      */
@@ -97,4 +94,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
        AND p.sourceId    = :sourceId
 """)
     int updateImageUrlBySource(String sourceTable, Long sourceId, String url, LocalDateTime ts);
+
+    Optional<Post> findTopByOrderByUpdatedAtDesc();
 }

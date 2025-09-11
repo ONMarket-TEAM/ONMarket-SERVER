@@ -1,7 +1,10 @@
 package com.onmarket.supportsdata.repository;
 
 
+import com.onmarket.fssdata.domain.CreditLoanProduct;
 import com.onmarket.supportsdata.domain.SupportProduct;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,5 +25,5 @@ public interface SupportProductRepository extends JpaRepository<SupportProduct, 
     List<Long> findIdsByRegionPatterns(@Param("sidoPattern") String sidoPattern,
                                        @Param("sigunguPattern") String sigunguPattern);
 
-    //sidoPattern: 서울특별시, sigunguPattern: 중랑구 이런 형태로 줄것
+    List<SupportProduct> findByUpdatedAtAfter(LocalDateTime dateTime);
 }
