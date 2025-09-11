@@ -15,7 +15,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
     // === 기존 메서드들 ===
@@ -25,6 +28,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     Long countBySourceTableAndSourceId(@Param("sourceTable") String sourceTable, @Param("sourceId") Long sourceId);
 
     boolean existsBySourceTableAndSourceId(String sourceTable, Long sourceId);
+
+    Optional<Post> findBySourceTableAndSourceId(String sourceTable, Long sourceId);
 
     @Modifying
     @Transactional

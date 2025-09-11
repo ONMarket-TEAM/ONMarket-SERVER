@@ -9,18 +9,24 @@ import com.onmarket.fssdata.repository.CreditLoanOptionRepository;
 import com.onmarket.fssdata.repository.CreditLoanProductRepository;
 import com.onmarket.loandata.domain.LoanProduct;
 import com.onmarket.loandata.repository.LoanProductRepository;
+import com.onmarket.post.domain.Post;
+import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.supportsdata.domain.SupportProduct;
 import com.onmarket.supportsdata.repository.SupportProductRepository;
 import com.onmarket.post.repository.PostRepository;
 import com.onmarket.summary.dto.SummaryAssembler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SummaryService {
 
     private final OpenAIClient ai;
@@ -107,46 +113,124 @@ public class SummaryService {
 - 출력은 반드시 JSON 하나만.
 """;
 
-
+    // 간단한 홀더
     private record Pair(String s, String l) {}
 
-    @Transactional
-    public void generateForLoan(long id) {
-        LoanProduct p = loanRepo.findById(id).orElseThrow();
-        String user = SummaryAssembler.forLoan(p);
-        String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+    /** LoanProduct → Post만 업데이트 */
+//    @Transactional
+//    public void generateForLoan(long id) {
+//        LoanProduct p = loanRepo.findById(id).orElseThrow();     // 프롬프트용 조회
+//        String user = SummaryAssembler.forLoan(p);
+//        String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+//
+//        Pair pair = parseJson(json); // ✅ 엔티티 세팅/저장 안 함
+//        postRepo.updateSummaryBySource("LoanProduct", p.getId(), pair.s(), pair.l());
+//    }
+    @Transactional(readOnly = true)
+    public String[] generateForLoan(long id) {
+        try {
+            // 1. LoanProduct 조회 (없을 경우 예외 발생)
+            LoanProduct p = loanRepo.findById(id).orElseThrow(
+                    () -> new RuntimeException("LoanProduct not found: " + id));
 
-        Pair pair = parseJson(json);
-        postRepo.updateSummaryBySource("LoanProduct", p.getId(), pair.s(), pair.l());
+            // 2. AI 프롬프트 생성 및 JSON 결과 요청
+            String user = SummaryAssembler.forLoan(p);
+            String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+
+            // 3. JSON 파싱
+            Pair pair = parseJson(json);
+
+            // 4. 성공 로그 추가
+            log.info("LoanProduct({}) AI 요약 생성 완료 - short: {}, long: {} chars",
+                    id, pair.s.length(), pair.l.length());
+
+            // 5. DB 직접 수정 대신, 결과물을 배열로 반환
+            return new String[]{pair.l, pair.s}; // [0]: long, [1]: short
+
+        } catch (Exception e) {
+            // 6. 예외 발생 시 에러 로그 남기고, 기본값 반환
+            log.error("LoanProduct({}) AI 요약 생성 실패: {}", id, e.getMessage());
+            return new String[]{"상품 정보를 준비 중입니다.", "상품 정보 준비중"};
+        }
+    }
+    /** CreditLoanProduct → Post만 업데이트 */
+//    @Transactional
+//    public void generateForCredit(long id) {
+//        CreditLoanProduct p = creditRepo.findById(id).orElseThrow();
+//        List<CreditLoanOption> opts = optionRepo.findByFinPrdtCd(p.getFinPrdtCd());
+//        String user = SummaryAssembler.forCredit(p, opts);
+//        String json = ai.chatJson(SYSTEM, user, 0.2);
+//
+//        Pair pair = parseJson(json);
+//        postRepo.findBySourceTableAndSourceId("CreditLoanProduct", id);
+//
+//    }
+
+    @Transactional(readOnly = true)
+    public String[] generateForCredit(long id) {
+        try {
+            CreditLoanProduct p = creditRepo.findById(id).orElseThrow(
+                    () -> new RuntimeException("CreditLoanProduct not found: " + id));
+
+            List<CreditLoanOption> opts = optionRepo.findByFinPrdtCd(p.getFinPrdtCd());
+            String user = SummaryAssembler.forCredit(p, opts);
+            String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+
+            Pair pair = parseJson(json);
+            log.info("CreditLoanProduct({}) AI 요약 생성 완료 - short: {}, long: {} chars",
+                    id, pair.s.length(), pair.l.length());
+
+            return new String[]{pair.l, pair.s}; // [0]: long, [1]: short
+
+        } catch (Exception e) {
+            log.error("CreditLoanProduct({}) AI 요약 생성 실패: {}", id, e.getMessage());
+            return new String[]{"상품 정보를 준비 중입니다.", "상품 정보 준비중"}; // 기본값 반환
+        }
     }
 
-    @Transactional
-    public void generateForCredit(long id) {
-        CreditLoanProduct p = creditRepo.findById(id).orElseThrow();
-        List<CreditLoanOption> opts = optionRepo.findByFinPrdtCd(p.getFinPrdtCd());
-        String user = SummaryAssembler.forCredit(p, opts);
-        String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+    /** SupportProduct → Post만 업데이트 */
+//    @Transactional
+//    public void generateForSupport(long id) {
+//        SupportProduct s = supportRepo.findById(id).orElseThrow();
+//        String user = SummaryAssembler.forSupport(s);
+//        String json = ai.chatJson(SYSTEM, user, 0.2);
+//
+//        Pair pair = parseJson(json);
+//        // ⚠️ PK 접근자 이름 확인: getId()/getServiceId() 중 프로젝트에 맞게 사용
+//        postRepo.findBySourceTableAndSourceId("SupportProduct", id);
+//
+//    }
 
-        Pair pair = parseJson(json);
-        postRepo.updateSummaryBySource("CreditLoanProduct", p.getId(), pair.s(), pair.l());
+    @Transactional(readOnly = true)
+    public String[] generateForSupport(long id) {
+        try {
+            SupportProduct s = supportRepo.findById(id).orElseThrow(
+                    () -> new RuntimeException("SupportProduct not found: " + id));
+
+            String user = SummaryAssembler.forSupport(s);
+            String json = ai.chatJson(SYSTEM_SUPPORT, user, 0.2);
+
+            Pair pair = parseJson(json);
+            log.info("SupportProduct({}) AI 요약 생성 완료 - short: {}, long: {} chars",
+                    id, pair.s.length(), pair.l.length());
+
+            return new String[]{pair.l, pair.s}; // [0]: long, [1]: short
+
+        } catch (Exception e) {
+            log.error("SupportProduct({}) AI 요약 생성 실패: {}", id, e.getMessage());
+            return new String[]{"지원 정보를 준비 중입니다.", "지원 정보 준비중"}; // 기본값 반환
+        }
     }
 
-    @Transactional
-    public void generateForSupport(long serviceId) {
-        SupportProduct s = supportRepo.findById(serviceId).orElseThrow();
-        String user = SummaryAssembler.forSupport(s);
-        String json = ai.chatJson(SYSTEM_SUPPORT, user, 0.2);
+    // ---------- 공통 유틸 ----------
 
-        Pair pair = parseJson(json);
-        postRepo.updateSummaryBySource("SupportProduct", s.getId(), pair.s(), pair.l());
-    }
-
+    /** JSON에서 short/long만 파싱 (엔티티 세팅 X) */
     private Pair parseJson(String json) {
         try {
             JsonNode root = om.readTree(json);
             String s = root.path("short").asText();
             String l = root.path("long").asText();
-            if (s != null && s.length() > 140) s = s.substring(0, 140);
+            if (s != null && s.length() > 140) s = s.substring(0, 140); // 필요 없으면 제거
             return new Pair(s, l);
         } catch (Exception e) {
             throw new RuntimeException("요약 파싱 실패: " + e.getMessage(), e);
