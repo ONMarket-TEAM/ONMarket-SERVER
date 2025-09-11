@@ -15,16 +15,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
 
-    // === 기존 메서드들 ===
     Page<Post> findByPostType(PostType postType, Pageable pageable);
 
     @Query("SELECT COUNT(p) FROM Post p WHERE p.sourceTable = :sourceTable AND p.sourceId = :sourceId")
     Long countBySourceTableAndSourceId(@Param("sourceTable") String sourceTable, @Param("sourceId") Long sourceId);
 
     boolean existsBySourceTableAndSourceId(String sourceTable, Long sourceId);
+
+    Optional<Post> findBySourceTableAndSourceId(String sourceTable, Long sourceId);
 
     @Modifying
     @Transactional
@@ -57,8 +61,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     }
 
     List<Post> findTop20ByOrderByCreatedAtDesc();
-
-    // === 우선순위 추천 시스템을 위한 추가 메서드들 ===
 
     /**
      * 우선순위 추천을 위한 최신 게시물 50개 조회
@@ -96,4 +98,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     List<Post> findTop200ByOrderByCreatedAtDesc();
 
     List<Post> findTop100ByOrderByCreatedAtDesc();
+
+    Optional<Post> findTopByOrderByUpdatedAtDesc();
 }

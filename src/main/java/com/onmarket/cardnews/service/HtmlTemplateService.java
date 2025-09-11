@@ -19,7 +19,7 @@ public class HtmlTemplateService {
 
     /** 히어로(중간) 이미지 목록 — 랜덤 선택 */
     private static final String[] HERO_IMAGES = {
-            "together1.png", "good.png", "market.png", "hae.png", "water.png", "happy.png"
+            "together1.png", "good.png", "market.png", "hae.png", "water.png","an.png","wow.png","q.png","g.png"
     };
     /** 직전 선택값(같은 이미지 연속 방지) */
     private static volatile int LAST_HERO_IDX = -1;

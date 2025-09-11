@@ -13,6 +13,8 @@ import com.onmarket.comment.exception.CommentReplyRatingNotAllowedException;
 import com.onmarket.comment.exception.ParentCommentNotFoundException;
 import com.onmarket.comment.repository.CommentRepository;
 import com.onmarket.comment.service.CommentService;
+import com.onmarket.member.domain.Member;
+import com.onmarket.member.service.MemberService;
 import com.onmarket.post.domain.Post;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.post.repository.PostRepository;
@@ -32,12 +34,14 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final MemberService memberService;
 
     @Override
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request, String userEmail, String author) {
         // 게시물 존재 확인
         Post post = findPostById(request.getPostId());
+        Member member = memberService.findByEmail(userEmail);
 
         Comment parentComment = null;
 
@@ -76,7 +80,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = Comment.builder()
                 .post(post)
                 .userEmail(userEmail)
-                .author(author)
+                .author(member.getNickname())
                 .content(request.getContent())
                 .rating(rating) // 별점 추가
                 .parentComment(parentComment)
@@ -87,7 +91,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("댓글 작성 완료 - commentId: {}, postId: {}, userEmail: {}, rating: {}",
                 savedComment.getCommentId(), request.getPostId(), userEmail, rating);
 
-        return CommentResponse.from(savedComment, userEmail);
+        return CommentResponse.from(savedComment, userEmail, memberService);
     }
 
     @Override
@@ -121,9 +125,10 @@ public class CommentServiceImpl implements CommentService {
             comment.updateContent(request.getContent());
         }
 
+        Member member = memberService.findByEmail(comment.getUserEmail());
         log.info("댓글 수정 완료 - commentId: {}, userEmail: {}", commentId, userEmail);
 
-        return CommentResponse.from(comment, userEmail);
+        return CommentResponse.from(comment, userEmail, memberService);
     }
 
     @Override
@@ -164,8 +169,21 @@ public class CommentServiceImpl implements CommentService {
 
         List<Comment> parentComments = commentRepository.findParentCommentsByPostId(postId);
 
+        Member currentMember = memberService.findByEmail(currentUserEmail);
+        String currentNickname = currentMember.getNickname();
+
         List<CommentResponse> commentResponses = parentComments.stream()
-                .map(comment -> CommentResponse.from(comment, currentUserEmail))
+                .map(comment -> {
+                    // 이메일로 Member 조회
+                    String commentUserEmail = comment.getUserEmail();
+                    String nickname;
+                    if (commentUserEmail.equals(currentUserEmail)) {
+                        nickname = currentNickname;
+                    } else {
+                        nickname = memberService.findByEmail(commentUserEmail).getNickname();
+                    }
+                    return CommentResponse.from(comment, currentUserEmail, memberService);
+                })
                 .collect(Collectors.toList());
 
         return CommentListResponse.of(postId, commentResponses);
@@ -179,8 +197,9 @@ public class CommentServiceImpl implements CommentService {
         if (comment.getIsDeleted()) {
             throw new CommentNotFoundException();
         }
+        Member member = memberService.findByEmail(comment.getUserEmail());
 
-        return CommentResponse.from(comment, currentUserEmail);
+        return CommentResponse.from(comment,currentUserEmail, memberService);
     }
 
     private Post findPostById(Long postId) {
