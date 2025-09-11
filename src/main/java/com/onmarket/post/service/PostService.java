@@ -12,7 +12,7 @@ public interface PostService {
     Page<PostListResponse> getPostsByType(PostType postType, Pageable pageable);
 
     // Top 5 게시물 조회
-    List<PostListResponse> getTopScrapedPosts();
+    List<PostSingleResponse> getTopScrapedPosts();
 
     // 게시물 상세 조회
     PostDetailResponse getPostDetail(Long postId);
