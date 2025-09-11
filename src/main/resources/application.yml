@@ -18,7 +18,7 @@ spring:
     import: optional:application-data.yml
 
   profiles:
-    active: local
+    active: prod
     include: oauth
   cors:
     allowed-origins: http://3.34.91.104:8080,https://onmarket.duckdns.org,http://localhost:5173
@@ -58,3 +58,6 @@ springdoc:
     user:
       name: test
       password: 1234
+
+app:
+  base-url: http://localhost:8080
