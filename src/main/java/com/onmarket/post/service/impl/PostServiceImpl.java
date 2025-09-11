@@ -34,9 +34,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -67,13 +69,9 @@ public class PostServiceImpl implements PostService {
         log.info("스크랩 수 상위 5개 게시물 조회 시작");
         Pageable pageable = PageRequest.of(0, 5);
         List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
-
-        List<PostListResponse> result = topPosts.stream()
+        return topPosts.stream()
                 .map(this::convertToListResponse)
                 .collect(Collectors.toList());
-
-        log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
-        return result;
     }
 
     @Override
@@ -142,11 +140,60 @@ public class PostServiceImpl implements PostService {
         );
     }
 
+    @Override
+    @Transactional
+    public void synchronizeModifiedPosts() {
+        LocalDateTime lastSyncTime = postRepository.findTopByOrderByUpdatedAtDesc()
+                .map(Post::getUpdatedAt)
+                .orElse(LocalDateTime.of(2000, 1, 1, 0, 0));
+
+        log.info("[스케줄러 동기화 시작] 기준 시간: {}", lastSyncTime);
+
+        List<CreditLoanProduct> modifiedCreditLoans = creditLoanProductRepository.findByUpdatedAtAfter(lastSyncTime);
+        modifiedCreditLoans.forEach(this::createOrUpdatePost);
+        log.info("신용대출 상품 {}건 동기화 완료", modifiedCreditLoans.size());
+
+        List<LoanProduct> modifiedLoans = loanProductRepository.findByUpdatedAtAfter(lastSyncTime);
+        modifiedLoans.forEach(this::createOrUpdatePost);
+        log.info("일반대출 상품 {}건 동기화 완료", modifiedLoans.size());
+
+        List<SupportProduct> modifiedSupports = supportProductRepository.findByUpdatedAtAfter(lastSyncTime);
+        modifiedSupports.forEach(this::createOrUpdatePost);
+        log.info("공공지원금 상품 {}건 동기화 완료", modifiedSupports.size());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createOrUpdatePost(CreditLoanProduct creditProduct) {
+        Post post = postRepository.findBySourceTableAndSourceId("CreditLoanProduct", creditProduct.getId())
+                .orElseGet(() -> createPostFromCreditLoanProduct(creditProduct));
+
+        updatePostFrom(post, creditProduct);
+        enrichPostWithAiContent(post, TargetType.CREDIT_LOAN_PRODUCT, creditProduct.getId());
+        postRepository.save(post);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createOrUpdatePost(LoanProduct loanProduct) {
+        Post post = postRepository.findBySourceTableAndSourceId("LoanProduct", loanProduct.getId())
+                .orElseGet(() -> createPostFromLoanProduct(loanProduct));
+        updatePostFrom(post, loanProduct);
+        enrichPostWithAiContent(post, TargetType.LOAN_PRODUCT, loanProduct.getId());
+        postRepository.save(post);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createOrUpdatePost(SupportProduct supportProduct) {
+        Post post = postRepository.findBySourceTableAndSourceId("SupportProduct", supportProduct.getId())
+                .orElseGet(() -> createPostFromSupportProduct(supportProduct));
+        updatePostFrom(post, supportProduct);
+        enrichPostWithAiContent(post, TargetType.SUPPORT_PRODUCT, supportProduct.getId());
+        postRepository.save(post);
+    }
+
     private <T> void processProductsInPages(PageableFunction<T> pagedFinder, String productType, ProductProcessor<T> processor) {
         int page = 0;
         final int PAGE_SIZE = 100;
         Page<T> productPage;
-
         do {
             Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id").ascending());
             productPage = pagedFinder.apply(pageable);
@@ -155,7 +202,6 @@ public class PostServiceImpl implements PostService {
             processProducts(productPage.getContent(), productType, processor);
             page++;
         } while (productPage.hasNext());
-
         log.info("{} 상품 Post 생성 전체 완료 - 총 {}개 페이지 처리 완료", productType, productPage.getTotalPages());
     }
 
@@ -183,9 +229,11 @@ public class PostServiceImpl implements PostService {
     public void processIndividualCreditProduct(CreditLoanProduct creditProduct) {
         if (!postRepository.existsBySourceTableAndSourceId("CreditLoanProduct", creditProduct.getId())) {
             Post post = createPostFromCreditLoanProduct(creditProduct);
-            Post savedPost = postRepository.save(post);
-            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
-            enrichPostWithAiContent(savedPost, TargetType.CREDIT_LOAN_PRODUCT, creditProduct.getId());
+            // 🔥 save 전에 필수 값들을 먼저 채워줍니다.
+            updatePostFrom(post, creditProduct);
+            enrichPostWithAiContent(post, TargetType.CREDIT_LOAN_PRODUCT, creditProduct.getId());
+            // 🔥 모든 내용이 채워진 후 마지막에 한 번만 저장합니다.
+            postRepository.save(post);
         }
     }
 
@@ -193,9 +241,9 @@ public class PostServiceImpl implements PostService {
     public void processIndividualLoanProduct(LoanProduct loanProduct) {
         if (!postRepository.existsBySourceTableAndSourceId("LoanProduct", loanProduct.getId())) {
             Post post = createPostFromLoanProduct(loanProduct);
-            Post savedPost = postRepository.save(post);
-            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
-            enrichPostWithAiContent(savedPost, TargetType.LOAN_PRODUCT, loanProduct.getId());
+            updatePostFrom(post, loanProduct);
+            enrichPostWithAiContent(post, TargetType.LOAN_PRODUCT, loanProduct.getId());
+            postRepository.save(post);
         }
     }
 
@@ -203,36 +251,29 @@ public class PostServiceImpl implements PostService {
     public void processIndividualSupportProduct(SupportProduct supportProduct) {
         if (!postRepository.existsBySourceTableAndSourceId("SupportProduct", supportProduct.getId())) {
             Post post = createPostFromSupportProduct(supportProduct);
-            Post savedPost = postRepository.save(post);
-            log.info("Post({}) 기본 정보 저장 완료", savedPost.getPostId());
-            enrichPostWithAiContent(savedPost, TargetType.SUPPORT_PRODUCT, supportProduct.getId());
+            updatePostFrom(post, supportProduct);
+            enrichPostWithAiContent(post, TargetType.SUPPORT_PRODUCT, supportProduct.getId());
+            postRepository.save(post);
         }
     }
 
     private void enrichPostWithAiContent(Post post, TargetType type, Long sourceId) {
-        boolean isUpdated = false;
         try {
             String cardNewsUrl = cardNewsService.buildFromDbAndPersist(type, sourceId.toString());
             post.setImageUrl(cardNewsUrl);
-            isUpdated = true;
-            log.info("Post({}) 카드뉴스 생성 및 URL 설정 완료", post.getPostId());
+            log.info("Post(sourceId={}) 카드뉴스 URL 설정 완료", sourceId);
         } catch (Exception e) {
-            log.warn("Post({}) 카드뉴스 생성 실패: {}", post.getPostId(), e.getMessage());
+            log.warn("Post(sourceId={}) 카드뉴스 생성 실패: {}", sourceId, e.getMessage());
         }
         try {
             String[] summaryResult = generateSummary(type, sourceId);
             if (summaryResult != null && summaryResult.length >= 2) {
                 post.setDetailContent(summaryResult[0]);
                 post.setSummary(summaryResult[1]);
-                isUpdated = true;
-                log.info("Post({}) AI 요약 생성 및 설정 완료", post.getPostId());
+                log.info("Post(sourceId={}) AI 요약 설정 완료", sourceId);
             }
         } catch (Exception e) {
-            log.warn("Post({}) AI 요약 생성 실패: {}", post.getPostId(), e.getMessage());
-        }
-        if (isUpdated) {
-            postRepository.save(post);
-            log.info("Post({}) AI 콘텐츠 최종 저장 완료", post.getPostId());
+            log.warn("Post(sourceId={}) AI 요약 생성 실패: {}", sourceId, e.getMessage());
         }
     }
 
@@ -247,12 +288,6 @@ public class PostServiceImpl implements PostService {
     private Post createPostFromCreditLoanProduct(CreditLoanProduct creditProduct) {
         return Post.builder()
                 .postType(PostType.LOAN)
-                .productName(creditProduct.getFinPrdtNm())
-                .summary("요약 정보 생성 중...")
-                .detailContent("상세 정보 생성 중...")
-                .deadline(creditProduct.getDclsEndDay())
-                .companyName(creditProduct.getKorCoNm())
-                .joinLink(creditProduct.getRltSite())
                 .sourceTable("CreditLoanProduct")
                 .sourceId(creditProduct.getId())
                 .build();
@@ -261,11 +296,6 @@ public class PostServiceImpl implements PostService {
     private Post createPostFromLoanProduct(LoanProduct loanProduct) {
         return Post.builder()
                 .postType(PostType.LOAN)
-                .productName(loanProduct.getProductName())
-                .summary("요약 정보 생성 중...")
-                .detailContent("상세 정보 생성 중...")
-                .companyName(loanProduct.getOfferingInstitution())
-                .joinLink(loanProduct.getRelatedSite())
                 .sourceTable("LoanProduct")
                 .sourceId(loanProduct.getId())
                 .build();
@@ -274,17 +304,30 @@ public class PostServiceImpl implements PostService {
     private Post createPostFromSupportProduct(SupportProduct supportProduct) {
         return Post.builder()
                 .postType(PostType.SUPPORT)
-                .productName(supportProduct.getServiceName())
-                .summary("요약 정보 생성 중...")
-                .detailContent("상세 정보 생성 중...")
-                .deadline(supportProduct.getEndDay())
-                .companyName(supportProduct.getDepartmentName())
-                .joinLink(supportProduct.getOnlineApplicationUrl() != null ?
-                        supportProduct.getOnlineApplicationUrl() :
-                        supportProduct.getDetailUrl())
                 .sourceTable("SupportProduct")
                 .sourceId(supportProduct.getId())
                 .build();
+    }
+
+    private void updatePostFrom(Post post, CreditLoanProduct creditProduct) {
+        post.setProductName(creditProduct.getFinPrdtNm());
+        post.setCompanyName(creditProduct.getKorCoNm());
+        post.setDeadline(creditProduct.getDclsEndDay());
+        post.setJoinLink(creditProduct.getRltSite());
+    }
+
+    private void updatePostFrom(Post post, LoanProduct loanProduct) {
+        post.setProductName(loanProduct.getProductName());
+        post.setCompanyName(loanProduct.getOfferingInstitution());
+        post.setJoinLink(loanProduct.getRelatedSite());
+    }
+
+    private void updatePostFrom(Post post, SupportProduct supportProduct) {
+        post.setProductName(supportProduct.getServiceName());
+        post.setDeadline(supportProduct.getEndDay());
+        post.setCompanyName(supportProduct.getDepartmentName());
+        post.setJoinLink(supportProduct.getOnlineApplicationUrl() != null ?
+                supportProduct.getOnlineApplicationUrl() : supportProduct.getDetailUrl());
     }
 
     private PostListResponse convertToListResponse(Post post) {

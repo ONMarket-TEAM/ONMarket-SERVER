@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -13,4 +14,5 @@ public interface CreditLoanProductRepository extends JpaRepository<CreditLoanPro
     List<CreditLoanProduct> findByFinCoNo(String finCoNo);
     List<CreditLoanProduct> findByKorCoNmContaining(String korCoNm);
     CreditLoanProduct findByFinPrdtCd(String finPrdtCd);
+    List<CreditLoanProduct> findByUpdatedAtAfter(LocalDateTime dateTime);
 }

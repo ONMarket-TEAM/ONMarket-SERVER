@@ -91,14 +91,13 @@ public class CommentServiceImpl implements CommentService {
         log.info("댓글 작성 완료 - commentId: {}, postId: {}, userEmail: {}, rating: {}",
                 savedComment.getCommentId(), request.getPostId(), userEmail, rating);
 
-        return CommentResponse.from(savedComment, userEmail, member.getNickname());
+        return CommentResponse.from(savedComment, userEmail, memberService);
     }
 
     @Override
     @Transactional
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, String userEmail) {
         Comment comment = findCommentById(commentId);
-        Member member = memberService.findByEmail(userEmail);
 
         // 권한 확인
         if (!comment.isOwner(userEmail)) {
@@ -126,9 +125,10 @@ public class CommentServiceImpl implements CommentService {
             comment.updateContent(request.getContent());
         }
 
+        Member member = memberService.findByEmail(comment.getUserEmail());
         log.info("댓글 수정 완료 - commentId: {}, userEmail: {}", commentId, userEmail);
 
-        return CommentResponse.from(comment, userEmail, member.getNickname());
+        return CommentResponse.from(comment, userEmail, memberService);
     }
 
     @Override
@@ -168,10 +168,22 @@ public class CommentServiceImpl implements CommentService {
         findPostById(postId);
 
         List<Comment> parentComments = commentRepository.findParentCommentsByPostId(postId);
-        Member member = memberService.findByEmail(currentUserEmail);
+
+        Member currentMember = memberService.findByEmail(currentUserEmail);
+        String currentNickname = currentMember.getNickname();
 
         List<CommentResponse> commentResponses = parentComments.stream()
-                .map(comment -> CommentResponse.from(comment, currentUserEmail, member.getNickname()))
+                .map(comment -> {
+                    // 이메일로 Member 조회
+                    String commentUserEmail = comment.getUserEmail();
+                    String nickname;
+                    if (commentUserEmail.equals(currentUserEmail)) {
+                        nickname = currentNickname;
+                    } else {
+                        nickname = memberService.findByEmail(commentUserEmail).getNickname();
+                    }
+                    return CommentResponse.from(comment, currentUserEmail, memberService);
+                })
                 .collect(Collectors.toList());
 
         return CommentListResponse.of(postId, commentResponses);
@@ -185,9 +197,9 @@ public class CommentServiceImpl implements CommentService {
         if (comment.getIsDeleted()) {
             throw new CommentNotFoundException();
         }
-        Member member = memberService.findByEmail(currentUserEmail);
+        Member member = memberService.findByEmail(comment.getUserEmail());
 
-        return CommentResponse.from(comment,currentUserEmail,member.getNickname());
+        return CommentResponse.from(comment,currentUserEmail, memberService);
     }
 
     private Post findPostById(Long postId) {
