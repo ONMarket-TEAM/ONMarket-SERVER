@@ -80,10 +80,8 @@ public class PriorityRecommendationService {
      */
     private PostPriorityScore calculatePriorityScore(Member member, Business business, Post post) {
         try {
-            // 1. 기존 관심도 스코어 조회
-            Optional<InterestScore> existingScore = interestScoreRepository
-                    .findByMemberAndBusinessAndPost(member, business, post);
-            double interestScore = existingScore.map(InterestScore::getTotalScore).orElse(0.0);
+            // 🔥 중복 처리 로직 추가
+            double interestScore = getInterestScoreWithDuplicateHandling(member, business, post);
 
             // 2. 지역 우선순위 스코어
             double regionScore = calculateRegionPriorityScore(business, post);
@@ -109,6 +107,45 @@ public class PriorityRecommendationService {
         } catch (Exception e) {
             log.error("우선순위 스코어 계산 실패: postId={}", post.getPostId(), e);
             return null; // 필터링됨
+        }
+    }
+
+    /**
+     * 🔥 중복 처리가 포함된 관심도 스코어 조회
+     */
+    private double getInterestScoreWithDuplicateHandling(Member member, Business business, Post post) {
+        try {
+            // Repository에 추가할 메서드 (또는 기존 메서드가 있다면 사용)
+            List<InterestScore> scores = interestScoreRepository
+                    .findByMemberAndBusinessAndPostOrderByLastCalculatedAtDesc(member, business, post);
+
+            if (scores.isEmpty()) {
+                return 0.0; // 기본값
+            }
+
+            // 첫 번째 (가장 최신) 스코어 사용
+            InterestScore latestScore = scores.get(0);
+
+            // 중복이 있으면 정리
+            if (scores.size() > 1) {
+                log.warn("중복 InterestScore 발견: Member {}, Post {}, Business {} - {}개 중복",
+                        member.getEmail(), post.getPostId(), business.getBusinessId(), scores.size());
+
+                // 나머지 삭제 (비동기로 처리하거나 별도 배치로 처리하는 것이 좋음)
+                List<InterestScore> duplicates = scores.subList(1, scores.size());
+                try {
+                    interestScoreRepository.deleteAll(duplicates);
+                    log.info("중복 InterestScore 삭제 완료: {}개", duplicates.size());
+                } catch (Exception deleteError) {
+                    log.error("중복 데이터 삭제 실패", deleteError);
+                }
+            }
+
+            return latestScore.getTotalScore();
+
+        } catch (Exception e) {
+            log.error("관심도 스코어 조회 실패: postId={}", post.getPostId(), e);
+            return 0.0; // 예외 시 기본값
         }
     }
 
@@ -194,7 +231,7 @@ public class PriorityRecommendationService {
                 .deadline(post.getDeadline())
                 .summary(post.getSummary())
                 .imageUrl(post.getImageUrl())
-                .interestScore(priorityScore.getTotalScore())
+                .interestScore(priorityScore.getInterestScore()) // <- 실제 관심도 점수
                 .recommendationReason(generateRecommendationReason(priorityScore))
                 .build();
     }

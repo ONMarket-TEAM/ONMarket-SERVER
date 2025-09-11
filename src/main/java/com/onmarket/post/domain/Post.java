@@ -2,6 +2,7 @@ package com.onmarket.post.domain;
 
 import com.onmarket.comment.domain.Comment;
 import com.onmarket.common.domain.BaseTimeEntity;
+import com.onmarket.recommendation.domain.UserInteraction;
 import com.onmarket.scrap.domain.Scrap;
 import jakarta.persistence.*;
 import lombok.*;
@@ -64,6 +65,10 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserInteraction> interactions = new ArrayList<>();
+
+    // 스크랩 수를 1 증가시키는 편의 메서드
     public void increaseScrapCount() {
         this.scrapCount++;
     }

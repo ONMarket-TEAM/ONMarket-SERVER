@@ -52,10 +52,10 @@ public class PostApiController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/top-scraped")
-    public ApiResponse<List<PostListResponse>> getTopScrapedPosts() {
+    public ApiResponse<List<PostSingleResponse>> getTopScrapedPosts() {
         log.info("인기 상품 Top 5 조회 요청");
 
-        List<PostListResponse> topPosts = postService.getTopScrapedPosts();
+        List<PostSingleResponse> topPosts = postService.getTopScrapedPosts();
 
         log.info("인기 상품 Top 5 조회 완료 - {}개 반환", topPosts.size());
 

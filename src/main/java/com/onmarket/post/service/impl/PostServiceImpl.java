@@ -64,15 +64,26 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
-    public List<PostListResponse> getTopScrapedPosts() {
+    // @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
+    public List<PostSingleResponse> getTopScrapedPosts() {
         log.info("스크랩 수 상위 5개 게시물 조회 시작");
-        Pageable pageable = PageRequest.of(0, 5);
-        List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
-        return topPosts.stream()
-                .map(this::convertToListResponse)
-                .collect(Collectors.toList());
+        try {
+            Pageable pageable = PageRequest.of(0, 5);
+            List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
+
+            List<PostSingleResponse> result = topPosts.stream()
+                    .map(this::convertToSingleResponse) // or convertToListResponse depending on your design
+                    .collect(Collectors.toList());
+
+            log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
+            return result;
+
+        } catch (Exception e) {
+            log.error("스크랩 수 상위 게시물 조회 중 오류 발생", e);
+            throw e;
+        }
     }
+
 
     @Override
     public PostDetailResponse getPostDetail(Long postId) {
