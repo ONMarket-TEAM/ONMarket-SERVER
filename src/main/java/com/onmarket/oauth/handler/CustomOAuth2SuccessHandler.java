@@ -44,15 +44,41 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             // 회원 처리
             SocialLoginResponse result = memberService.handleSocialLogin(info);
 
+            // 동적 리다이렉트 URL 생성
+            String baseUrl = getBaseUrl(request);
+
             if (result.getStatus() == MemberStatus.PENDING) {
-                response.sendRedirect("http://localhost:5173/login/signup?memberId=" + result.getMemberId());
+                response.sendRedirect(baseUrl + "/login/signup?memberId=" + result.getMemberId());
             } else {
-                response.sendRedirect("http://localhost:5173?accessToken=" + result.getAccessToken() +
+                response.sendRedirect(baseUrl + "?accessToken=" + result.getAccessToken() +
                         "&refreshToken=" + result.getRefreshToken());
             }
         } catch (Exception e) {
-            response.sendRedirect("http://localhost:5173/login?error=oauth_failed");
+            String baseUrl = getBaseUrl(request);
+            response.sendRedirect(baseUrl + "/login?error=oauth_failed");
         }
     }
 
+    private String getBaseUrl(HttpServletRequest request) {
+        // Origin 헤더에서 프론트엔드 URL 가져오기
+        String origin = request.getHeader("Origin");
+        if (origin != null && !origin.isEmpty()) {
+            return origin;
+        }
+
+        // Referer 헤더에서 가져오기 (fallback)
+        String referer = request.getHeader("Referer");
+        if (referer != null && !referer.isEmpty()) {
+            try {
+                java.net.URL url = new java.net.URL(referer);
+                return url.getProtocol() + "://" + url.getHost() +
+                        (url.getPort() != -1 && url.getPort() != 80 && url.getPort() != 443 ? ":" + url.getPort() : "");
+            } catch (Exception e) {
+                // URL 파싱 실패시 기본값 사용
+            }
+        }
+
+        // 기본값 (로컬 개발용)
+        return "http://localhost:5173";
+    }
 }
