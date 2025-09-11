@@ -31,6 +31,9 @@ public class MemberResponse {
     @Schema(description = "회원 생년월일", example = "1995-08-27")
     private final LocalDate birthDate;
 
+    @Schema(description = "메인 사업장", example = "20")
+    private final Long mainBusinessId;
+
     @Schema(description = "회원 프로필사진", example = "https://example.com/profile.jpg")
     private final String profileImage;
 
@@ -40,6 +43,7 @@ public class MemberResponse {
     @Schema(description = "Instagram 연결 여부", example = "false")
     private final Boolean instagramConnected;
 
+
     public static MemberResponse from(Member m) {
         return MemberResponse.builder()
                 .memberId(m.getMemberId())
@@ -48,6 +52,7 @@ public class MemberResponse {
                 .email(m.getEmail())
                 .phone(m.getPhone())
                 .birthDate(m.getBirthDate())
+                .mainBusinessId(m.getMainBusinessId())
                 .profileImage(m.getProfileImage())
                 .instagramUsername(m.getDisplayInstagramUsername())
                 .instagramConnected(m.hasInstagramConnected())

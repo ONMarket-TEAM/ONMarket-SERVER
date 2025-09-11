@@ -129,6 +129,12 @@ public class Member extends BaseTimeEntity {
         this.status = status;
     }
 
+    /** 회원 메인 비지니스 변경 */
+    public void updateMainBusiness(Long businessId) {
+        this.mainBusinessId = businessId;
+    }
+
+
     /** Instagram 연결 여부 확인 */
     public boolean hasInstagramConnected() {
         return this.instagramUsername!= null && !this.instagramUsername.trim().isEmpty();

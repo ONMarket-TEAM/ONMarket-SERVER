@@ -53,6 +53,10 @@ public class BusinessServiceImpl implements BusinessService {
 
         Business saved = businessRepository.save(business);
 
+        if (member.getMainBusinessId() == null) {
+            member.updateMainBusiness(saved.getBusinessId());
+        }
+
         return toResponse(saved);
     }
 
@@ -153,5 +157,28 @@ public class BusinessServiceImpl implements BusinessService {
         Business business = findOwnedBusiness(member, businessId);
 
         businessRepository.delete(business);
+
+        // 🔑 메인 사업장을 지운 경우 → 다른 사업장 중 하나를 자동 메인으로 지정
+        if (member.getMainBusinessId() != null &&
+                member.getMainBusinessId().equals(businessId)) {
+            List<Business> remaining = businessRepository.findByMember(member);
+            if (!remaining.isEmpty()) {
+                member.updateMainBusiness(remaining.get(0).getBusinessId());
+            } else {
+                member.updateMainBusiness(null); // 사업장이 아예 없으면 null 허용
+            }
+        }
     }
+
+
+    @Override
+    @Transactional
+    public void changeMainBusiness(String email, Long businessId) {
+        Member member = findMember(email);
+        Business business = findOwnedBusiness(member, businessId);
+
+        // 본인 소유 사업장 확인 후 메인 사업장 갱신
+        member.updateMainBusiness(business.getBusinessId());
+    }
+
 }
