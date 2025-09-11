@@ -3,8 +3,10 @@ package com.onmarket.notification.repository;
 import com.onmarket.member.domain.Member;
 import com.onmarket.notification.domain.NotificationSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
- import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +24,8 @@ public interface NotificationSubscriptionRepository extends JpaRepository<Notifi
 
     // endpoint로 구독 정보 찾기 (중복 구독 체크용)
     Optional<NotificationSubscription> findByEndpoint(String endpoint);
+
+    @Modifying
+    @Transactional
+    void deleteByMemberMemberId(Long memberId);
 }

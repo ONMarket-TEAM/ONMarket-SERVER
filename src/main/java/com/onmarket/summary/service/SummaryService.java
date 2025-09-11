@@ -13,7 +13,7 @@ import com.onmarket.post.domain.Post;
 import com.onmarket.post.exception.PostNotFoundException;
 import com.onmarket.supportsdata.domain.SupportProduct;
 import com.onmarket.supportsdata.repository.SupportProductRepository;
-import com.onmarket.post.repository.PostRepository; // ✅ 추가
+import com.onmarket.post.repository.PostRepository;
 import com.onmarket.summary.dto.SummaryAssembler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class SummaryService {
     private final CreditLoanOptionRepository optionRepo;
     private final SupportProductRepository supportRepo;
 
-    private final PostRepository postRepo; // ✅ 추가
+    private final PostRepository postRepo;
 
     /** 대출/신용 상품용 프롬프트 (LOAN 계열) */
     private static final String SYSTEM_LOAN = """
@@ -113,34 +113,46 @@ public class SummaryService {
 - 출력은 반드시 JSON 하나만.
 """;
 
-
-
     // 간단한 홀더
     private record Pair(String s, String l) {}
 
     /** LoanProduct → Post만 업데이트 */
-    @Transactional
+//    @Transactional
+//    public void generateForLoan(long id) {
+//        LoanProduct p = loanRepo.findById(id).orElseThrow();     // 프롬프트용 조회
+//        String user = SummaryAssembler.forLoan(p);
+//        String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+//
+//        Pair pair = parseJson(json); // ✅ 엔티티 세팅/저장 안 함
+//        postRepo.updateSummaryBySource("LoanProduct", p.getId(), pair.s(), pair.l());
+//    }
+    @Transactional(readOnly = true)
     public String[] generateForLoan(long id) {
-        LoanProduct p = loanRepo.findById(id).orElseThrow();     // 프롬프트용 조회
-        String user = SummaryAssembler.forLoan(p);
-        String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
+        try {
+            // 1. LoanProduct 조회 (없을 경우 예외 발생)
+            LoanProduct p = loanRepo.findById(id).orElseThrow(
+                    () -> new RuntimeException("LoanProduct not found: " + id));
 
-        Pair pair = parseJson(json); // ✅ 엔티티 세팅/저장 안 함
-        log.info("=============");
-        log.info(pair.toString());
-        log.info("=============");
+            // 2. AI 프롬프트 생성 및 JSON 결과 요청
+            String user = SummaryAssembler.forLoan(p);
+            String json = ai.chatJson(SYSTEM_LOAN, user, 0.2);
 
-        String[] str = new String[2];
-        str[0] = pair.l;
-        str[1] = pair.s;
-//        postRepo.findBySourceTableAndSourceId("LoanProduct", id);
-//        Post post = postRepo.findById(postId).orElseThrow(PostNotFoundException::new);
-//        post.setSummary(pair.l);
-//        post.setDetailContent(pair.l);
+            // 3. JSON 파싱
+            Pair pair = parseJson(json);
 
-        return str;
+            // 4. 성공 로그 추가
+            log.info("LoanProduct({}) AI 요약 생성 완료 - short: {}, long: {} chars",
+                    id, pair.s.length(), pair.l.length());
+
+            // 5. DB 직접 수정 대신, 결과물을 배열로 반환
+            return new String[]{pair.l, pair.s}; // [0]: long, [1]: short
+
+        } catch (Exception e) {
+            // 6. 예외 발생 시 에러 로그 남기고, 기본값 반환
+            log.error("LoanProduct({}) AI 요약 생성 실패: {}", id, e.getMessage());
+            return new String[]{"상품 정보를 준비 중입니다.", "상품 정보 준비중"};
+        }
     }
-
     /** CreditLoanProduct → Post만 업데이트 */
 //    @Transactional
 //    public void generateForCredit(long id) {
