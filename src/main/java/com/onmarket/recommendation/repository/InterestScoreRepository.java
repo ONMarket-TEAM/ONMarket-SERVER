@@ -90,4 +90,6 @@ public interface InterestScoreRepository extends JpaRepository<InterestScore, Lo
 
     List<InterestScore> findByMemberAndBusiness(Member member, Business business);
 
+
+
 }
