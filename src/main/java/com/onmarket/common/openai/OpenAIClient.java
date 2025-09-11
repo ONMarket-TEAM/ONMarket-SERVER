@@ -8,7 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +62,10 @@ public class OpenAIClient {
                 .body(BodyInserters.fromValue(body))
                 .retrieve()
                 .bodyToMono(String.class)
-                .retry(1)
+                .retryWhen(Retry.backoff(5, Duration.ofSeconds(5))
+                        .maxBackoff(Duration.ofSeconds(20))
+                        .filter(ex -> ex instanceof WebClientResponseException.TooManyRequests)
+                )
                 .block();
 
         try {

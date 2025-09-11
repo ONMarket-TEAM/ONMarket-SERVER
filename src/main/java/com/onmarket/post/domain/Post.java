@@ -31,6 +31,7 @@ public class Post extends BaseTimeEntity {
     private String productName; // 상품명
 
     @Column(columnDefinition = "TEXT")
+    @Setter
     private String summary; // 요약 정보
 
     private String deadline; // 마감일
@@ -41,9 +42,11 @@ public class Post extends BaseTimeEntity {
     private String joinLink; // 가입하기 링크
 
     // 나중에 다른 사람이 채워줄 필드들
+    @Setter
     private String imageUrl; // 상품 이미지 URL
 
     @Column(columnDefinition = "TEXT")
+    @Setter
     private String detailContent; // 상세 내용
 
     @Column(nullable = false)

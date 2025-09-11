@@ -136,7 +136,11 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "http://3.34.91.104",
+                "http://3.34.91.104:8080",
+                "http://3.34.91.104:8082",
+                "https://onmarket.duckdns.org"
         ));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
