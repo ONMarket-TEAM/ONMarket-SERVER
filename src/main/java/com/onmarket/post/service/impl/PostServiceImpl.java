@@ -119,30 +119,56 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void createPostsFromCreditLoanProducts() {
-        log.info("신용대출 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
-        Pageable pageRequest = PageRequest.of(1, 1, Sort.by("id").ascending());
-        Page<CreditLoanProduct> productPage = creditLoanProductRepository.findAll(pageRequest);
-        processProducts(productPage.getContent(), "신용대출 (테스트)", this::processIndividualCreditProduct);
+        log.info("신용대출 상품 전체 데이터 동기화 시작...");
+        processProductsInPages(
+                creditLoanProductRepository::findAll,
+                "신용대출",
+                this::processIndividualCreditProduct
+        );
     }
 
     @Override
     @Transactional
     public void createPostsFromLoanProducts() {
-        log.info("일반대출 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
-        // 🔥 [수정] 5 -> 1로 변경하고 정렬 추가
-        Pageable pageRequest = PageRequest.of(0, 1, Sort.by("id").ascending());
-        Page<LoanProduct> productPage = loanProductRepository.findAll(pageRequest);
-        processProducts(productPage.getContent(), "일반대출 (테스트)", this::processIndividualLoanProduct);
+        log.info("일반대출 상품 전체 데이터 동기화 시작...");
+        processProductsInPages(
+                loanProductRepository::findAll,
+                "일반대출",
+                this::processIndividualLoanProduct
+        );
     }
 
     @Override
     @Transactional
     public void createPostsFromSupportProducts() {
-        log.info("공공지원금 상품 데이터 동기화 시작 (테스트: 1개만 처리)...");
-        // 🔥 [수정] 5 -> 1로 변경하고 정렬 추가
-        Pageable pageRequest = PageRequest.of(0, 1, Sort.by("id").ascending());
-        Page<SupportProduct> productPage = supportProductRepository.findAll(pageRequest);
-        processProducts(productPage.getContent(), "공공지원금 (테스트)", this::processIndividualSupportProduct);
+        log.info("공공지원금 상품 전체 데이터 동기화 시작...");
+        processProductsInPages(
+                supportProductRepository::findAll,
+                "공공지원금",
+                this::processIndividualSupportProduct
+        );
+    }
+
+    private <T> void processProductsInPages(PageableFunction<T> pagedFinder, String productType, ProductProcessor<T> processor) {
+        int page = 0;
+        final int PAGE_SIZE = 100;
+        Page<T> productPage;
+
+        do {
+            Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id").ascending());
+            productPage = pagedFinder.apply(pageable);
+            log.info("[{}] 처리 진행: {}/{} 페이지 (현재 페이지 항목: {}개)",
+                    productType, page + 1, productPage.getTotalPages(), productPage.getNumberOfElements());
+            processProducts(productPage.getContent(), productType, processor);
+            page++;
+        } while (productPage.hasNext());
+
+        log.info("{} 상품 Post 생성 전체 완료 - 총 {}개 페이지 처리 완료", productType, productPage.getTotalPages());
+    }
+
+    @FunctionalInterface
+    private interface PageableFunction<T> {
+        Page<T> apply(Pageable pageable);
     }
 
     private <T> void processProducts(List<T> products, String productType, ProductProcessor<T> processor) {
@@ -192,7 +218,6 @@ public class PostServiceImpl implements PostService {
 
     private void enrichPostWithAiContent(Post post, TargetType type, Long sourceId) {
         boolean isUpdated = false;
-
         try {
             String cardNewsUrl = cardNewsService.buildFromDbAndPersist(type, sourceId.toString());
             post.setImageUrl(cardNewsUrl);
@@ -201,7 +226,6 @@ public class PostServiceImpl implements PostService {
         } catch (Exception e) {
             log.warn("Post({}) 카드뉴스 생성 실패: {}", post.getPostId(), e.getMessage());
         }
-
         try {
             String[] summaryResult = generateSummary(type, sourceId);
             if (summaryResult != null && summaryResult.length >= 2) {
@@ -213,7 +237,6 @@ public class PostServiceImpl implements PostService {
         } catch (Exception e) {
             log.warn("Post({}) AI 요약 생성 실패: {}", post.getPostId(), e.getMessage());
         }
-
         if (isUpdated) {
             postRepository.save(post);
             log.info("Post({}) AI 콘텐츠 최종 저장 완료", post.getPostId());
