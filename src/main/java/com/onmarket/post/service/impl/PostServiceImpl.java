@@ -57,16 +57,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
-    public List<PostListResponse> getTopScrapedPosts() {
+//    @Cacheable(value = "topScrapedPosts", key = "'top5'", unless = "#result.size() < 5")
+    public List<PostSingleResponse> getTopScrapedPosts() {
         log.info("스크랩 수 상위 5개 게시물 조회 시작");
 
         try {
             Pageable pageable = PageRequest.of(0, 5);
             List<Post> topPosts = postRepository.findTopByScrapCountOrderByScrapCountDesc(pageable);
 
-            List<PostListResponse> result = topPosts.stream()
-                    .map(this::convertToListResponse)
+            List<PostSingleResponse> result = topPosts.stream()
+                    .map(this::convertToSingleResponse)
                     .collect(Collectors.toList());
 
             log.info("스크랩 수 상위 게시물 조회 완료 - {}개", result.size());
