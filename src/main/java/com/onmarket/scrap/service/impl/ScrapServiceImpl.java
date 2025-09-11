@@ -107,6 +107,7 @@ public class ScrapServiceImpl implements ScrapService {
                 .productName(post.getProductName())
                 .summary(post.getSummary())
                 .deadline(calculateDDay(post.getDeadline()))
+                .companyName(post.getCompanyName())
                 .build();
     }
 
