@@ -95,5 +95,9 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 """)
     int updateImageUrlBySource(String sourceTable, Long sourceId, String url, LocalDateTime ts);
 
+    List<Post> findTop200ByOrderByCreatedAtDesc();
+
+    List<Post> findTop100ByOrderByCreatedAtDesc();
+
     Optional<Post> findTopByOrderByUpdatedAtDesc();
 }
