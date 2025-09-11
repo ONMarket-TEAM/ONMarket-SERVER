@@ -9,6 +9,7 @@ import com.onmarket.member.repository.MemberRepository;
 import com.onmarket.business.exception.BusinessException;
 import com.onmarket.common.response.ResponseCode;
 import com.onmarket.member.service.MemberService;
+import com.onmarket.notification.repository.NotificationSubscriptionRepository;
 import com.onmarket.oauth.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,7 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final NotificationSubscriptionRepository notificationSubscriptionRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
@@ -58,6 +60,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new LoginException(ResponseCode.MEMBER_NOT_FOUND));
 
         try {
+            notificationSubscriptionRepository.deleteByMemberMemberId(member.getMemberId());
             memberRepository.delete(member);
         } catch (Exception e) {
             throw new LoginException(ResponseCode.MEMBER_WITHDRAW_FAILED);
