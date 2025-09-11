@@ -140,4 +140,21 @@ public class BusinessApiController {
         return ApiResponse.success(ResponseCode.BUSINESS_DELETE_SUCCESS, null);
     }
 
+    @PatchMapping("/{businessId}/main")
+    @Operation(summary = "메인 사업장 변경", description = "사용자가 소유한 사업장 중 하나를 메인 사업장으로 변경합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "메인 사업장 변경 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "내 소유 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "사업장 없음")
+    })
+    public ApiResponse<Void> changeMainBusiness(
+            @AuthenticationPrincipal String email,
+            @PathVariable Long businessId
+    ) {
+        businessService.changeMainBusiness(email, businessId);
+        return ApiResponse.success(ResponseCode.BUSINESS_UPDATE_SUCCESS, null);
+    }
+
+
 }
