@@ -42,7 +42,7 @@ public class PostApiController {
     }
 
     /**
-     * 상품 검색 API - 개선된 버전
+     * 상품 검색 API
      */
     @Operation(summary = "상품 검색", description = "타입별 상품을 키워드로 검색합니다")
     @ApiResponses(value = {
@@ -62,10 +62,8 @@ public class PostApiController {
             @RequestParam(value = "company", required = false) String companyName,
 
             Pageable pageable,
+            HttpServletRequest request) {
 
-            HttpServletRequest request) { // 🔥 요청 정보 로깅을 위해 추가
-
-        // 🔥 디버깅을 위한 로깅 추가
         log.info("검색 요청 - URL: {}, 타입: {}, 키워드: '{}', 회사명: '{}', 페이지: {}",
                 request.getRequestURL() + "?" + request.getQueryString(),
                 type, keyword, companyName, pageable.getPageNumber());
@@ -89,12 +87,17 @@ public class PostApiController {
      * 게시물 상세 조회 (스크랩 정보 포함)
      */
     @GetMapping("/{postId}")
-    public ApiResponse<PostDetailWithScrapResponse> getPostDetail(HttpServletRequest request, @PathVariable Long postId) {
+    public ApiResponse<PostDetailWithScrapResponse> getPostDetail(
+            HttpServletRequest request,
+            @PathVariable Long postId) {
         String email = extractEmailFromToken(request);
         PostDetailWithScrapResponse response = postService.getPostDetailWithScrap(postId, email);
         return ApiResponse.success(ResponseCode.POST_DETAIL_SUCCESS, response);
     }
 
+    /**
+     * 추천용 단일 게시물 조회
+     */
     @GetMapping("/recommendation/{postId}")
     public ApiResponse<PostSingleResponse> getPostById(@PathVariable Long postId) {
         PostSingleResponse response = postService.getPostById(postId);
@@ -102,8 +105,9 @@ public class PostApiController {
     }
 
     /**
-     * CreditLoanProduct 데이터 동기화 (관리자용)
+     * 신용대출 상품 데이터 동기화 (관리자용)
      */
+    @Operation(summary = "신용대출 상품 동기화", description = "CreditLoanProduct 데이터를 Post로 동기화합니다")
     @PostMapping("/sync/credit-loans")
     public ApiResponse<String> syncCreditLoanPosts() {
         postService.createPostsFromCreditLoanProducts();
@@ -111,8 +115,9 @@ public class PostApiController {
     }
 
     /**
-     * LoanProduct 데이터 동기화 (관리자용)
+     * 일반대출 상품 데이터 동기화 (관리자용)
      */
+    @Operation(summary = "일반대출 상품 동기화", description = "LoanProduct 데이터를 Post로 동기화합니다")
     @PostMapping("/sync/general-loans")
     public ApiResponse<String> syncGeneralLoanPosts() {
         postService.createPostsFromLoanProducts();
@@ -120,8 +125,9 @@ public class PostApiController {
     }
 
     /**
-     * SupportProduct 데이터 동기화 (관리자용)
+     * 공공지원금 상품 데이터 동기화 (관리자용)
      */
+    @Operation(summary = "공공지원금 상품 동기화", description = "SupportProduct 데이터를 Post로 동기화합니다")
     @PostMapping("/sync/support-products")
     public ApiResponse<String> syncSupportPosts() {
         postService.createPostsFromSupportProducts();

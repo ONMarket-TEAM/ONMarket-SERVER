@@ -1,13 +1,10 @@
 package com.onmarket.post.service;
 
 import com.onmarket.post.domain.PostType;
-import com.onmarket.post.dto.PostDetailResponse;
-import com.onmarket.post.dto.PostDetailWithScrapResponse;
-import com.onmarket.post.dto.PostListResponse;
+import com.onmarket.post.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.onmarket.post.dto.PostSingleResponse;
 import java.util.List;
 
 public interface PostService {
