@@ -57,4 +57,12 @@ public class InterestScore extends BaseTimeEntity {
         this.totalScore = (viewScore * 0.3) + (engagementScore * 0.5) + (timeScore * 0.2);
         this.lastCalculatedAt = LocalDateTime.now();
     }
+
+    /**
+     * 총합 스코어만 직접 업데이트 (상대적 조정용)
+     */
+    public void updateTotalScore(Double totalScore) {
+        this.totalScore = totalScore;
+        this.lastCalculatedAt = LocalDateTime.now();
+    }
 }

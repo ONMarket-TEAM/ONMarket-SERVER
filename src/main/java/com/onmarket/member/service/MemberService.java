@@ -3,6 +3,7 @@ package com.onmarket.member.service;
 import com.onmarket.member.domain.Member;
 import com.onmarket.member.domain.enums.Gender;
 import com.onmarket.member.dto.*;
+import java.util.List;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.time.LocalDate;
@@ -63,4 +64,6 @@ public interface MemberService {
             LocalDate birthDate,
             Gender gender
     );
+
+    List<Member> findAllActiveMembers();
 }

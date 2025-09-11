@@ -3,7 +3,10 @@ package com.onmarket.business.domain;
 import com.onmarket.business.domain.enums.*;
 import com.onmarket.common.domain.BaseTimeEntity;
 import com.onmarket.member.domain.Member;
+import com.onmarket.recommendation.domain.InterestScore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 
 @Entity
@@ -54,6 +57,8 @@ public class Business extends BaseTimeEntity {
     @Column(nullable = false)
     private BusinessStatus status;
 
+    @OneToMany(mappedBy = "business", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<InterestScore> interestScores = new ArrayList<>();
     @PrePersist
     protected void onCreate() {
         if (this.status == null) this.status = BusinessStatus.ACTIVE;

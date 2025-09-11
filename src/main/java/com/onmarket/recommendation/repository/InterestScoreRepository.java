@@ -73,4 +73,21 @@ public interface InterestScoreRepository extends JpaRepository<InterestScore, Lo
             @Param("member") Member member,
             @Param("business") Business business,
             Pageable pageable);
+
+    @Query("SELECT i FROM InterestScore i WHERE i.member = :member AND i.business = :business AND i.post = :post ORDER BY i.lastCalculatedAt DESC")
+    List<InterestScore> findAllByMemberAndBusinessAndPost(
+            @Param("member") Member member,
+            @Param("business") Business business,
+            @Param("post") Post post
+    );
+
+    @Query("SELECT i FROM InterestScore i WHERE i.member = :member AND i.business = :business AND i.post = :post ORDER BY i.lastCalculatedAt DESC")
+    List<InterestScore> findByMemberAndBusinessAndPostOrderByLastCalculatedAtDesc(
+            @Param("member") Member member,
+            @Param("business") Business business,
+            @Param("post") Post post
+    );
+
+    List<InterestScore> findByMemberAndBusiness(Member member, Business business);
+
 }
