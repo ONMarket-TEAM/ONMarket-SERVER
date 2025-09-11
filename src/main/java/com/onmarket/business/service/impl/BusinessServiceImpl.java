@@ -14,7 +14,11 @@ import com.onmarket.member.domain.Member;
 import com.onmarket.member.service.MemberService;
 import com.onmarket.common.response.ResponseCode;
 import com.onmarket.business.service.BusinessService;
+import com.onmarket.recommendation.domain.MainBusinessChangedEvent;
+import com.onmarket.recommendation.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +27,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
     private final MemberService memberService;
+    private final RecommendationService recommendationService; // 추가
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -115,6 +122,16 @@ public class BusinessServiceImpl implements BusinessService {
         Member member = findMember(email);
         Business business = findOwnedBusiness(member, businessId);
 
+        // 변경 전 상태 저장 (대표 사업장인 경우만)
+        boolean isMainBusiness = member.getMainBusinessId() != null &&
+                member.getMainBusinessId().equals(businessId);
+        boolean needsRecommendationRebuild = false;
+
+        // 추천에 영향을 주는 필드 변경 감지
+        if (isMainBusiness) {
+            needsRecommendationRebuild = checkRecommendationRelevantChanges(business, req);
+        }
+
         // 사업장명 변경 시 중복 체크
         if (req.getBusinessName() != null &&
                 !req.getBusinessName().equals(business.getBusinessName()) &&
@@ -131,6 +148,12 @@ public class BusinessServiceImpl implements BusinessService {
         if (req.getAnnualRevenue() != null) business.changeAnnualRevenue(req.getAnnualRevenue());
         if (req.getEmployeeCount() != null) business.changeEmployeeCount(req.getEmployeeCount());
         if (req.getEstablishedYear()!= null) business.changeEstablishedYear(req.getEstablishedYear());
+
+        if (isMainBusiness && needsRecommendationRebuild) {
+            eventPublisher.publishEvent(new MainBusinessChangedEvent(
+                    email, businessId, businessId,
+                    MainBusinessChangedEvent.BusinessChangeType.BUSINESS_INFO_UPDATED));
+        }
 
         // JPA Dirty Checking으로 자동 반영
         return BusinessResponse.from(business);
@@ -156,16 +179,25 @@ public class BusinessServiceImpl implements BusinessService {
         Member member = findMember(email);
         Business business = findOwnedBusiness(member, businessId);
 
+        boolean wasMainBusiness = member.getMainBusinessId() != null &&
+                member.getMainBusinessId().equals(businessId);
+
         businessRepository.delete(business);
 
-        // 🔑 메인 사업장을 지운 경우 → 다른 사업장 중 하나를 자동 메인으로 지정
-        if (member.getMainBusinessId() != null &&
-                member.getMainBusinessId().equals(businessId)) {
+        if (wasMainBusiness) {
             List<Business> remaining = businessRepository.findByMember(member);
             if (!remaining.isEmpty()) {
-                member.updateMainBusiness(remaining.get(0).getBusinessId());
+                Business newMainBusiness = remaining.get(0);
+                member.updateMainBusiness(newMainBusiness.getBusinessId());
+
+                // 🔥 새로운 대표 사업장 기준으로 추천 재구축
+                log.info("대표 사업장 삭제 후 새 대표 사업장 기준 추천 재구축: Member {}, 신규 대표: {}",
+                        member.getEmail(), newMainBusiness.getBusinessId());
+                recommendationService.rebuildRecommendationsForBusiness(member, newMainBusiness);
             } else {
-                member.updateMainBusiness(null); // 사업장이 아예 없으면 null 허용
+                member.updateMainBusiness(null);
+                // 🔥 사업장이 없는 경우 추천 캐시 삭제
+                recommendationService.clearRecommendationsForMember(member);
             }
         }
     }
@@ -175,10 +207,32 @@ public class BusinessServiceImpl implements BusinessService {
     @Transactional
     public void changeMainBusiness(String email, Long businessId) {
         Member member = findMember(email);
-        Business business = findOwnedBusiness(member, businessId);
+        Long previousBusinessId = member.getMainBusinessId();
 
-        // 본인 소유 사업장 확인 후 메인 사업장 갱신
-        member.updateMainBusiness(business.getBusinessId());
+        // 이전 대표 사업장과 다른 경우에만 추천 재구축
+        if (!businessId.equals(member.getMainBusinessId())) {
+            member.updateMainBusiness(businessId);
+
+            eventPublisher.publishEvent(new MainBusinessChangedEvent(
+                    email, previousBusinessId, businessId,
+                    MainBusinessChangedEvent.BusinessChangeType.BUSINESS_SWITCH));
+        }
     }
+    /**
+     * 추천에 영향을 주는 필드 변경 여부 확인
+     */
+    private boolean checkRecommendationRelevantChanges(Business business, BusinessUpdateRequest req) {
+        // 지역 정보 변경 확인
+        boolean regionChanged = (req.getSidoName() != null && !req.getSidoName().equals(business.getSidoName())) ||
+                (req.getSigunguName() != null && !req.getSigunguName().equals(business.getSigunguName()));
 
+        // 업종 변경 확인
+        boolean industryChanged = req.getIndustry() != null && !req.getIndustry().equals(business.getIndustry());
+
+        // 사업 형태 변경 확인 (추천에 영향을 줄 수 있는 경우)
+        boolean businessTypeChanged = req.getBusinessType() != null &&
+                !req.getBusinessType().equals(business.getBusinessType());
+
+        return regionChanged || industryChanged || businessTypeChanged;
+    }
 }

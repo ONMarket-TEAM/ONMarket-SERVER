@@ -1,7 +1,9 @@
 package com.onmarket.member.repository;
 
 import com.onmarket.member.domain.Member;
+import com.onmarket.member.domain.enums.MemberStatus;
 import com.onmarket.member.domain.enums.SocialProvider;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -16,4 +18,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmailAndMemberIdNot(String email, Long memberId);
     boolean existsByNicknameAndMemberIdNot(String nickname, Long memberId);
 
+    List<Member> findByStatus(MemberStatus memberStatus);
 }

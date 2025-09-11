@@ -10,6 +10,7 @@ import com.onmarket.business.exception.BusinessException;
 import com.onmarket.common.response.ResponseCode;
 import com.onmarket.member.service.MemberService;
 import com.onmarket.oauth.jwt.JwtTokenProvider;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,11 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    @Override
+    @Transactional(readOnly = true)
+    public List<Member> findAllActiveMembers() {
+        return memberRepository.findByStatus(MemberStatus.ACTIVE);
+    }
 
     @Override
     public Member findByEmail(String email) {
