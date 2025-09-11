@@ -393,7 +393,7 @@ public class PostServiceImpl implements PostService {
             }
         } catch (Exception e) {
             log.warn("날짜 파싱 실패: {}", deadlineStr);
-            return "상시";
+            return "상시 모집";
         }
     }
 }
